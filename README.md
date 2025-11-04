@@ -1,2 +1,37 @@
-# hearsay
-HearSay is a social platform that lets users share podcast ratings with friends, follow their listening activity, track and rate episodes, curate playlists, and discover new podcasts based on genres, languages, ratings, and platforms. It provides a central hub for friends to compare and share what they’re enjoying.
+# HearSay
+
+HearSay is a social podcast rating platform where users can rate podcast episodes, follow friends, and explore their friends' listening activity. This project is built with **Python**, **FastAPI** and **MySQL**.
+
+## Getting Started
+
+### 1. Clone the repository
+
+```
+git clone https://github.com/<your-username>/hearsay.git
+cd hearsay
+```
+
+### 2. Create and activate a virtual environment
+
+```
+# Windows PowerShell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+
+# macOS / Linux
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 3. Install backend dependencies
+
+```
+pip install --upgrade pip
+pip install -r backend/requirements.txt
+```
+
+### 4. Run the FastAPI server
+
+```
+uvicorn backend.main:app --reload
+```
