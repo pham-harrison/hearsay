@@ -28,10 +28,10 @@ CREATE TABLE guest (
 CREATE TABLE platform (
 	name VARCHAR(32) PRIMARY KEY,
     is_subscription_req BOOL NOT NULL,
-    subscription_cost DECIMAL(10,2),
+    subscription_monthly_cost DECIMAL(10,2),
     CONSTRAINT subscription_check CHECK (
-		(is_subscription_req = 1 AND subscription_cost IS NOT NULL) OR
-		(is_subscription_req = 0 AND subscription_cost IS NULL)
+		(is_subscription_req = 1 AND subscription_monthly_cost IS NOT NULL) OR
+		(is_subscription_req = 0 AND subscription_monthly_cost IS NULL)
 	)
 );
 
@@ -161,7 +161,7 @@ CREATE TABLE episode_to_host (
     PRIMARY KEY (podcast_id, episode_num, host_id)
 );
 
-CREATE TABLE episode_to_host (
+CREATE TABLE episode_to_guest (
 	-- episodes may invite guests
     podcast_id INT NOT NULL,
 	episode_num INT NOT NULL,
