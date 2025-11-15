@@ -599,5 +599,3 @@ INSERT INTO language_to_podcast (podcast_id, language_name) VALUES
 (18, 'English'),
 (19, 'English'),
 (20, 'English');
-
-SELECT * FROM podcast
