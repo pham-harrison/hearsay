@@ -105,7 +105,7 @@ async def getUser(user_id):
         cursor = connection.cursor()
         cursor.callproc("get_user", (user_id,))
         user_info = cursor.fetchone()
-        return user_info
+        return {"user_info": user_info}
     finally:
         connection.close()
 
@@ -150,11 +150,11 @@ async def getUserFriends(user_id: int):
         
         cursor.callproc("get_friends", (user_id,))
         user_friends = cursor.fetchall()
-        return user_friends
+        return {"user_friends": user_friends}
     finally:
         connection.close()
 
-@app.delete("users/{user_id}/friends/{friend_id}")
+@app.delete("/users/{user_id}/friends/{friend_id}")
 ### Fill out later ###
 
 @app.get("/podcasts")
@@ -178,9 +178,46 @@ async def searchPodcasts(
         cursor = connection.cursor()
         cursor.callproc("search_podcasts", (name, genre, language, platform, host, guest, year))
         filtered_podcasts = cursor.fetchall()
-        return filtered_podcasts
+        return {"podcasts": filtered_podcasts}
     except pymysql.MySQLError as e:
         raise HTTPException(status_code=500, detail=f"Failed to search podcasts")
     finally:
         connection.close()
 
+@app.get("/podcasts/hosts")
+async def getHosts():
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        cursor = connection.cursor()
+        cursor.callproc("get_hosts")
+        all_hosts = cursor.fetchall()
+        return {"hosts": all_hosts}
+    except pymysql.MySQLError as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get hosts")
+    finally:
+        connection.close()
+
+@app.get("/podcasts/guests")
+async def getHosts():
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        cursor = connection.cursor()
+        cursor.callproc("get_guests")
+        all_guests = cursor.fetchall()
+        return {"guests": all_guests}
+    except pymysql.MySQLError as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get hosts")
+    finally:
+        connection.close()
