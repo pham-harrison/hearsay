@@ -165,7 +165,7 @@ async def searchPodcasts(
     platform: Optional[str] = None,
     host: Optional[str] = None,
     guest: Optional[str] = None,
-    year: Optional[str] = None
+    year: Optional[int] = None
 ):
     try:
         connection = pymysql.connect(
@@ -223,7 +223,14 @@ async def getHosts():
         connection.close()
 
 @app.get("/podcasts/{podcast_id}/episodes")
-async def getPodcastEpisodes(podcast_id: int):
+async def searchPodcastEpisodes(
+    podcast_id: int,
+    num: Optional[int] = None,
+    name: Optional[str] = None,
+    host: Optional[str] = None,
+    guest: Optional[str] = None,
+    year: Optional[int] = None
+):
     try:
         connection = pymysql.connect(
             host=HOST,
@@ -233,10 +240,10 @@ async def getPodcastEpisodes(podcast_id: int):
             cursorclass=pymysql.cursors.DictCursor
         )
         cursor = connection.cursor()
-        cursor.callproc("get_episodes", (podcast_id,))
-        podcast_episodes = cursor.fetchall()
-        return {"podcast_episodes": podcast_episodes}
+        cursor.callproc("search_episodes", (podcast_id, num, name, host, guest, year))
+        filtered_episodes = cursor.fetchall()
+        return {"episodes": filtered_episodes}
     except pymysql.MySQLError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get episodes from podcast {podcast_id}")
+        raise HTTPException(status_code=500, detail=f"Failed to search episodes")
     finally:
         connection.close()
