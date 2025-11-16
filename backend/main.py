@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, EmailStr
 import pymysql
 import bcrypt
-
+from typing import Optional
 app = FastAPI()
 
 HOST = "localhost"
@@ -23,6 +23,15 @@ class UserLogin(BaseModel):
 
 class UserBio(BaseModel):
     bio: str
+
+class PodcastSearchFilters(BaseModel):
+    name: str
+    genre: str
+    language: str
+    platform: str
+    host: str
+    guest: str
+    year: str
 
 @app.get("/")
 async def root():
@@ -145,4 +154,33 @@ async def getUserFriends(user_id: int):
     finally:
         connection.close()
 
-    
+@app.delete("users/{user_id}/friends/{friend_id}")
+### Fill out later ###
+
+@app.get("/podcasts")
+async def searchPodcasts(
+    name: Optional[str] = None,
+    genre: Optional[str] = None,
+    language: Optional[str] = None,
+    platform: Optional[str] = None,
+    host: Optional[str] = None,
+    guest: Optional[str] = None,
+    year: Optional[str] = None
+):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        cursor = connection.cursor()
+        cursor.callproc("search_podcasts", (name, genre, language, platform, host, guest, year))
+        filtered_podcasts = cursor.fetchall()
+        return filtered_podcasts
+    except pymysql.MySQLError as e:
+        raise HTTPException(status_code=500, detail=f"Failed to search podcasts")
+    finally:
+        connection.close()
+
