@@ -8,7 +8,7 @@ CREATE PROCEDURE create_user
 (
 	email VARCHAR(32),
     username VARCHAR(32),
-    password_hash VARCHAR(32),
+    password_hash VARCHAR(255),
     first_name VARCHAR(32),
     last_name VARCHAR(32)
 )

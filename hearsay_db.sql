@@ -6,7 +6,7 @@ CREATE TABLE user (
 	id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(32) UNIQUE NOT NULL,
     username VARCHAR(32) UNIQUE NOT NULL,
-    password_hash VARCHAR(32) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     first_name VARCHAR(32) NOT NULL,
     last_name VARCHAR(32) NOT NULL,
     bio VARCHAR(255) 			-- Optional
