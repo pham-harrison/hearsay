@@ -14,8 +14,8 @@ class UserCreate(BaseModel):
     email: EmailStr
     username: str
     password: str
-    first_name: str
-    last_name: str
+    firstName: str
+    lastName: str
 
 class UserLogin(BaseModel):
     username: str
@@ -49,9 +49,9 @@ async def createUser(data: UserCreate): # Check if email is already registered
             raise HTTPException(status_code=400, detail=f"Username {data.username} is already taken")
 
         hashed_password = bcrypt.hashpw(data.password.encode("utf-8"), bcrypt.gensalt())
-        cursor.callproc("create_user", (data.email, data.username, hashed_password, data.first_name, data.last_name))
+        cursor.callproc("create_user", (data.email, data.username, hashed_password, data.firstName, data.lastName))
         connection.commit()
-        return {"message": f"User {data.username} created successfully"}
+        return {"userCreated": True, "message": f"User {data.username} created successfully"}
     finally:
         connection.close()
 
@@ -102,7 +102,7 @@ async def getUser(user_id):
 
 
 @app.put("/users/{user_id}")
-async def updateBio(user_id: int):
+async def updateBio(user_id: int, data: UserBio):
     try:
         connection = pymysql.connect(
             host=HOST,
@@ -113,6 +113,27 @@ async def updateBio(user_id: int):
         )
 
         cursor = connection.cursor()
+        cursor.execute("SELECT * FROM user WHERE id=%s", (user_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail=f"User not found")
         
+        cursor.callproc("update_bio", (user_id, data.bio))
+        connection.commit()
+
+        return {"bioUpdated": True, "message": "User bio updated successfully", "bio": data.bio}
+    finally:
+        connection.close()
+
+@app.get("/users/{user_id}/friends")
+async def getUserFriends(user_id: int):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
     finally:
         connection.close()
