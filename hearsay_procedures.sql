@@ -181,7 +181,7 @@ CREATE PROCEDURE create_playlist
     playlist_name VARCHAR(32)
 )
 BEGIN
-	IF playlist_name NOT IN (SELECT playlist_name FROM playlist AS pl WHERE pl.user_id = user_id) THEN
+	IF playlist_name NOT IN (SELECT name FROM playlist AS pl WHERE pl.user_id = user_id) THEN
 		INSERT INTO playlist(user_id, name) VALUES(user_id, playlist_name);
     END IF;
 END $$
