@@ -7,7 +7,7 @@ app = FastAPI()
 
 HOST = "localhost"
 DB_USER = "root"
-DB_PASSWORD = "root1234"
+DB_PASSWORD = "your_new_password"
 DATABASE = "hearsay_db"
 
 class UserCreate(BaseModel):
@@ -23,6 +23,9 @@ class UserLogin(BaseModel):
 
 class UserBio(BaseModel):
     bio: str
+
+class Playlist(BaseModel):
+    name: str
 
 @app.get("/")
 async def root():
@@ -236,5 +239,28 @@ async def searchPodcastEpisodes(
         return {"episodes": filtered_episodes}
     except pymysql.MySQLError as e:
         raise HTTPException(status_code=500, detail=f"Failed to search episodes")
+    finally:
+        connection.close()
+
+@app.put("/playlists/{user_id}")
+async def createPlaylist(user_id: int, playlist: Playlist):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM playlist WHERE user_id=%s AND playlist_name=%s", (user_id, playlist.name))
+        if cursor.fetchone():
+            raise HTTPException(status_code=400, detail=f"Playlist already")
+        
+        cursor.callproc("create_playlist", (user_id, playlist.name))
+        connection.commit()
+
+        return {"bioUpdated": True, "message": "User bio updated successfully", "bio": data.bio}
     finally:
         connection.close()
