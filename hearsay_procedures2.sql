@@ -23,6 +23,8 @@ END $$
 DELIMITER ;
  
 CALL send_friend_request(1, 51);
+SELECT * FROM user_to_user WHERE id1 = 1;
+SELECT * FROM user_to_user WHERE id1 = 51;
 
 /*
 Accept a friend request
@@ -38,6 +40,9 @@ BEGIN
 		UPDATE user_to_user
         SET status = "accepted", date_added = CURRENT_DATE
         WHERE id1 = requester_id_p AND id2 = user_id_p;
+        
+        INSERT INTO user_to_user (id1, id2, status, date_added)
+        VALUES (user_id_p, requester_id_p, "accepted", CURRENT_DATE);
 	ELSE
 		SIGNAL SQLSTATE "45000"
 		SET MESSAGE_TEXT="Unable to add friend";
@@ -46,6 +51,7 @@ END $$
 DELIMITER ;
 
 CALL accept_friend_request(51, 1);
+SELECT * FROM user_to_user WHERE id1 = 51;
 SELECT * FROM user_to_user WHERE id2 = 51;
 
 
@@ -64,6 +70,7 @@ DELIMITER ;
 
 INSERT INTO user(email, username, password_hash, first_name, last_name) VALUES ("pham.har@email", "pham-har", "root1234", "Harrison", "Pham");
 CALL insert_podcast_review(51, 1, 5, NULL);
+CALL insert_podcast_review(51, 4, 2, NULL);
 SELECT * FROM podcast_review WHERE user_id = 51;
 
 
@@ -161,18 +168,47 @@ Get the user's friends' average rating of a podcast
 DELIMITER $$
 DROP FUNCTION IF EXISTS get_user_friends_podcast_avg_rating $$
 CREATE FUNCTION get_user_friends_podcast_avg_rating(user_id_p INT, podcast_id_p INT)
-RETURNS DECIMAL(4,2)
+RETURNS DECIMAL(2,1)
 DETERMINISTIC READS SQL DATA
 BEGIN
-	DECLARE friends_avg_rating DECIMAL(4,2);
+	DECLARE friends_avg_rating DECIMAL(2,1);
     
     SELECT AVG(rating) INTO friends_avg_rating
     FROM user_to_user
+    JOIN podcast_review ON id2 = podcast_review.user_id
+    WHERE id1 = user_id_p AND podcast_id = podcast_id_p;
+    
+    RETURN friends_avg_rating;
 END $$
 DELIMITER ;
 
+SELECT get_user_friends_podcast_avg_rating(1, 4);
 
 
+
+/*
+Get user's friends' avg podcast rating by episode
+*/
+DELIMITER $$
+DROP FUNCTION IF EXISTS get_user_friends_podcast_avg_rating_by_episode $$
+CREATE FUNCTION get_user_friends_podcast_avg_rating_by_episode(user_id_p INT, podcast_id_p INT)
+RETURNS DECIMAL(2,1)
+DETERMINISTIC READS SQL DATA
+BEGIN
+	DECLARE friends_avg_rating_by_episode DECIMAL(2,1);
+    
+	SELECT AVG(rating) INTO friends_avg_rating_by_episode
+    FROM user_to_user
+    JOIN episode_review ON id2 = episode_review.user_id
+    WHERE id1 = user_id_p AND podcast_id = podcast_id_p;
+    
+    RETURN friends_avg_rating_by_episode;
+END $$
+DELIMITER ;
+
+INSERT INTO episode_review (user_id, podcast_id, episode_num, rating, text) VALUES (51, 4, 1, 1, NULL);
+INSERT INTO episode_review (user_id, podcast_id, episode_num, rating, text) VALUES (51, 4, 2, 5, NULL);
+SELECT get_user_friends_podcast_avg_rating_by_episode(1, 4);
 /*
 Get a user's rating of a podcast
 */
