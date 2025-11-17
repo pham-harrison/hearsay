@@ -24,15 +24,6 @@ class UserLogin(BaseModel):
 class UserBio(BaseModel):
     bio: str
 
-class PodcastSearchFilters(BaseModel):
-    name: str
-    genre: str
-    language: str
-    platform: str
-    host: str
-    guest: str
-    year: str
-
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
