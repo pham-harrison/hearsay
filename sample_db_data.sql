@@ -95,7 +95,7 @@ INSERT INTO guest (first_name, last_name, bio) VALUES
 ('Jane', 'Goodall', 'Primatologist and anthropologist');
 
 -- Insert Platforms
-INSERT INTO platform (name, is_subscription_req, subscription_monthly_cost) VALUES
+INSERT INTO platform (platform_name, is_subscription_req, subscription_monthly_cost) VALUES
 ('Spotify', 0, NULL),
 ('Apple Podcasts', 0, NULL),
 ('Audible', 1, 7.95),
@@ -107,7 +107,7 @@ INSERT INTO platform (name, is_subscription_req, subscription_monthly_cost) VALU
 ('Patreon', 1, 5.00);
 
 -- Insert Genres
-INSERT INTO genre (name, description) VALUES
+INSERT INTO genre (genre_name, description) VALUES
 ('Comedy', 'Humorous and entertaining content'),
 ('True Crime', 'Real-life crime stories and investigations'),
 ('Technology', 'Tech news, reviews, and discussions'),
@@ -125,7 +125,7 @@ INSERT INTO genre (name, description) VALUES
 ('Food', 'Cooking and culinary content');
 
 -- Insert Languages
-INSERT INTO language (name) VALUES
+INSERT INTO language (language_name) VALUES
 ('English'),
 ('Spanish'),
 ('French'),
