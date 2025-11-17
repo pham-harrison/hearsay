@@ -242,7 +242,7 @@ async def searchPodcastEpisodes(
     finally:
         connection.close()
 
-@app.put("/playlists/{user_id}")
+@app.post("/playlists/{user_id}")
 async def createPlaylist(user_id: int, playlist: Playlist):
     try:
         connection = pymysql.connect(
@@ -254,13 +254,13 @@ async def createPlaylist(user_id: int, playlist: Playlist):
         )
 
         cursor = connection.cursor()
-        cursor.execute("SELECT * FROM playlist WHERE user_id=%s AND playlist_name=%s", (user_id, playlist.name))
-        if cursor.fetchone():
-            raise HTTPException(status_code=400, detail=f"Playlist already")
+        #cursor.execute("SELECT * FROM playlist WHERE user_id=%s AND playlist_name=%s", (user_id, playlist.name))
+        #if cursor.fetchone():
+        #    raise HTTPException(status_code=400, detail=f"Playlist already exists")
         
         cursor.callproc("create_playlist", (user_id, playlist.name))
         connection.commit()
 
-        return {"bioUpdated": True, "message": "User bio updated successfully", "bio": data.bio}
+        return {"playlistCreated": True, "message": "New playlist created succesfully", "playlist_name": playlist.name}
     finally:
         connection.close()
