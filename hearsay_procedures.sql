@@ -128,18 +128,117 @@ BEGIN
 	IF year IS NULL THEN SET year_flag = 1; END IF;
 	
     -- Return table based on passed filters
-    SELECT * FROM podcast AS p JOIN platform_to_podcast AS ptp ON p.id = ptp.podcast_id
-						   JOIN platform AS pl ON ptp.platform_name = pl.name
-                           JOIN genre_to_podcast AS gtp ON p.id = gtp.podcast_id
-                           JOIN genre AS g ON gtp.genre_name = g.name
-                           JOIN language_to_podcast AS ltp ON p.id = ltp.podcast_id
-                           JOIN language AS l ON ltp.language_name = l.name
-                           JOIN 
-	WITH H AS (SELECT * FROM podcast JOIN 
+    SELECT * FROM podcast AS p 
+		  JOIN platform_to_podcast AS ptp USING (podcast_id)
+		  JOIN platform AS pl USING (platform_name)
+          JOIN genre_to_podcast AS gtp USING (podcast_id)
+          JOIN genre AS g USING (genre_name)
+          JOIN language_to_podcast AS ltp USING (podcast_id)
+          JOIN language AS l USING (language_name)
+          JOIN episode_to_host AS eth USING (podcast_id)
+          JOIN host AS h USING (host_id)
+          JOIN episode_to_guest AS etg USING (podcast_id)
+          JOIN guest AS gu USING (guest_id)
     WHERE (p.name = name OR name_flag) AND
-		  (p.genre = genre OR genre_flag) AND
-          (p.language = language OR language_flag) AND
-          (p.platform = platform OR platform_flag) AND
-          (p.host_first = host_first OR host_first_flag) AND
+		  (g.genre_name = genre OR genre_flag) AND
+          (l.language_name = language OR language_flag) AND
+          (pl.platform_name = platform OR platform_flag) AND
+          (h.first_name = host_first OR host_first_flag) AND
+          (h.last_name = host_last OR host_last_flag) AND
+          (gu.first_name = guest_first OR guest_first_flag) AND 
+          (gu.last_name = guest_last OR guest_last_flag) AND 
+          (p.release_date = year OR year_flag);
+END $$
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Get hosts
+DROP PROCEDURE IF EXISTS get_hosts;
+DELIMITER $$
+CREATE PROCEDURE get_hosts()
+BEGIN
+	SELECT first_name, last_name FROM host;
+END $$
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Get guests
+DROP PROCEDURE IF EXISTS get_guests;
+DELIMITER $$
+CREATE PROCEDURE get_guests()
+BEGIN
+	SELECT first_name, last_name FROM guest;
+END $$
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Create playlist
+DROP PROCEDURE IF EXISTS create_playlist;
+DELIMITER $$
+CREATE PROCEDURE create_playlist
+(
+	user_id INT,
+    playlist_name VARCHAR(32)
+)
+BEGIN
+	IF playlist_name NOT IN (SELECT playlist_name FROM playlist AS pl WHERE pl.user_id = user_id) THEN
+		INSERT INTO playlist(user_id, name) VALUES(user_id, playlist_name);
+    END IF;
+END $$
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Delete playlist
+DROP PROCEDURE IF EXISTS delete_playlist;
+DELIMITER $$
+CREATE PROCEDURE delete_playlist
+(
+	user_id INT,
+    playlist_name VARCHAR(32)
+)
+BEGIN
+	IF playlist_name IN (SELECT playlist_name FROM playlist) THEN
+		DELETE FROM playlist AS pl WHERE pl.user_id = user_id AND playlist_name = pl.playlist_name;
+	END IF;
+END $$
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Add to playlist
+DROP PROCEDURE IF EXISTS add_to_playlist;
+DELIMITER $$
+CREATE PROCEDURE add_to_playlist
+(
+	user_id INT,
+    playlist_name VARCHAR(32),
+    podcast_id INT,
+    episode_num INT
+)
+BEGIN
+	IF playlist_name IN (SELECT playlist_name FROM playlist AS pl WHERE pl.user_id = user_id) THEN
+		INSERT INTO episode_to_playlist(user_id, podcast_id, episode_num, playlist_name) VALUES(user_id, podcast_id, episode_num, playlist_name);
+    END IF;
+END $$
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Remove from playlist
+DROP PROCEDURE IF EXISTS remove_from_playlist;
+DELIMITER $$
+CREATE PROCEDURE remove_from_playlist
+(
+	user_id INT,
+    playlist_name VARCHAR(32),
+    podcast_id INT,
+    episode_num INT
+)
+BEGIN
+	IF playlist_name IN (SELECT playlist_name FROM playlist AS pl WHERE pl.user_id = user_id) THEN
+		DELETE FROM episode_to_playlist AS etp 
+        WHERE user_id = etp.user_id AND 
+        playlist_name = etp.playlist_name AND 
+        podcast_id = etp.podcast_id AND 
+        episode_num = etp.episode_num;
+    END IF;
 END $$
 DELIMITER ;

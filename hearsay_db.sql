@@ -13,21 +13,21 @@ CREATE TABLE user (
 );
 
 CREATE TABLE host (
-	id INT AUTO_INCREMENT PRIMARY KEY,
+	host_id INT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(32) NOT NULL,
     last_name VARCHAR(32) NOT NULL,
     bio VARCHAR(255) 		  	-- Optional
 );
 
 CREATE TABLE guest (
-	id INT AUTO_INCREMENT PRIMARY KEY,
+	guest_id INT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(32) NOT NULL,
     last_name VARCHAR(32) NOT NULL,
     bio VARCHAR(255) 			-- Optional
 );
 
 CREATE TABLE platform (
-	name VARCHAR(32) PRIMARY KEY,
+	platform_name VARCHAR(32) PRIMARY KEY,
     is_subscription_req BOOL NOT NULL,
     subscription_monthly_cost DECIMAL(10,2),
     CONSTRAINT subscription_check CHECK (
@@ -37,12 +37,12 @@ CREATE TABLE platform (
 );
 
 CREATE TABLE genre (
-	name VARCHAR(32) PRIMARY KEY,
+	genre_name VARCHAR(32) PRIMARY KEY,
     description VARCHAR(255)     -- Optional
 );
 
 CREATE TABLE podcast (
-	id INT AUTO_INCREMENT PRIMARY KEY,
+	podcast_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(32) NOT NULL,
     description VARCHAR(255),    -- Optional
     release_date DATE NOT NULL
@@ -57,7 +57,7 @@ CREATE TABLE episode (
     
     -- podcast contains episodes
     podcast_id INT NOT NULL,
-    FOREIGN KEY (podcast_id) REFERENCES podcast(id)
+    FOREIGN KEY (podcast_id) REFERENCES podcast(podcast_id)
     ON UPDATE CASCADE ON DELETE CASCADE,
     
     PRIMARY KEY (podcast_id, episode_num)
@@ -94,13 +94,13 @@ CREATE TABLE podcast_review (
     created_at DATE NOT NULL DEFAULT (CURRENT_DATE),
     FOREIGN KEY (user_id) REFERENCES user(id)
     ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (podcast_id) REFERENCES podcast(id)
+    FOREIGN KEY (podcast_id) REFERENCES podcast(podcast_id)
     ON UPDATE CASCADE ON DELETE CASCADE,
     PRIMARY KEY (user_id, podcast_id)
 );
 
 CREATE TABLE language (
-	name VARCHAR(32) PRIMARY KEY
+	language_name VARCHAR(32) PRIMARY KEY
 );
 
 CREATE TABLE user_to_user (
@@ -120,9 +120,9 @@ CREATE TABLE platform_to_podcast (
 	-- platforms offer podcasts
 	podcast_id INT NOT NULL,
 	platform_name VARCHAR(32) NOT NULL,
-    FOREIGN KEY (podcast_id) REFERENCES podcast(id)
+    FOREIGN KEY (podcast_id) REFERENCES podcast(podcast_id)
     ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (platform_name) REFERENCES platform(name)
+    FOREIGN KEY (platform_name) REFERENCES platform(platform_name)
     ON UPDATE CASCADE ON DELETE CASCADE,
     PRIMARY KEY (podcast_id, platform_name)
 );
@@ -131,9 +131,9 @@ CREATE TABLE genre_to_podcast (
 	-- podcasts categorized_by genres
 	podcast_id INT NOT NULL,
 	genre_name VARCHAR(32) NOT NULL,
-    FOREIGN KEY (podcast_id) REFERENCES podcast(id)
+    FOREIGN KEY (podcast_id) REFERENCES podcast(podcast_id)
     ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (genre_name) REFERENCES genre(name)
+    FOREIGN KEY (genre_name) REFERENCES genre(genre_name)
     ON UPDATE CASCADE ON DELETE CASCADE,
     PRIMARY KEY (podcast_id, genre_name)
 );
@@ -157,7 +157,7 @@ CREATE TABLE episode_to_host (
     host_id INT NOT NULL,
     FOREIGN KEY (podcast_id, episode_num) REFERENCES episode(podcast_id, episode_num)
     ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (host_id) REFERENCES host(id)
+    FOREIGN KEY (host_id) REFERENCES host(host_id)
     ON UPDATE CASCADE ON DELETE CASCADE,
     PRIMARY KEY (podcast_id, episode_num, host_id)
 );
@@ -169,7 +169,7 @@ CREATE TABLE episode_to_guest (
     guest_id INT NOT NULL,
     FOREIGN KEY (podcast_id, episode_num) REFERENCES episode(podcast_id, episode_num)
     ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (guest_id) REFERENCES guest(id)
+    FOREIGN KEY (guest_id) REFERENCES guest(guest_id)
     ON UPDATE CASCADE ON DELETE CASCADE,
     PRIMARY KEY (podcast_id, episode_num, guest_id)
 );
@@ -178,9 +178,9 @@ CREATE TABLE language_to_podcast (
 	-- podcast language options
     podcast_id INT NOT NULL,
     language_name VARCHAR(32),
-    FOREIGN KEY (podcast_id) REFERENCES podcast(id)
+    FOREIGN KEY (podcast_id) REFERENCES podcast(podcast_id)
     ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (language_name) REFERENCES language(name)
+    FOREIGN KEY (language_name) REFERENCES language(language_name)
     ON UPDATE CASCADE ON DELETE CASCADE,
     PRIMARY KEY (podcast_id, language_name)
 );
