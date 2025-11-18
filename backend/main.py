@@ -602,3 +602,47 @@ async def getPodcastGlobalAvgEp(podcast_id: int, episode_num: int, user_id: int)
         raise HTTPException(status_code=400, detail=message)
     finally:
         connection.close()
+
+@app.delete("/podcasts/{podcast_id}/review/{user_id}")
+async def deleteUserPodcastReview(podcast_id: int, user_id: int):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        cursor = connection.cursor()
+        cursor.callproc("delete_podcast_review", (user_id, podcast_id,))
+        connection.commit()
+
+        return {"reviewDelete": True, "message": "Review deleted succesfully"}
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+    finally:
+        connection.close()
+
+@app.delete("/podcasts/{podcast_id}/{episode_num}/review/{user_id}")
+async def getUserPodcastReview(podcast_id: int, episode_num: int, user_id: int):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        cursor = connection.cursor()
+        cursor.callproc("delete_episode_review", (user_id, podcast_id, episode_num,))
+        connection.commit()
+
+        return {"reviewDelete": True, "message": "Review deleted succesfully"}
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+    finally:
+        connection.close()
