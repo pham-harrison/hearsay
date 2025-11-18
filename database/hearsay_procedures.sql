@@ -242,3 +242,31 @@ BEGIN
     END IF;
 END $$
 DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Get review
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_podcast_review $$
+CREATE PROCEDURE get_podcast_review
+(
+	user_id_p INT,
+    podcast_id_p INT
+)
+BEGIN
+    SELECT * FROM podcast_review WHERE user_id = user_id_p AND podcast_id = podcast_id_p;
+END $$
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Delete review
+DELIMITER $$
+DROP PROCEDURE IF EXISTS delete_review $$
+CREATE PROCEDURE delete_review
+(
+	user_id_p INT,
+    podcast_id_p INT
+)
+BEGIN
+    DELETE FROM podcast_review WHERE user_id = user_id_p AND podcast_id = podcast_id_p;
+END $$
+DELIMITER ;
