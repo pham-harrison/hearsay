@@ -188,6 +188,20 @@ END $$
 DELIMITER ;
 
 -- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Get playlist
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_playlist $$
+CREATE PROCEDURE get_playlist
+(
+	IN user_id_p INT,
+    IN playlist_name_p VARCHAR(32)
+)
+BEGIN
+	SELECT * FROM playlist WHERE user_id = user_id_p AND playlist_name = playlist_name_p;
+END $$
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Delete playlist
 DROP PROCEDURE IF EXISTS delete_playlist;
 DELIMITER $$
