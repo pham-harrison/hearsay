@@ -1,201 +1,8 @@
--- CALL send_friend_request(1, 51);
--- SELECT * FROM user_to_user WHERE id1 = 1;
--- SELECT * FROM user_to_user WHERE id1 = 51;
-
--- CALL accept_friend_request(51, 1);
--- SELECT * FROM user_to_user WHERE id1 = 51;
--- SELECT * FROM user_to_user WHERE id2 = 51;
-
--- INSERT INTO user(email, username, password_hash, first_name, last_name) VALUES ("pham.har@email", "pham-har", "root1234", "Harrison", "Pham");
--- CALL insert_podcast_review(51, 1, 5, NULL);
--- CALL insert_podcast_review(51, 4, 2, NULL);
--- SELECT * FROM podcast_review WHERE user_id = 51;
-
-
--- CALL update_podcast_review(51, 1, 4, "Not as good as I remember");
--- SELECT * FROM podcast_review WHERE user_id = 51;
-
--- CALL insert_episode_review(51, 1, 1169, 5, "Amazing");
--- SELECT * FROM episode_review WHERE user_id = 51;
-
--- CALL update_episode_review(51, 1, 1169, 2, "Boring");
--- SELECT * FROM episode_review WHERE user_id = 51;
-
-
-
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /*
-Get global podcast average rating
+USER PROCEDURES
 */
-DELIMITER $$
-DROP PROCEDURE IF EXISTS get_global_podcast_avg_rating $$
-CREATE PROCEDURE get_global_podcast_avg_rating(IN podcast_id_p INT)
-BEGIN
-	SELECT AVG(rating)
-    FROM podcast_review
-    WHERE podcast_id = podcast_id_p;
-END $$
-DELIMITER ;
-
-CALL get_global_podcast_avg_rating(1);
-
-
-
-/*
-Get global podcast avg rating by episode
-*/
-DELIMITER $$
-DROP PROCEDURE IF EXISTS get_global_podcast_avg_rating_by_episode $$
-CREATE PROCEDURE get_global_podcast_avg_rating_by_episode(IN podcast_id_p INT)
-BEGIN
-	SELECT AVG(rating)
-    FROM episode_review
-    WHERE podcast_id = podcast_id_p;
-END $$
-DELIMITER ;
-
-CALL get_global_podcast_avg_rating_by_episode(1);
-
-
-
-/*
-Get the user's friends' average rating of a podcast
-*/
-DELIMITER $$
-DROP FUNCTION IF EXISTS get_user_friends_podcast_avg_rating $$
-CREATE FUNCTION get_user_friends_podcast_avg_rating(user_id_p INT, podcast_id_p INT)
-RETURNS DECIMAL(2,1)
-DETERMINISTIC READS SQL DATA
-BEGIN
-	DECLARE friends_avg_rating DECIMAL(2,1);
-    
-    SELECT AVG(rating) INTO friends_avg_rating
-    FROM user_to_user
-    JOIN podcast_review ON id2 = podcast_review.user_id
-    WHERE id1 = user_id_p AND podcast_id = podcast_id_p;
-    
-    RETURN friends_avg_rating;
-END $$
-DELIMITER ;
-
-SELECT get_user_friends_podcast_avg_rating(1, 4);
-
-
-
-/*
-Get user's friends' avg podcast rating by episode
-*/
-DELIMITER $$
-DROP FUNCTION IF EXISTS get_user_friends_podcast_avg_rating_by_episode $$
-CREATE FUNCTION get_user_friends_podcast_avg_rating_by_episode(user_id_p INT, podcast_id_p INT)
-RETURNS DECIMAL(2,1)
-DETERMINISTIC READS SQL DATA
-BEGIN
-	DECLARE friends_avg_rating_by_episode DECIMAL(2,1);
-    
-	SELECT AVG(rating) INTO friends_avg_rating_by_episode
-    FROM user_to_user
-    JOIN episode_review ON id2 = episode_review.user_id
-    WHERE id1 = user_id_p AND podcast_id = podcast_id_p;
-    
-    RETURN friends_avg_rating_by_episode;
-END $$
-DELIMITER ;
-
-INSERT INTO episode_review (user_id, podcast_id, episode_num, rating, text) VALUES (51, 4, 1, 1, NULL);
-INSERT INTO episode_review (user_id, podcast_id, episode_num, rating, text) VALUES (51, 4, 2, 5, NULL);
-SELECT get_user_friends_podcast_avg_rating_by_episode(1, 4);
-
-
-
-/*
-Get a user's rating of a podcast
-*/
-DELIMITER $$
-DROP PROCEDURE IF EXISTS get_user_podcast_rating $$
-CREATE PROCEDURE get_user_podcast_rating(IN user_id_p INT, IN podcast_id_p INT)
-BEGIN
-    SELECT rating
-    FROM podcast_review
-    WHERE user_id = user_id_p AND podcast_id = podcast_id_p;
-END $$
-DELIMITER ;
-
-CALL get_user_podcast_rating(4, 5);
-
-
-
-/*
-Get a user's rating of an episode
-*/
-DELIMITER $$
-DROP PROCEDURE IF EXISTS get_user_episode_rating $$
-CREATE PROCEDURE get_user_episode_rating(IN user_id_p INT, IN podcast_id_p INT, IN episode_num_p INT)
-BEGIN
-	SELECT rating
-    FROM episode_review
-    WHERE user_id = user_id_p AND podcast_id = podcast_id_p AND episode_num = episode_num_p;
-END $$
-DELIMITER ;
-
-CALL get_user_episode_rating(8, 16, 1);
-
-
-
-/*
-Get an episode's global average rating
-*/
-DELIMITER $$
-DROP FUNCTION IF EXISTS get_global_episode_avg_rating $$
-CREATE FUNCTION get_global_episode_avg_rating(podcast_id_p INT, episode_num_p INT)
-RETURNS DECIMAL (2,1)
-DETERMINISTIC READS SQL DATA
-BEGIN
-	DECLARE episode_rating DECIMAL(2,1);
-
-	SELECT AVG(rating) INTO episode_rating
-    FROM episode_review
-    WHERE podcast_id = podcast_id_p AND episode_num = episode_num_p;
-    
-    RETURN episode_rating;
-END $$
-DELIMITER ;
-
-SELECT get_global_episode_avg_rating(4, 1);
-
-
-
-/*
-Get an episode's average rating from a user's friends
-*/
-DELIMITER $$
-DROP FUNCTION IF EXISTS get_user_friends_episode_avg_rating $$
-CREATE FUNCTION get_user_friends_episode_avg_rating(user_id_p INT, podcast_id_p INT, episode_num_p INT)
-RETURNS DECIMAL(2,1) 
-DETERMINISTIC READS SQL DATA
-BEGIN
-	DECLARE friends_rating DECIMAL(2,1);
-    
-	SELECT AVG(rating) INTO friends_rating
-    FROM user_to_user
-    JOIN episode_review ON id2 = episode_review.user_id
-    WHERE id1 = user_id_p AND podcast_id = podcast_id_p AND episode_num = episode_num_p;
-    
-    RETURN friends_rating;
-END $$
-DELIMITER ;
-
-SELECT * FROM episode_review WHERE podcast_id = 4;
-SELECT * FROM user_to_user WHERE id1 = 1;
-SELECT get_user_friends_episode_avg_rating(1, 4, 1);
-
-
-
-
-
-
-/*
-ADDING CHECKS TO PROCEDURES
-*/
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 /*
 Create user
@@ -204,11 +11,11 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS create_user $$
 CREATE PROCEDURE create_user
 (
-	email_p VARCHAR(32),
-    username_p VARCHAR(32),
-    password_hash_p VARCHAR(255),
-    first_name_p VARCHAR(32),
-    last_name_p VARCHAR(32)
+	IN email_p VARCHAR(32),
+    IN username_p VARCHAR(32),
+    IN password_hash_p VARCHAR(255),
+    IN first_name_p VARCHAR(32),
+    IN last_name_p VARCHAR(32)
 )
 BEGIN
     IF EXISTS (SELECT * FROM user WHERE email = email_p) THEN 
@@ -224,7 +31,8 @@ BEGIN
 END $$
 DELIMITER ;
 
-
+CALL create_user("pham.har@northeastern.edu", "hpham", "root1234", "Harrison", "Pham");
+-- SELECT * FROM user;
 
 /*
 Get user login details
@@ -242,7 +50,7 @@ BEGIN
 END $$
 DELIMITER ;
 
-CALL get_user_log_in_details("johndoe");
+-- CALL get_user_log_in_details("hpfham");
 
 
 
@@ -253,7 +61,7 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS get_user_by_id $$
 CREATE PROCEDURE get_user_by_id(IN user_id_p INT)
 BEGIN
-    IF NOT EXISTS (SELECT * FROM user WHERE user_id = user_id_p) THEN
+    IF NOT EXISTS (SELECT * FROM user WHERE id = user_id_p) THEN
 		SIGNAL SQLSTATE "45000"
         SET MESSAGE_TEXT="User not found";
 	END IF;
@@ -262,14 +70,14 @@ BEGIN
 END $$
 DELIMITER ;
 
-
+-- CALL get_user_by_id(51);
 
 /*
 Get user by username
 */
 DELIMITER $$
-DROP PROCEDURE IF EXISTS get_user_by_username;
-CREATE PROCEDURE get_user_by_username(IN username_p INT)
+DROP PROCEDURE IF EXISTS get_user_by_username $$
+CREATE PROCEDURE get_user_by_username(IN username_p VARCHAR(32))
 BEGIN
     IF NOT EXISTS (SELECT * FROM user WHERE username = username_p) THEN
 		SIGNAL SQLSTATE "45000"
@@ -279,7 +87,7 @@ BEGIN
 END $$
 DELIMITER ;
 
-
+-- CALL get_user_by_username("hpham");
 
 /*
 Update user bio
@@ -288,182 +96,25 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS update_bio $$
 CREATE PROCEDURE update_bio(user_id_p INT, bio_p VARCHAR(255))
 BEGIN
-	IF NOT EXISTS (SELECT * FROM user WHERE user_id = user_id_p) THEN
+	IF NOT EXISTS (SELECT * FROM user WHERE id = user_id_p) THEN
 		SIGNAL SQLSTATE "45000"
         SET MESSAGE_TEXT="User not found";
 	END IF;
     
 	UPDATE user
-    SET user.bio = bio WHERE user.id = user_id;
+    SET bio = bio_p WHERE id = user_id_p;
 END $$
 DELIMITER ;
 
+-- CALL update_bio(51, "My name is Harrison");
+-- SELECT * FROM user WHERE id = 51;
+-- CALL update_bio(56, "My name is Harrison");
 
-
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /*
-Get friends
+USER-FRIEND PROCEDURES
 */
-DELIMITER $$
-DROP PROCEDURE IF EXISTS get_friends $$
-CREATE PROCEDURE get_friends(user_id_p INT)
-BEGIN
-	IF NOT EXISTS (SELECT * FROM user WHERE user_id = user_id_p) THEN
-		SIGNAL SQLSTATE "45000"
-        SET MESSAGE_TEXT="User not found";
-	END IF;
-    SELECT * FROM user WHERE id IN (SELECT id2 FROM user_to_user WHERE id1 = user_id_p);
-END $$
-DELIMITER ;
-
-
-
-/*
-Delete friend
-*/
-DELIMITER $$
-DROP PROCEDURE IF EXISTS delete_friend $$
-CREATE PROCEDURE delete_friend(IN user_id_p INT, IN user_to_delete_id_p INT) 
-BEGIN
-	IF NOT EXISTS (SELECT * FROM user_to_user WHERE id = user_id_p) THEN
-		SIGNAL SQLSTATE "45000"
-        SET MESSAGE_TEXT = "User ID not found";
-	ELSEIF NOT EXISTS (SELECT * FROM user_to_user WHERE id1 = user_id_p AND id2 = user_to_delete_id_p) THEN
-		SIGNAL SQLSTATE "45000"
-        SET MESSAGE_TEXT = "Users are not friends";
-	END IF;
-    
-    IF (SELECT status FROM user_to_user WHERE id1 = user_id_p AND id2 = user_to_delete_id_p) = "accepted" THEN
-		DELETE FROM user_to_user WHERE id1 = user_to_delete_id_p AND id2 = user_id_p;
-	END IF;
-    
-	DELETE FROM user_to_user WHERE id1 = user_id_p AND id2 = user_to_delete_id_p;
-END $$
-DELIMITER ;
-
-
-
-/*
-Get all hosts
-*/
-DELIMITER $$
-DROP PROCEDURE IF EXISTS get_hosts $$
-CREATE PROCEDURE get_hosts()
-BEGIN
-	SELECT * FROM host;
-END $$
-DELIMITER ;
-
-
-
-/*
-Get all guests
-*/
-DELIMITER $$
-DROP PROCEDURE IF EXISTS get_guests $$
-CREATE PROCEDURE get_guests()
-BEGIN
-	SELECT * FROM guest;
-END $$
-DELIMITER ;
-
-
-DROP PROCEDURE IF EXISTS search_podcasts;
-DELIMITER $$
-CREATE PROCEDURE search_podcasts
-(
-	name VARCHAR(32),
-    genre VARCHAR(32),
-    language VARCHAR(32),
-    platform VARCHAR(32),
-    host_first VARCHAR(32),
-    host_last VARCHAR(32),
-    guest_first VARCHAR(32),
-    guest_last VARCHAR(32),
-    year INT
-)
-BEGIN
-	-- Declare flags for filters
-	DECLARE name_flag TINYINT DEFAULT 0;
-    DECLARE genre_flag TINYINT DEFAULT 0;
-    DECLARE language_flag TINYINT DEFAULT 0;
-    DECLARE platform_flag TINYINT DEFAULT 0;
-    DECLARE host_first_flag TINYINT DEFAULT 0;
-    DECLARE host_last_flag TINYINT DEFAULT 0;
-    DECLARE guest_first_flag TINYINT DEFAULT 0;
-    DECLARE guest_last_flag TINYINT DEFAULT 0;
-    DECLARE year_flag TINYINT DEFAULT 0;
-    
-    -- Set flags to disable check if filter is null
-    IF name IS NULL THEN SET name_flag = 1; END IF;
-	IF genre IS NULL THEN SET genre_flag = 1; END IF;
-	IF language IS NULL THEN SET language_flag = 1; END IF;
-	IF platform IS NULL THEN SET platform_flag = 1; END IF;
-	IF host_first IS NULL THEN SET host_first_flag = 1; END IF;
-	IF host_last IS NULL THEN SET host_last_flag = 1; END IF;
-	IF guest_first IS NULL THEN SET guest_first_flag = 1; END IF;
-	IF guest_last IS NULL THEN SET guest_last_flag = 1; END IF;
-	IF year IS NULL THEN SET year_flag = 1; END IF;
-	
-    -- Return table based on passed filters
-    SELECT * FROM podcast AS p 
-		  JOIN platform_to_podcast AS ptp USING (podcast_id)
-		  JOIN platform AS pl USING (platform_name)
-          JOIN genre_to_podcast AS gtp USING (podcast_id)
-          JOIN genre AS g USING (genre_name)
-          JOIN language_to_podcast AS ltp USING (podcast_id)
-          JOIN language AS l USING (language_name)
-          JOIN episode_to_host AS eth USING (podcast_id)
-          JOIN host AS h USING (host_id)
-          JOIN episode_to_guest AS etg USING (podcast_id)
-          JOIN guest AS gu USING (guest_id)
-    WHERE (p.name = name OR name_flag) AND
-		  (g.genre_name = genre OR genre_flag) AND
-          (l.language_name = language OR language_flag) AND
-          (pl.platform_name = platform OR platform_flag) AND
-          (h.first_name = host_first OR host_first_flag) AND
-          (h.last_name = host_last OR host_last_flag) AND
-          (gu.first_name = guest_first OR guest_first_flag) AND 
-          (gu.last_name = guest_last OR guest_last_flag) AND 
-          (YEAR(p.release_date) = year OR year_flag);
-END $$
-DELIMITER ;
-
-
-DELIMITER $$
-DROP PROCEDURE IF EXISTS search_episodes $$
-CREATE PROCEDURE search_episodes
-(
-    podcast_id_p INT,
-    episode_num_p INT,
-	episode_name_p VARCHAR(32),
-    host_first_p VARCHAR(32),
-    host_last_p VARCHAR(32),
-    guest_first_p VARCHAR(32),
-    guest_last_p VARCHAR(32),
-    year_p INT
-)
-BEGIN
-    SELECT * FROM episode
-    JOIN episode_to_host AS eth 
-        ON episode.podcast_id = eth.podcast_id
-        AND episode.episode_num = eth.episode_num
-    JOIN host USING (host_id)
-    JOIN episode_to_guest AS etg 
-        ON episode.podcast_id = etg.podcast_id
-        AND episode.episode_num = etg.episode_num
-    JOIN guest USING (guest_id)
-    WHERE ((episode.podcast_id = podcast_id_p)
-        AND (episode_num_p IS NULL OR episode.episode_num = episode_num_p)
-        AND (episode_name_p IS NULL OR episode.name LIKE CONCAT('%', episode_name_p, '%'))
-        AND (host_first_p IS NULL OR host.first_name = host_first_p)
-        AND (host_last_p IS NULL OR host.last_name = host_last_p)
-        AND (guest_first_p IS NULL OR guest.first_name = guest_first_p)
-        AND (guest_last_p IS NULL OR guest.last_name = guest_last_p)
-        AND (year_p IS NULL OR YEAR(episode.release_date) = year_p));
-END $$
-DELIMITER ;
-
-
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 /*
 Send friend request
@@ -489,6 +140,7 @@ BEGIN
 END $$
 DELIMITER ;
 
+-- CALL send_friend_request(1, 51);
 
 
 /*
@@ -515,6 +167,238 @@ BEGIN
 END $$
 DELIMITER ;
 
+-- CALL accept_friend_request(51, 1);
+-- CALL accept_friend_request(1, 51);
+
+/*
+Delete friend
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS delete_friend $$
+CREATE PROCEDURE delete_friend(IN user_id_p INT, IN user_to_delete_id_p INT) 
+BEGIN
+	IF NOT EXISTS (SELECT * FROM user WHERE id = user_id_p) THEN
+		SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT = "User ID not found";
+	ELSEIF NOT EXISTS (SELECT * FROM user_to_user WHERE id1 = user_id_p AND id2 = user_to_delete_id_p) THEN
+		SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT = "Users are not friends";
+	END IF;
+    
+    IF (SELECT status FROM user_to_user WHERE id1 = user_id_p AND id2 = user_to_delete_id_p) = "accepted" THEN
+		DELETE FROM user_to_user WHERE id1 = user_to_delete_id_p AND id2 = user_id_p;
+	END IF;
+    
+	DELETE FROM user_to_user WHERE id1 = user_id_p AND id2 = user_to_delete_id_p;
+END $$
+DELIMITER ;
+
+-- CALL delete_friend(1, 51);
+
+/*
+Get friends
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_friends $$
+CREATE PROCEDURE get_friends(user_id_p INT)
+BEGIN
+	IF NOT EXISTS (SELECT * FROM user WHERE id = user_id_p) THEN
+		SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT="User not found";
+	END IF;
+    SELECT * FROM user_to_user
+    JOIN user ON id2 = user.id
+    WHERE id1 = user_id_p AND status = "accepted";
+END $$
+DELIMITER ;
+
+-- CALL get_friends(1);
+-- CALL get_friends(51);
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+PODCAST PROCEDURES
+*/
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+/*
+Get all hosts
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_hosts $$
+CREATE PROCEDURE get_hosts()
+BEGIN
+	SELECT * FROM host;
+END $$
+DELIMITER ;
+
+-- CALL get_hosts();
+
+/*
+Get all guests
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_guests $$
+CREATE PROCEDURE get_guests()
+BEGIN
+	SELECT * FROM guest;
+END $$
+DELIMITER ;
+
+-- CALL get_guests();
+
+/*
+Search podcasts
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS search_podcasts $$
+CREATE PROCEDURE search_podcasts
+(
+	IN name_p VARCHAR(32),
+    IN genre_p VARCHAR(32),
+    IN language_p VARCHAR(32),
+    IN platform_p VARCHAR(32),
+    IN host_first_p VARCHAR(32),
+    IN host_last_p VARCHAR(32),
+    IN guest_first_p VARCHAR(32),
+    IN guest_last_p VARCHAR(32),
+    IN year_p INT
+)
+BEGIN
+	-- Declare flags for filters
+	DECLARE name_flag TINYINT DEFAULT 0;
+    DECLARE genre_flag TINYINT DEFAULT 0;
+    DECLARE language_flag TINYINT DEFAULT 0;
+    DECLARE platform_flag TINYINT DEFAULT 0;
+    DECLARE host_first_flag TINYINT DEFAULT 0;
+    DECLARE host_last_flag TINYINT DEFAULT 0;
+    DECLARE guest_first_flag TINYINT DEFAULT 0;
+    DECLARE guest_last_flag TINYINT DEFAULT 0;
+    DECLARE year_flag TINYINT DEFAULT 0;
+    
+    -- Set flags to disable check if filter is null
+    IF name_p IS NULL THEN SET name_flag = 1; END IF;
+	IF genre_p IS NULL THEN SET genre_flag = 1; END IF;
+	IF language_p IS NULL THEN SET language_flag = 1; END IF;
+	IF platform_p IS NULL THEN SET platform_flag = 1; END IF;
+	IF host_first_p IS NULL THEN SET host_first_flag = 1; END IF;
+	IF host_last_p IS NULL THEN SET host_last_flag = 1; END IF;
+	IF guest_first_p IS NULL THEN SET guest_first_flag = 1; END IF;
+	IF guest_last_p IS NULL THEN SET guest_last_flag = 1; END IF;
+	IF year_p IS NULL THEN SET year_flag = 1; END IF;
+	
+    -- Return table based on passed filters
+    SELECT * FROM podcast AS p 
+		  LEFT JOIN platform_to_podcast AS ptp USING (podcast_id)
+		  LEFT JOIN platform AS pl USING (platform_name)
+          LEFT JOIN genre_to_podcast AS gtp USING (podcast_id)
+          LEFT JOIN genre AS g USING (genre_name)
+          LEFT JOIN language_to_podcast AS ltp USING (podcast_id)
+          LEFT JOIN language AS l USING (language_name)
+          LEFT JOIN episode_to_host AS eth USING (podcast_id)
+          LEFT JOIN host AS h USING (host_id)
+          LEFT JOIN episode_to_guest AS etg USING (podcast_id)
+          LEFT JOIN guest AS gu USING (guest_id)
+    WHERE (p.name LIKE CONCAT('%', name_p, '%') OR name_flag) AND
+		  (g.genre_name = genre_p OR genre_flag) AND
+          (l.language_name = language_p OR language_flag) AND
+          (pl.platform_name = platform_p OR platform_flag) AND
+          (h.first_name = host_first_p OR host_first_flag) AND
+          (h.last_name = host_last_p OR host_last_flag) AND
+          (gu.first_name = guest_first_p OR guest_first_flag) AND 
+          (gu.last_name = guest_last_p OR guest_last_flag) AND 
+          (YEAR(p.release_date) = year_p OR year_flag);
+END $$
+DELIMITER ;
+
+-- CALL search_podcasts
+-- (
+-- 	NULL, -- name VARCHAR(32),
+--     NULL, -- genre VARCHAR(32),
+--     NULL, -- language VARCHAR(32),
+--     NULL, -- platform VARCHAR(32),
+--     NULL, -- host_first VARCHAR(32),
+--     NULL, -- host_last VARCHAR(32),
+--     NULL, -- guest_first VARCHAR(32),
+--     NULL, -- guest_last VARCHAR(32),
+--     NULL -- year INT
+-- );
+
+-- SELECT * FROM podcast;
+
+/*
+Search episodes
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS search_episodes $$
+CREATE PROCEDURE search_episodes
+(
+    IN podcast_id_p INT,
+    IN episode_num_p INT,
+	IN episode_name_p VARCHAR(32),
+    IN host_first_p VARCHAR(32),
+    IN host_last_p VARCHAR(32),
+    IN guest_first_p VARCHAR(32),
+    IN guest_last_p VARCHAR(32),
+    IN year_p INT
+)
+BEGIN
+    SELECT * FROM episode
+    LEFT JOIN episode_to_host AS eth 
+        ON episode.podcast_id = eth.podcast_id
+        AND episode.episode_num = eth.episode_num
+    LEFT JOIN host USING (host_id)
+    LEFT JOIN episode_to_guest AS etg 
+        ON episode.podcast_id = etg.podcast_id
+        AND episode.episode_num = etg.episode_num
+    LEFT JOIN guest USING (guest_id)
+    WHERE ((episode.podcast_id = podcast_id_p)
+        AND (episode_num_p IS NULL OR episode.episode_num = episode_num_p)
+        AND (episode_name_p IS NULL OR episode.name LIKE CONCAT('%', episode_name_p, '%'))
+        AND (host_first_p IS NULL OR host.first_name = host_first_p)
+        AND (host_last_p IS NULL OR host.last_name = host_last_p)
+        AND (guest_first_p IS NULL OR guest.first_name = guest_first_p)
+        AND (guest_last_p IS NULL OR guest.last_name = guest_last_p)
+        AND (year_p IS NULL OR YEAR(episode.release_date) = year_p));
+END $$
+DELIMITER ;
+
+-- CALL search_episodes
+-- (
+--     1, -- IN podcast_id_p INT,
+--     NULL, -- IN episode_num_p INT,
+-- 	NULL, -- IN episode_name_p VARCHAR(32),
+--     NULL, -- IN host_first_p VARCHAR(32),
+--     NULL, -- IN host_last_p VARCHAR(32),
+--     NULL, -- IN guest_first_p VARCHAR(32),
+--     NULL, -- IN guest_last_p VARCHAR(32),
+--     2018 -- IN year_p INT
+-- );
+
+-- SELECT * FROM episode WHERE podcast_id = 1;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+PODCAST-REVIEW PROCEDURES
+*/
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+Get a user's rating of a podcast
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_user_podcast_review $$
+CREATE PROCEDURE get_user_podcast_review(IN user_id_p INT, IN podcast_id_p INT)
+BEGIN
+    SELECT *
+    FROM podcast_review
+    WHERE user_id = user_id_p AND podcast_id = podcast_id_p;
+END $$
+DELIMITER ;
+
+CALL get_user_podcast_review(51, 1);
+
+
 
 /*
 Insert podcast review
@@ -536,6 +420,7 @@ BEGIN
 END $$
 DELIMITER ;
 
+-- CALL insert_podcast_review(51, 190, 4, "Decent");
 
 
 /*
@@ -559,7 +444,22 @@ BEGIN
 END $$
 DELIMITER ;
 
+CALL update_podcast_review(51, 1, 5, "better than I remember");
 
+/*
+Get a user's review of an episode
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_user_episode_review $$
+CREATE PROCEDURE get_user_episode_review(IN user_id_p INT, IN podcast_id_p INT, IN episode_num_p INT)
+BEGIN
+	SELECT *
+    FROM episode_review
+    WHERE user_id = user_id_p AND podcast_id = podcast_id_p AND episode_num = episode_num_p;
+END $$
+DELIMITER ;
+
+CALL get_user_episode_review(51, 1, 1555);
 
 /*
 Insert episode review
@@ -584,6 +484,7 @@ BEGIN
 END $$
 DELIMITER ;
 
+CALL insert_episode_review(51, 1, 1555, 5, NULL);
 
 /*
 Update episode review
@@ -608,3 +509,280 @@ BEGIN
     WHERE user_id = user_id_p AND podcast_id = podcast_id_p AND episode_num = episode_num_p;
 END $$
 DELIMITER ;
+
+CALL update_episode_review(51, 1, 1555, 5, "Forgot to add a comment");
+
+/*
+Get global podcast average rating
+*/
+DELIMITER $$
+DROP FUNCTION IF EXISTS get_global_podcast_avg_rating $$
+CREATE FUNCTION get_global_podcast_avg_rating(podcast_id_p INT)
+RETURNS DECIMAL(2,1)
+DETERMINISTIC READS SQL DATA
+BEGIN
+    DECLARE podcast_rating DECIMAL(2,1);
+    
+	SELECT AVG(rating) INTO podcast_rating
+    FROM podcast_review
+    WHERE podcast_id = podcast_id_p;
+    
+    RETURN podcast_rating;
+END $$
+DELIMITER ;
+
+-- SELECT get_global_podcast_avg_rating(2);
+-- SELECT * FROM podcast_review where podcast_id = 2;
+
+
+/*
+Get global podcast average rating by episode
+*/
+DELIMITER $$
+DROP FUNCTION IF EXISTS get_global_podcast_avg_rating_by_episode $$
+CREATE FUNCTION get_global_podcast_avg_rating_by_episode(podcast_id_p INT)
+RETURNS DECIMAL(2,1)
+DETERMINISTIC READS SQL DATA
+BEGIN
+    DECLARE podcast_rating DECIMAL(2,1);
+    
+	SELECT AVG(rating) INTO podcast_rating
+    FROM episode_review
+    WHERE podcast_id = podcast_id_p;
+    
+    RETURN podcast_rating;
+END $$
+DELIMITER ;
+
+SELECT * FROM episode_review WHERE podcast_id = 2;
+SELECT get_global_podcast_avg_rating_by_episode(2);
+
+/*
+Get the user's friends' average rating of a podcast
+*/
+DELIMITER $$
+DROP FUNCTION IF EXISTS get_user_friends_podcast_avg_rating $$
+CREATE FUNCTION get_user_friends_podcast_avg_rating(user_id_p INT, podcast_id_p INT)
+RETURNS DECIMAL(2,1)
+DETERMINISTIC READS SQL DATA
+BEGIN
+	DECLARE friends_avg_rating DECIMAL(2,1);
+    
+    SELECT AVG(rating) INTO friends_avg_rating
+    FROM user_to_user
+    JOIN podcast_review ON id2 = podcast_review.user_id
+    WHERE id1 = user_id_p AND podcast_id = podcast_id_p;
+    
+    RETURN friends_avg_rating;
+END $$
+DELIMITER ;
+
+-- SELECT * FROM podcast_review WHERE user_id = 51;
+-- SELECT * FROM podcast;
+-- CALL create_user("testuser@email.com", "testUser", "root1234", "Test", "User");
+-- CALL send_friend_request(1, 52);
+-- CALL accept_friend_request(52, 1);
+-- CALL get_friends(1);
+-- CALL insert_podcast_review(52, 1, 3, NULL);
+-- CALL get_user_podcast_review(52, 1);
+-- SELECT * FROM user_to_user JOIN podcast_review ON id2 = user_id WHERE id1 = 1 AND podcast_id = 1;
+-- SELECT get_user_friends_podcast_avg_rating(1, 1);
+
+
+/*
+Get user's friends' average podcast rating by episode
+*/
+DELIMITER $$
+DROP FUNCTION IF EXISTS get_user_friends_podcast_avg_rating_by_episode $$
+CREATE FUNCTION get_user_friends_podcast_avg_rating_by_episode(user_id_p INT, podcast_id_p INT)
+RETURNS DECIMAL(2,1)
+DETERMINISTIC READS SQL DATA
+BEGIN
+	DECLARE friends_avg_rating_by_episode DECIMAL(2,1);
+    
+	SELECT AVG(rating) INTO friends_avg_rating_by_episode
+    FROM user_to_user
+    JOIN episode_review ON id2 = episode_review.user_id
+    WHERE id1 = user_id_p AND podcast_id = podcast_id_p;
+    
+    RETURN friends_avg_rating_by_episode;
+END $$
+DELIMITER ;
+
+-- SELECT * FROM episode_review WHERE user_id = 51;
+-- CALL insert_episode_review(52, 1, 1555, 1, NULL);
+-- SELECT * FROM episode_review WHERE user_id = 52;
+-- SELECT * FROM user_to_user JOIN episode_review ON episode_review.user_id = id2 WHERE id1 = 1 AND podcast_id = 1;
+-- SELECT get_user_friends_podcast_avg_rating_by_episode(1, 1);
+
+/*
+Get an episode's global average rating
+*/
+DELIMITER $$
+DROP FUNCTION IF EXISTS get_global_episode_avg_rating $$
+CREATE FUNCTION get_global_episode_avg_rating(podcast_id_p INT, episode_num_p INT)
+RETURNS DECIMAL (2,1)
+DETERMINISTIC READS SQL DATA
+BEGIN
+	DECLARE episode_rating DECIMAL(2,1);
+
+	SELECT AVG(rating) INTO episode_rating
+    FROM episode_review
+    WHERE podcast_id = podcast_id_p AND episode_num = episode_num_p;
+    
+    RETURN episode_rating;
+END $$
+DELIMITER ;
+
+-- SELECT * FROM episode_review WHERE podcast_id = 1;
+-- SELECT get_global_episode_avg_rating(1, 1555);
+
+
+
+/*
+Get an episode's average rating from a user's friends
+*/
+DELIMITER $$
+DROP FUNCTION IF EXISTS get_user_friends_episode_avg_rating $$
+CREATE FUNCTION get_user_friends_episode_avg_rating(user_id_p INT, podcast_id_p INT, episode_num_p INT)
+RETURNS DECIMAL(2,1) 
+DETERMINISTIC READS SQL DATA
+BEGIN
+	DECLARE friends_rating DECIMAL(2,1);
+    
+	SELECT AVG(rating) INTO friends_rating
+    FROM user_to_user
+    JOIN episode_review ON id2 = episode_review.user_id
+    WHERE id1 = user_id_p AND podcast_id = podcast_id_p AND episode_num = episode_num_p;
+    
+    RETURN friends_rating;
+END $$
+DELIMITER ;
+
+-- SELECT * FROM user_to_user WHERE id1 = 1;
+-- SELECT get_user_friends_episode_avg_rating(1, 1, 1555);
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+PLAYLIST PROCEDURES
+*/
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+Create a playlist
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS create_playlist $$
+CREATE PROCEDURE create_playlist (IN user_id_p INT, IN playlist_name_p VARCHAR(32))
+BEGIN
+	IF playlist_name_p NOT IN (SELECT name FROM playlist AS pl WHERE pl.user_id = user_id_p) THEN
+		INSERT INTO playlist(user_id, name) VALUES (user_id_p, playlist_name_p);
+    ELSE 
+        SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT="Playlist already exists";
+    END IF;
+END $$
+DELIMITER ;
+
+-- CALL create_playlist(51, "Real G tunes");
+-- SELECT * FROM playlist;
+
+/*
+Get a playlist
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_playlists $$
+CREATE PROCEDURE get_playlists (IN user_id_p INT)
+BEGIN
+	SELECT * FROM playlist WHERE user_id = user_id_p;
+END $$
+DELIMITER ;
+
+-- CALL get_playlists(51);
+
+/*
+Delete a playlist
+*/
+DROP PROCEDURE IF EXISTS delete_playlist;
+DELIMITER $$
+CREATE PROCEDURE delete_playlist(IN user_id_p INT, IN playlist_name_p VARCHAR(32))
+BEGIN
+	IF playlist_name_p IN (SELECT name FROM playlist WHERE user_id = user_id_p) THEN
+		DELETE FROM playlist AS pl 
+        WHERE pl.user_id = user_id_p
+        AND name = playlist_name_p;
+    ELSE
+        SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT = "Playlist not found";
+	END IF;
+END $$
+DELIMITER ;
+
+-- CALL delete_playlist(51, "Real G tunes");
+
+/*
+Get episodes in playlist
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_episodes_in_playlist $$
+CREATE PROCEDURE get_episodes_in_playlist(IN user_id_p INT, IN playlist_name_p VARCHAR(32))
+BEGIN
+    SELECT * FROM episode_to_playlist
+    WHERE user_id = user_id_p AND playlist_name = playlist_name_p;
+END $$
+DELIMITER ;
+
+-- CALL get_episodes_in_playlist(51, "Real G tunes");
+
+
+/*
+Add episode to playlist
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS add_episode_to_playlist $$
+CREATE PROCEDURE add_episode_to_playlist
+(
+	IN user_id_p INT,
+    IN podcast_id_p INT,
+    IN episode_num_p INT,
+    IN playlist_name_p VARCHAR(32)
+)
+BEGIN
+	IF playlist_name_p IN (SELECT name FROM playlist AS pl WHERE pl.user_id = user_id_p) THEN
+		INSERT INTO episode_to_playlist(user_id, podcast_id, episode_num, playlist_name) 
+            VALUES(user_id_p, podcast_id_p, episode_num_p, playlist_name_p);
+    ELSE
+        SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT = "Playlist not found";
+    END IF;
+END $$
+DELIMITER ;
+
+-- CALL add_to_playlist(51, 1, 1555, "Real G tunes");
+
+/*
+Remove an episode from a playlist
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS remove_episode_from_playlist $$
+CREATE PROCEDURE remove_episode_from_playlist
+(
+	IN user_id_p INT,
+    IN podcast_id_p INT,
+    IN episode_num_p INT,
+    IN playlist_name_p VARCHAR(32)
+)
+BEGIN
+	IF playlist_name_p IN (SELECT name FROM playlist AS pl WHERE pl.user_id = user_id_p) THEN
+		DELETE FROM episode_to_playlist AS etp 
+        WHERE user_id_p = etp.user_id 
+            AND playlist_name_p = etp.playlist_name 
+            AND podcast_id_p = etp.podcast_id 
+            AND episode_num_p = etp.episode_num;
+    ELSE 
+        SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT = "Playlist not found";
+    END IF;
+END $$
+DELIMITER ;
+
+-- CALL remove_episode_from_playlist(51, 1, 1555, "Real G tunes");
