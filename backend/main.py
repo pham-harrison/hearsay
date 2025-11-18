@@ -40,6 +40,7 @@ class Review(BaseModel):
 async def root():
     return {"message": "Hello World"}
 
+# Create user account
 @app.post("/users", status_code=201)
 async def createUser(data: UserCreate): # Check if email is already registered
     try:
@@ -67,6 +68,7 @@ async def createUser(data: UserCreate): # Check if email is already registered
     finally:
         connection.close()
 
+# Login a registered user
 @app.post("/users/login")
 async def logInUser(data: UserLogin):
     try:
@@ -94,6 +96,7 @@ async def logInUser(data: UserLogin):
     finally:
         connection.close()
 
+# Get all user details
 @app.get("/users/{user_id}")
 async def getUser(user_id):
     try:
@@ -112,7 +115,7 @@ async def getUser(user_id):
     finally:
         connection.close()
 
-
+# Update user bio
 @app.put("/users/{user_id}")
 async def updateBio(user_id: int, data: UserBio):
     try:
@@ -136,6 +139,7 @@ async def updateBio(user_id: int, data: UserBio):
     finally:
         connection.close()
 
+# Get all friends for a user
 @app.get("/users/{user_id}/friends")
 async def getUserFriends(user_id: int):
     try:
@@ -160,6 +164,7 @@ async def getUserFriends(user_id: int):
 @app.delete("/users/{user_id}/friends/{friend_id}")
 ### Fill out later ###
 
+# Search for a podcast 
 @app.get("/podcasts")
 async def searchPodcasts(
     name: Optional[str] = None,
@@ -187,6 +192,7 @@ async def searchPodcasts(
     finally:
         connection.close()
 
+# Get all hosts
 @app.get("/podcasts/hosts")
 async def getHosts():
     try:
@@ -206,6 +212,7 @@ async def getHosts():
     finally:
         connection.close()
 
+# Get all guests
 @app.get("/podcasts/guests")
 async def getHosts():
     try:
@@ -225,6 +232,7 @@ async def getHosts():
     finally:
         connection.close()
 
+# Search for an episode of a podcast
 @app.get("/podcasts/{podcast_id}/episodes")
 async def searchPodcastEpisodes(
     podcast_id: int,
@@ -251,6 +259,7 @@ async def searchPodcastEpisodes(
     finally:
         connection.close()
 
+# Create a playlist for a user
 @app.post("/users/{user_id}/playlists")
 async def createPlaylist(user_id: int, playlist: Playlist):
     try:
@@ -263,10 +272,6 @@ async def createPlaylist(user_id: int, playlist: Playlist):
         )
 
         cursor = connection.cursor()
-        #cursor.execute("SELECT * FROM playlist WHERE user_id=%s AND playlist_name=%s", (user_id, playlist.name))
-        #if cursor.fetchone():
-        #    raise HTTPException(status_code=400, detail=f"Playlist already exists")
-        
         cursor.callproc("create_playlist", (user_id, playlist.name))
         connection.commit()
 
@@ -277,6 +282,7 @@ async def createPlaylist(user_id: int, playlist: Playlist):
     finally:
         connection.close()
 
+# Delete a playlist for a user
 @app.delete("/users/{user_id}/playlists")
 async def deletePlaylist(user_id: int, playlist: Playlist):
     try:
@@ -301,6 +307,7 @@ async def deletePlaylist(user_id: int, playlist: Playlist):
     finally:
         connection.close()
 
+# Add an episode to a playlist
 @app.post("/users/{user_id}/playlists/add")
 async def addToPlaylist(user_id: int, playlist_ep: PlaylistEp):
     try:
@@ -324,6 +331,7 @@ async def addToPlaylist(user_id: int, playlist_ep: PlaylistEp):
     finally:
         connection.close()
 
+# Remove an episode from a playlist
 @app.delete("/users/{user_id}/playlists/add")
 async def removeFromPlaylist(user_id: int, playlist_ep: PlaylistEp):
     try:
@@ -347,6 +355,7 @@ async def removeFromPlaylist(user_id: int, playlist_ep: PlaylistEp):
     finally:
         connection.close()
 
+# Create a podcast review
 @app.post("/podcasts/{podcast_id}/review/{user_id}")
 async def addReviewPodcast(user_id: int, podcast_id: int, review: Review):
     try:
@@ -368,6 +377,7 @@ async def addReviewPodcast(user_id: int, podcast_id: int, review: Review):
     finally:
         connection.close()
 
+# Update a podcast review
 @app.put("/podcasts/{podcast_id}/review/{user_id}")
 async def updateReviewPodcast(user_id: int, podcast_id: int, review: Review):
     try:
@@ -389,6 +399,7 @@ async def updateReviewPodcast(user_id: int, podcast_id: int, review: Review):
     finally:
         connection.close()
 
+# Create an episode review
 @app.post("/podcasts/{podcast_id}/{episode_num}/review/{user_id}")
 async def addReviewEpisode(user_id: int, podcast_id: int, episode_num: int, review: Review):
     try:
@@ -410,6 +421,7 @@ async def addReviewEpisode(user_id: int, podcast_id: int, episode_num: int, revi
     finally:
         connection.close()
 
+# Update an episode review
 @app.put("/podcasts/{podcast_id}/{episode_num}/review/{user_id}")
 async def updateReviewEpisode(user_id: int, podcast_id: int, episode_num: int, review: Review):
     try:
@@ -431,6 +443,53 @@ async def updateReviewEpisode(user_id: int, podcast_id: int, episode_num: int, r
     finally:
         connection.close()
 
+# Delete a podcast review
+@app.delete("/podcasts/{podcast_id}/review/{user_id}")
+async def deleteUserPodcastReview(podcast_id: int, user_id: int):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        cursor = connection.cursor()
+        cursor.callproc("delete_podcast_review", (user_id, podcast_id,))
+        connection.commit()
+
+        return {"reviewDelete": True, "message": "Review deleted succesfully"}
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+    finally:
+        connection.close()
+
+# Delete an episode review
+@app.delete("/podcasts/{podcast_id}/{episode_num}/review/{user_id}")
+async def deleteUserEpisodeReview(podcast_id: int, episode_num: int, user_id: int):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        cursor = connection.cursor()
+        cursor.callproc("delete_episode_review", (user_id, podcast_id, episode_num,))
+        connection.commit()
+
+        return {"reviewDelete": True, "message": "Review deleted succesfully"}
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+    finally:
+        connection.close()
+
+# Get rating scores for a podcast
 @app.get("/podcasts/{podcast_id}/global")
 async def getPodcastGlobalAvg(podcast_id: int):
     try:
@@ -597,50 +656,6 @@ async def getPodcastGlobalAvgEp(podcast_id: int, episode_num: int, user_id: int)
         cursor.execute(stmt, (user_id, podcast_id, episode_num,))
         global_avg_rating = cursor.fetchone()
         return global_avg_rating
-    except pymysql.err.OperationalError as e:
-        error_code, message = e.args
-        raise HTTPException(status_code=400, detail=message)
-    finally:
-        connection.close()
-
-@app.delete("/podcasts/{podcast_id}/review/{user_id}")
-async def deleteUserPodcastReview(podcast_id: int, user_id: int):
-    try:
-        connection = pymysql.connect(
-            host=HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DATABASE,
-            cursorclass=pymysql.cursors.DictCursor
-        )
-
-        cursor = connection.cursor()
-        cursor.callproc("delete_podcast_review", (user_id, podcast_id,))
-        connection.commit()
-
-        return {"reviewDelete": True, "message": "Review deleted succesfully"}
-    except pymysql.err.OperationalError as e:
-        error_code, message = e.args
-        raise HTTPException(status_code=400, detail=message)
-    finally:
-        connection.close()
-
-@app.delete("/podcasts/{podcast_id}/{episode_num}/review/{user_id}")
-async def getUserPodcastReview(podcast_id: int, episode_num: int, user_id: int):
-    try:
-        connection = pymysql.connect(
-            host=HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DATABASE,
-            cursorclass=pymysql.cursors.DictCursor
-        )
-
-        cursor = connection.cursor()
-        cursor.callproc("delete_episode_review", (user_id, podcast_id, episode_num,))
-        connection.commit()
-
-        return {"reviewDelete": True, "message": "Review deleted succesfully"}
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
