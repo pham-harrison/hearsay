@@ -292,3 +292,72 @@ DELIMITER ;
 SELECT * FROM episode_review WHERE podcast_id = 4;
 SELECT * FROM user_to_user WHERE id1 = 1;
 SELECT get_user_friends_episode_avg_rating(1, 4, 1);
+
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Get podcast review
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_podcast_review $$
+CREATE PROCEDURE get_podcast_review
+(
+	IN user_id_p INT,
+    IN podcast_id_p INT
+)
+BEGIN
+    SELECT * FROM podcast_review 
+    WHERE user_id = user_id_p 
+    AND podcast_id = podcast_id_p;
+END $$
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Delete podcast review
+DELIMITER $$
+DROP PROCEDURE IF EXISTS delete_podcast_review $$
+CREATE PROCEDURE delete_podcast_review
+(
+	IN user_id_p INT,
+    IN podcast_id_p INT
+)
+BEGIN
+    DELETE FROM podcast_review 
+    WHERE user_id = user_id_p 
+    AND podcast_id = podcast_id_p;
+END $$
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Get episode review
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_episode_review $$
+CREATE PROCEDURE get_episode_review
+(
+	IN user_id_p INT,
+    IN podcast_id_p INT,
+    IN episode_num_p INT
+)
+BEGIN
+    SELECT * FROM episode_review 
+    WHERE user_id = user_id_p 
+    AND podcast_id = podcast_id_p 
+    AND episode_num = episode_num_p;
+END $$
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Delete episode review
+DELIMITER $$
+DROP PROCEDURE IF EXISTS delete_episode_review $$
+CREATE PROCEDURE delete_episode_review
+(
+	IN user_id_p INT,
+    IN podcast_id_p INT,
+    IN episode_num_p INT
+)
+BEGIN
+    DELETE FROM episode_review 
+    WHERE user_id = user_id_p 
+    AND podcast_id = podcast_id_p
+    AND episode_num = episode_num_p;
+END $$
+DELIMITER ;
