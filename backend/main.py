@@ -7,7 +7,7 @@ app = FastAPI()
 
 HOST = "localhost"
 DB_USER = "root"
-DB_PASSWORD = "root1234"
+DB_PASSWORD = "your_new_password"
 DATABASE = "hearsay_db"
 
 class UserCreate(BaseModel):
@@ -23,6 +23,14 @@ class UserLogin(BaseModel):
 
 class UserBio(BaseModel):
     bio: str
+
+class Playlist(BaseModel):
+    name: str
+
+class PlaylistEp(BaseModel):
+    podcast_id: int
+    episode_num: int
+    playlist_name: str
 
 @app.get("/")
 async def root():
@@ -236,5 +244,101 @@ async def searchPodcastEpisodes(
         return {"episodes": filtered_episodes}
     except pymysql.MySQLError as e:
         raise HTTPException(status_code=500, detail=f"Failed to search episodes")
+    finally:
+        connection.close()
+
+@app.post("/users/{user_id}/playlists")
+async def createPlaylist(user_id: int, playlist: Playlist):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        cursor = connection.cursor()
+        #cursor.execute("SELECT * FROM playlist WHERE user_id=%s AND playlist_name=%s", (user_id, playlist.name))
+        #if cursor.fetchone():
+        #    raise HTTPException(status_code=400, detail=f"Playlist already exists")
+        
+        cursor.callproc("create_playlist", (user_id, playlist.name))
+        connection.commit()
+
+        return {"playlistCreated": True, "message": "New playlist created succesfully", "playlist_name": playlist.name}
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+    finally:
+        connection.close()
+
+@app.delete("/users/{user_id}/playlists")
+async def deletePlaylist(user_id: int, playlist: Playlist):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        cursor = connection.cursor()
+       
+        
+        cursor.callproc("delete_playlist", (user_id, playlist.name))
+        connection.commit()
+
+        return {"playlistDelete": True, "message": "Playlist deleted succesfully", "playlist_name": playlist.name}
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+    finally:
+        connection.close()
+
+@app.post("/users/{user_id}/playlists/add")
+async def addToPlaylist(user_id: int, playlist_ep: PlaylistEp):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        cursor = connection.cursor()
+        cursor.callproc("add_to_playlist", (user_id, playlist_ep.podcast_id, playlist_ep.episode_num, playlist_ep.playlist_name))
+        connection.commit()
+
+        return {"playlistEpisodeAdded": True,
+                 "message": "New episode added to playlist succesfully", "playlist_name": playlist_ep.playlist_name}
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+    finally:
+        connection.close()
+
+@app.delete("/users/{user_id}/playlists/add")
+async def removeFromPlaylist(user_id: int, playlist_ep: PlaylistEp):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        cursor = connection.cursor()
+        cursor.callproc("remove_from_playlist", (user_id, playlist_ep.podcast_id, playlist_ep.episode_num, playlist_ep.playlist_name))
+        connection.commit()
+
+        return {"playlistEpisodeAdded": True,
+                 "message": "Episode delete from playlist succesfully", "playlist_name": playlist_ep.playlist_name}
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
     finally:
         connection.close()
