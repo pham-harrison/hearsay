@@ -549,7 +549,7 @@ async def getPodcastFriendsAvg(podcast_id: int, user_id: int):
         friends_avg_rating = cursor.fetchone()
         return friends_avg_rating
     except pymysql.err.OperationalError as e:
-        message = e.args
+        error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
     finally:
         connection.close()
@@ -571,7 +571,7 @@ async def getPodcastFriendsAvgEp(podcast_id: int, user_id: int):
         friends_avg_rating_ep = cursor.fetchone()
         return friends_avg_rating_ep
     except pymysql.err.OperationalError as e:
-        message = e.args
+        error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
     finally:
         connection.close()
