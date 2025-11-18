@@ -387,8 +387,8 @@ PODCAST-REVIEW PROCEDURES
 Get a user's rating of a podcast
 */
 DELIMITER $$
-DROP PROCEDURE IF EXISTS get_user_podcast_review $$
-CREATE PROCEDURE get_user_podcast_review(IN user_id_p INT, IN podcast_id_p INT)
+DROP PROCEDURE IF EXISTS get_podcast_review $$
+CREATE PROCEDURE get_podcast_review(IN user_id_p INT, IN podcast_id_p INT)
 BEGIN
     SELECT *
     FROM podcast_review
@@ -396,7 +396,7 @@ BEGIN
 END $$
 DELIMITER ;
 
-CALL get_user_podcast_review(51, 1);
+-- CALL get_podcast_review(51, 1);
 
 
 
@@ -444,14 +444,31 @@ BEGIN
 END $$
 DELIMITER ;
 
-CALL update_podcast_review(51, 1, 5, "better than I remember");
+-- CALL update_podcast_review(51, 1, 5, "better than I remember");
+
+
+
+/*
+Delete podcast review
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS delete_podcast_review $$
+CREATE PROCEDURE delete_podcast_review (IN user_id_p INT, IN podcast_id_p INT)
+BEGIN
+    DELETE FROM podcast_review 
+    WHERE user_id = user_id_p 
+    AND podcast_id = podcast_id_p;
+END $$
+DELIMITER ;
+
+-- CALL delete_podcast_review(51, 1);
 
 /*
 Get a user's review of an episode
 */
 DELIMITER $$
-DROP PROCEDURE IF EXISTS get_user_episode_review $$
-CREATE PROCEDURE get_user_episode_review(IN user_id_p INT, IN podcast_id_p INT, IN episode_num_p INT)
+DROP PROCEDURE IF EXISTS get_episode_review $$
+CREATE PROCEDURE get_episode_review(IN user_id_p INT, IN podcast_id_p INT, IN episode_num_p INT)
 BEGIN
 	SELECT *
     FROM episode_review
@@ -459,7 +476,7 @@ BEGIN
 END $$
 DELIMITER ;
 
-CALL get_user_episode_review(51, 1, 1555);
+-- CALL get_episode_review(51, 1, 1555);
 
 /*
 Insert episode review
@@ -484,7 +501,7 @@ BEGIN
 END $$
 DELIMITER ;
 
-CALL insert_episode_review(51, 1, 1555, 5, NULL);
+-- CALL insert_episode_review(51, 1, 1555, 5, NULL);
 
 /*
 Update episode review
@@ -510,7 +527,32 @@ BEGIN
 END $$
 DELIMITER ;
 
-CALL update_episode_review(51, 1, 1555, 5, "Forgot to add a comment");
+-- CALL update_episode_review(51, 1, 1555, 5, "Forgot to add a comment");
+
+
+
+/*
+Delete episode review
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS delete_episode_review $$
+CREATE PROCEDURE delete_episode_review
+(
+	IN user_id_p INT,
+    IN podcast_id_p INT,
+    IN episode_num_p INT
+)
+BEGIN
+    DELETE FROM episode_review 
+    WHERE user_id = user_id_p 
+    AND podcast_id = podcast_id_p
+    AND episode_num = episode_num_p;
+END $$
+DELIMITER ;
+
+
+-- CALL delete_episode_review(51, 1, 1555);
+
 
 /*
 Get global podcast average rating
