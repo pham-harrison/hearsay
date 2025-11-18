@@ -188,6 +188,20 @@ END $$
 DELIMITER ;
 
 -- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Get playlist
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_playlist $$
+CREATE PROCEDURE get_playlist
+(
+	IN user_id_p INT,
+    IN playlist_name_p VARCHAR(32)
+)
+BEGIN
+	SELECT * FROM playlist WHERE user_id = user_id_p AND playlist_name = playlist_name_p;
+END $$
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Delete playlist
 DROP PROCEDURE IF EXISTS delete_playlist;
 DELIMITER $$
@@ -198,7 +212,9 @@ CREATE PROCEDURE delete_playlist
 )
 BEGIN
 	IF playlist_name IN (SELECT name FROM playlist) THEN
-		DELETE FROM playlist AS pl WHERE pl.user_id = user_id AND playlist_name = name;
+		DELETE FROM playlist AS pl 
+        WHERE pl.user_id = user_id 
+        AND playlist_name = name;
 	END IF;
 END $$
 DELIMITER ;
@@ -216,7 +232,8 @@ CREATE PROCEDURE add_to_playlist
 )
 BEGIN
 	IF playlist_name IN (SELECT name FROM playlist AS pl WHERE pl.user_id = user_id) THEN
-		INSERT INTO episode_to_playlist(user_id, podcast_id, episode_num, playlist_name) VALUES(user_id, podcast_id, episode_num, playlist_name);
+		INSERT INTO episode_to_playlist(user_id, podcast_id, episode_num, playlist_name) 
+            VALUES(user_id, podcast_id, episode_num, playlist_name);
     END IF;
 END $$
 DELIMITER ;
@@ -235,10 +252,78 @@ CREATE PROCEDURE remove_from_playlist
 BEGIN
 	IF playlist_name IN (SELECT name FROM playlist AS pl WHERE pl.user_id = user_id) THEN
 		DELETE FROM episode_to_playlist AS etp 
-        WHERE user_id = etp.user_id AND 
-        playlist_name = etp.playlist_name AND 
-        podcast_id = etp.podcast_id AND 
-        episode_num = etp.episode_num;
+        WHERE user_id = etp.user_id 
+        AND playlist_name = etp.playlist_name 
+        AND podcast_id = etp.podcast_id 
+        AND episode_num = etp.episode_num;
     END IF;
+END $$
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Get podcast review
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_podcast_review $$
+CREATE PROCEDURE get_podcast_review
+(
+	IN user_id_p INT,
+    IN podcast_id_p INT
+)
+BEGIN
+    SELECT * FROM podcast_review 
+    WHERE user_id = user_id_p 
+    AND podcast_id = podcast_id_p;
+END $$
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Delete podcast review
+DELIMITER $$
+DROP PROCEDURE IF EXISTS delete_podcast_review $$
+CREATE PROCEDURE delete_podcast_review
+(
+	IN user_id_p INT,
+    IN podcast_id_p INT
+)
+BEGIN
+    DELETE FROM podcast_review 
+    WHERE user_id = user_id_p 
+    AND podcast_id = podcast_id_p;
+END $$
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Get episode review
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_episode_review $$
+CREATE PROCEDURE get_episode_review
+(
+	IN user_id_p INT,
+    IN podcast_id_p INT,
+    IN episode_num_p INT
+)
+BEGIN
+    SELECT * FROM episode_review 
+    WHERE user_id = user_id_p 
+    AND podcast_id = podcast_id_p 
+    AND episode_num = episode_num_p;
+END $$
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Delete episode review
+DELIMITER $$
+DROP PROCEDURE IF EXISTS delete_episode_review $$
+CREATE PROCEDURE delete_episode_review
+(
+	IN user_id_p INT,
+    IN podcast_id_p INT,
+    IN episode_num_p INT
+)
+BEGIN
+    DELETE FROM episode_review 
+    WHERE user_id = user_id_p 
+    AND podcast_id = podcast_id_p
+    AND episode_num = episode_num_p;
 END $$
 DELIMITER ;
