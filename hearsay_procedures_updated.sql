@@ -358,6 +358,11 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS get_user_by_id $$
 CREATE PROCEDURE get_user_by_id(IN user_id_p INT)
 BEGIN
+    IF NOT EXISTS (SELECT * FROM user WHERE user_id = user_id_p) THEN
+		SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT="User not found";
+	END IF;
+    
 	SELECT * FROM user WHERE id = user_id_p;
 END $$
 DELIMITER ;
@@ -371,6 +376,10 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS get_user_by_username;
 CREATE PROCEDURE get_user_by_username(IN username_p INT)
 BEGIN
+    IF NOT EXISTS (SELECT * FROM user WHERE username = username_p) THEN
+		SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT="User not found";
+	END IF; 
 	SELECT * FROM user WHERE username = username_p;
 END $$
 DELIMITER ;
@@ -439,6 +448,136 @@ DELIMITER ;
 
 
 /*
-
+Get all hosts
 */
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_hosts $$
+CREATE PROCEDURE get_hosts()
+BEGIN
+	SELECT * FROM host;
+END $$
+DELIMITER ;
 
+
+
+/*
+Get all guests
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_guests $$
+CREATE PROCEDURE get_guests()
+BEGIN
+	SELECT * FROM guest;
+END $$
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS search_podcasts;
+DELIMITER $$
+CREATE PROCEDURE search_podcasts
+(
+	name VARCHAR(32),
+    genre VARCHAR(32),
+    language VARCHAR(32),
+    platform VARCHAR(32),
+    host_first VARCHAR(32),
+    host_last VARCHAR(32),
+    guest_first VARCHAR(32),
+    guest_last VARCHAR(32),
+    year INT
+)
+BEGIN
+	-- Declare flags for filters
+	DECLARE name_flag TINYINT DEFAULT 0;
+    DECLARE genre_flag TINYINT DEFAULT 0;
+    DECLARE language_flag TINYINT DEFAULT 0;
+    DECLARE platform_flag TINYINT DEFAULT 0;
+    DECLARE host_first_flag TINYINT DEFAULT 0;
+    DECLARE host_last_flag TINYINT DEFAULT 0;
+    DECLARE guest_first_flag TINYINT DEFAULT 0;
+    DECLARE guest_last_flag TINYINT DEFAULT 0;
+    DECLARE year_flag TINYINT DEFAULT 0;
+    
+    -- Set flags to disable check if filter is null
+    IF name IS NULL THEN SET name_flag = 1; END IF;
+	IF genre IS NULL THEN SET genre_flag = 1; END IF;
+	IF language IS NULL THEN SET language_flag = 1; END IF;
+	IF platform IS NULL THEN SET platform_flag = 1; END IF;
+	IF host_first IS NULL THEN SET host_first_flag = 1; END IF;
+	IF host_last IS NULL THEN SET host_last_flag = 1; END IF;
+	IF guest_first IS NULL THEN SET guest_first_flag = 1; END IF;
+	IF guest_last IS NULL THEN SET guest_last_flag = 1; END IF;
+	IF year IS NULL THEN SET year_flag = 1; END IF;
+	
+    -- Return table based on passed filters
+    SELECT * FROM podcast AS p 
+		  JOIN platform_to_podcast AS ptp USING (podcast_id)
+		  JOIN platform AS pl USING (platform_name)
+          JOIN genre_to_podcast AS gtp USING (podcast_id)
+          JOIN genre AS g USING (genre_name)
+          JOIN language_to_podcast AS ltp USING (podcast_id)
+          JOIN language AS l USING (language_name)
+          JOIN episode_to_host AS eth USING (podcast_id)
+          JOIN host AS h USING (host_id)
+          JOIN episode_to_guest AS etg USING (podcast_id)
+          JOIN guest AS gu USING (guest_id)
+    WHERE (p.name = name OR name_flag) AND
+		  (g.genre_name = genre OR genre_flag) AND
+          (l.language_name = language OR language_flag) AND
+          (pl.platform_name = platform OR platform_flag) AND
+          (h.first_name = host_first OR host_first_flag) AND
+          (h.last_name = host_last OR host_last_flag) AND
+          (gu.first_name = guest_first OR guest_first_flag) AND 
+          (gu.last_name = guest_last OR guest_last_flag) AND 
+          (YEAR(p.release_date) = year OR year_flag);
+END $$
+DELIMITER ;
+
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS search_episodes $$
+CREATE PROCEDURE search_episodes
+(
+    podcast_id_p INT,
+    episode_num_p INT,
+	episode_name_p VARCHAR(32),
+    host_first_p VARCHAR(32),
+    host_last_p VARCHAR(32),
+    guest_first_p VARCHAR(32),
+    guest_last_p VARCHAR(32),
+    year_p INT
+)
+BEGIN
+    SELECT * FROM episode
+    JOIN episode_to_host AS eth 
+        ON episode.podcast_id = eth.podcast_id
+        AND episode.episode_num = eth.episode_num
+    JOIN host USING (host_id)
+    JOIN episode_to_guest AS etg 
+        ON episode.podcast_id = etg.podcast_id
+        AND episode.episode_num = etg.episode_num
+    JOIN guest USING (guest_id)
+    WHERE ((episode.podcast_id = podcast_id_p)
+        AND (episode_num_p IS NULL OR episode.episode_num = episode_num_p)
+        AND (episode_name_p IS NULL OR episode.name LIKE CONCAT('%', episode_name_p, '%'))
+        AND (host_first_p IS NULL OR host.first_name = host_first_p)
+        AND (host_last_p IS NULL OR host.last_name = host_last_p)
+        AND (guest_first_p IS NULL OR guest.first_name = guest_first_p)
+        AND (guest_last_p IS NULL OR guest.last_name = guest_last_p)
+        AND (year_p IS NULL OR YEAR(episode.release_date) = year_p));
+END $$
+DELIMITER ;
+
+CALL search_episodes
+(
+    1, -- podcast_id_p INT,
+    NULL,
+	NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+SELECT * FROM episode where podcast_id = 1;
