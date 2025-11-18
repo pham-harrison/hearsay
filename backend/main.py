@@ -363,7 +363,6 @@ async def addReviewPodcast(user_id: int, podcast_id: int, review: Review):
         connection.commit()
         return {"reviewAdded": True, "message": "Review added successfully", "rating": review.rating, "comment": review.comment}
     except pymysql.err.OperationalError as e:
-        print("exception")
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
     finally:
@@ -385,13 +384,12 @@ async def updateReviewPodcast(user_id: int, podcast_id: int, review: Review):
         connection.commit()
         return {"reviewAdded": True, "message": "Review updated successfully", "rating": review.rating, "comment": review.comment}
     except pymysql.err.OperationalError as e:
-        print("exception")
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
     finally:
         connection.close()
 
-@app.post("/podcasts/{podcast_id}/episodes/{episode_num}/review/{user_id}")
+@app.post("/podcasts/{podcast_id}/{episode_num}/review/{user_id}")
 async def addReviewEpisode(user_id: int, podcast_id: int, episode_num: int, review: Review):
     try:
         connection = pymysql.connect(
@@ -407,13 +405,12 @@ async def addReviewEpisode(user_id: int, podcast_id: int, episode_num: int, revi
         connection.commit()
         return {"reviewAdded": True, "message": "Review added successfully", "rating": review.rating, "comment": review.comment}
     except pymysql.err.OperationalError as e:
-        print("exception")
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
     finally:
         connection.close()
 
-@app.put("/podcasts/{podcast_id}/episodes/{episode_num}/review/{user_id}")
+@app.put("/podcasts/{podcast_id}/{episode_num}/review/{user_id}")
 async def updateReviewEpisode(user_id: int, podcast_id: int, episode_num: int, review: Review):
     try:
         connection = pymysql.connect(
@@ -429,7 +426,178 @@ async def updateReviewEpisode(user_id: int, podcast_id: int, episode_num: int, r
         connection.commit()
         return {"reviewUpdated": True, "message": "Review updated successfully", "rating": review.rating, "comment": review.comment}
     except pymysql.err.OperationalError as e:
-        print("exception")
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+    finally:
+        connection.close()
+
+@app.get("/podcasts/{podcast_id}/global")
+async def getPodcastGlobalAvg(podcast_id: int):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        cursor = connection.cursor()
+        cursor.callproc("get_global_podcast_avg_rating", (podcast_id,))
+        global_avg_rating = cursor.fetchone()
+        return global_avg_rating
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+    finally:
+        connection.close()
+
+@app.get("/podcasts/{podcast_id}/global_ep")
+async def getPodcastGlobalAvgEp(podcast_id: int):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        cursor = connection.cursor()
+        cursor.callproc("get_global_podcast_avg_rating_by_episode", (podcast_id,))
+        global_avg_rating_by_ep = cursor.fetchone()
+        return global_avg_rating_by_ep
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+    finally:
+        connection.close()
+
+@app.get("/podcasts/{podcast_id}/friends/{user_id}")
+async def getPodcastFriendsAvg(podcast_id: int, user_id: int):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        cursor = connection.cursor()
+        stmt = "SELECT get_user_friends_podcast_avg_rating(%s, %s)"
+        cursor.execute(stmt, (user_id, podcast_id,))
+        friends_avg_rating = cursor.fetchone()
+        return friends_avg_rating
+    except pymysql.err.OperationalError as e:
+        message = e.args
+        raise HTTPException(status_code=400, detail=message)
+    finally:
+        connection.close()
+
+@app.get("/podcasts/{podcast_id}/friends_ep/{user_id}")
+async def getPodcastFriendsAvgEp(podcast_id: int, user_id: int):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        cursor = connection.cursor()
+        stmt = "SELECT get_user_friends_podcast_avg_rating_by_episode(%s, %s)"
+        cursor.execute(stmt, (user_id, podcast_id,))
+        friends_avg_rating_ep = cursor.fetchone()
+        return friends_avg_rating_ep
+    except pymysql.err.OperationalError as e:
+        message = e.args
+        raise HTTPException(status_code=400, detail=message)
+    finally:
+        connection.close()
+
+@app.get("/podcasts/{podcast_id}/review/{user_id}")
+async def getUserPodcastReview(podcast_id: int, user_id: int):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        cursor = connection.cursor()
+        cursor.callproc("get_user_podcast_rating", (user_id, podcast_id,))
+        rating_by_user = cursor.fetchone()
+        return rating_by_user
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+    finally:
+        connection.close()
+
+@app.get("/podcasts/{podcast_id}/{episode_num}/review/{user_id}")
+async def getUserEpisodeReview(podcast_id: int, episode_num: int, user_id: int):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        cursor = connection.cursor()
+        cursor.callproc("get_user_episode_rating", (user_id, podcast_id, episode_num,))
+        rating_by_user = cursor.fetchone()
+        return rating_by_user
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+    finally:
+        connection.close()
+
+@app.get("/podcasts/{podcast_id}/{episode_num}/global")
+async def getPodcastGlobalAvgEp(podcast_id: int, episode_num: int):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        cursor = connection.cursor()
+        stmt = "SELECT get_global_episode_avg_rating(%s, %s)"
+        cursor.execute(stmt, (podcast_id, episode_num,))
+        global_avg_rating = cursor.fetchone()
+        return global_avg_rating
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+    finally:
+        connection.close()
+
+@app.get("/podcasts/{podcast_id}/{episode_num}/friends/{user_id}")
+async def getPodcastGlobalAvgEp(podcast_id: int, episode_num: int, user_id: int):
+    try:
+        connection = pymysql.connect(
+            host=HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DATABASE,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        cursor = connection.cursor()
+        stmt = "SELECT get_user_friends_episode_avg_rating(%s, %s, %s)"
+        cursor.execute(stmt, (user_id, podcast_id, episode_num,))
+        global_avg_rating = cursor.fetchone()
+        return global_avg_rating
+    except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
     finally:
