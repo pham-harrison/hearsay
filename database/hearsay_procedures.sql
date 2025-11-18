@@ -197,8 +197,8 @@ CREATE PROCEDURE delete_playlist
     playlist_name VARCHAR(32)
 )
 BEGIN
-	IF playlist_name IN (SELECT playlist_name FROM playlist) THEN
-		DELETE FROM playlist AS pl WHERE pl.user_id = user_id AND playlist_name = pl.playlist_name;
+	IF playlist_name IN (SELECT name FROM playlist) THEN
+		DELETE FROM playlist AS pl WHERE pl.user_id = user_id AND playlist_name = name;
 	END IF;
 END $$
 DELIMITER ;
@@ -210,12 +210,12 @@ DELIMITER $$
 CREATE PROCEDURE add_to_playlist
 (
 	user_id INT,
-    playlist_name VARCHAR(32),
     podcast_id INT,
-    episode_num INT
+    episode_num INT,
+    playlist_name VARCHAR(32)
 )
 BEGIN
-	IF playlist_name IN (SELECT playlist_name FROM playlist AS pl WHERE pl.user_id = user_id) THEN
+	IF playlist_name IN (SELECT name FROM playlist AS pl WHERE pl.user_id = user_id) THEN
 		INSERT INTO episode_to_playlist(user_id, podcast_id, episode_num, playlist_name) VALUES(user_id, podcast_id, episode_num, playlist_name);
     END IF;
 END $$
@@ -228,12 +228,12 @@ DELIMITER $$
 CREATE PROCEDURE remove_from_playlist
 (
 	user_id INT,
-    playlist_name VARCHAR(32),
     podcast_id INT,
-    episode_num INT
+    episode_num INT,
+    playlist_name VARCHAR(32)
 )
 BEGIN
-	IF playlist_name IN (SELECT playlist_name FROM playlist AS pl WHERE pl.user_id = user_id) THEN
+	IF playlist_name IN (SELECT name FROM playlist AS pl WHERE pl.user_id = user_id) THEN
 		DELETE FROM episode_to_playlist AS etp 
         WHERE user_id = etp.user_id AND 
         playlist_name = etp.playlist_name AND 
