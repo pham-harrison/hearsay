@@ -31,7 +31,7 @@ BEGIN
 END $$
 DELIMITER ;
 
-CALL create_user("pham.har@northeastern.edu", "hpham", "root1234", "Harrison", "Pham");
+-- CALL create_user("pham.har@northeastern.edu", "hpham", "root1234", "Harrison", "Pham");
 -- SELECT * FROM user;
 
 /*
