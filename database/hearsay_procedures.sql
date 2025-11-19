@@ -66,7 +66,7 @@ BEGIN
         SET MESSAGE_TEXT="User not found";
 	END IF;
     
-	SELECT * FROM user WHERE id = user_id_p;
+	SELECT id, username, first_name, last_name, bio FROM user WHERE id = user_id_p;
 END $$
 DELIMITER ;
 
@@ -79,11 +79,11 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS get_user_by_username $$
 CREATE PROCEDURE get_user_by_username(IN username_p VARCHAR(32))
 BEGIN
-    IF NOT EXISTS (SELECT * FROM user WHERE username = username_p) THEN
+    IF NOT EXISTS (SELECT * FROM user WHERE username LIKE CONCAT("%", username_p, "%")) THEN
 		SIGNAL SQLSTATE "45000"
-        SET MESSAGE_TEXT="User not found";
+        SET MESSAGE_TEXT="No users found";
 	END IF; 
-	SELECT * FROM user WHERE username = username_p;
+	SELECT id, username, first_name, last_name, bio FROM user WHERE username LIKE CONCAT("%", username_p, "%");
 END $$
 DELIMITER ;
 
@@ -206,7 +206,7 @@ BEGIN
 		SIGNAL SQLSTATE "45000"
         SET MESSAGE_TEXT="User not found";
 	END IF;
-    SELECT * FROM user_to_user
+    SELECT id, date_added, username, first_name, last_name, bio FROM user_to_user
     JOIN user ON id2 = user.id
     WHERE id1 = user_id_p AND status = "accepted";
 END $$
@@ -366,14 +366,14 @@ DELIMITER ;
 
 -- CALL search_episodes
 -- (
---     1, -- IN podcast_id_p INT,
+--     5, -- IN podcast_id_p INT,
 --     NULL, -- IN episode_num_p INT,
 -- 	NULL, -- IN episode_name_p VARCHAR(32),
 --     NULL, -- IN host_first_p VARCHAR(32),
 --     NULL, -- IN host_last_p VARCHAR(32),
---     NULL, -- IN guest_first_p VARCHAR(32),
---     NULL, -- IN guest_last_p VARCHAR(32),
---     2018 -- IN year_p INT
+--     "Michelle", -- IN guest_first_p VARCHAR(32),
+--     "Obama", -- IN guest_last_p VARCHAR(32),
+--     NULL -- IN year_p INT
 -- );
 
 -- SELECT * FROM episode WHERE podcast_id = 1;
@@ -390,13 +390,13 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS get_podcast_review $$
 CREATE PROCEDURE get_podcast_review(IN user_id_p INT, IN podcast_id_p INT)
 BEGIN
-    SELECT *
+    SELECT rating, text, created_at
     FROM podcast_review
     WHERE user_id = user_id_p AND podcast_id = podcast_id_p;
 END $$
 DELIMITER ;
 
--- CALL get_podcast_review(51, 1);
+-- CALL get_podcast_review(1, 1);
 
 
 
@@ -470,7 +470,7 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS get_episode_review $$
 CREATE PROCEDURE get_episode_review(IN user_id_p INT, IN podcast_id_p INT, IN episode_num_p INT)
 BEGIN
-	SELECT *
+	SELECT rating, text, created_at
     FROM episode_review
     WHERE user_id = user_id_p AND podcast_id = podcast_id_p AND episode_num = episode_num_p;
 END $$
@@ -768,12 +768,12 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS get_episodes_in_playlist $$
 CREATE PROCEDURE get_episodes_in_playlist(IN user_id_p INT, IN playlist_name_p VARCHAR(32))
 BEGIN
-    SELECT * FROM episode_to_playlist
+    SELECT podcast_id, episode_num FROM episode_to_playlist
     WHERE user_id = user_id_p AND playlist_name = playlist_name_p;
 END $$
 DELIMITER ;
 
--- CALL get_episodes_in_playlist(51, "Real G tunes");
+-- CALL get_episodes_in_playlist(54, "create new playlist");
 
 
 /*
