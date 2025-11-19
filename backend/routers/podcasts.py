@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException
 from typing import Optional
 from ..db import db_cursor
 from pydantic import BaseModel
-from episodes import router as episodes_router
-from reviews import router as reviews_router
+from .episodes import router as episodes_router
+from .reviews import router as reviews_router
 import pymysql
 
 class Review(BaseModel):
