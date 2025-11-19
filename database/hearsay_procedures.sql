@@ -390,14 +390,14 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS get_podcast_review $$
 CREATE PROCEDURE get_podcast_review(IN user_id_p INT, IN podcast_id_p INT)
 BEGIN
-    SELECT rating, text, created_at
+    SELECT rating, comment, created_at
     FROM podcast_review
     WHERE user_id = user_id_p AND podcast_id = podcast_id_p;
 END $$
 DELIMITER ;
 
 -- CALL get_podcast_review(1, 1);
-
+-- CALL get_podcast_review(51, 1);
 
 
 /*
@@ -405,7 +405,7 @@ Insert podcast review
 */
 DELIMITER $$
 DROP PROCEDURE IF EXISTS insert_podcast_review $$
-CREATE PROCEDURE insert_podcast_review(IN user_id_p INT, IN podcast_id_p INT, IN rating_p INT, IN text_p VARCHAR(255))
+CREATE PROCEDURE insert_podcast_review(IN user_id_p INT, IN podcast_id_p INT, IN rating_p INT, IN comment_p VARCHAR(255))
 BEGIN
     IF NOT EXISTS (SELECT * FROM podcast WHERE podcast_id = podcast_id_p) THEN
         SIGNAL SQLSTATE "45000"
@@ -415,12 +415,12 @@ BEGIN
         SET MESSAGE_TEXT="User not found";
     END IF;
     
-    INSERT INTO podcast_review (user_id, podcast_id, rating, text) 
-    VALUES (user_id_p, podcast_id_p, rating_p, text_p);
+    INSERT INTO podcast_review (user_id, podcast_id, rating, comment) 
+    VALUES (user_id_p, podcast_id_p, rating_p, comment_p);
 END $$
 DELIMITER ;
 
--- CALL insert_podcast_review(51, 190, 4, "Decent");
+-- CALL insert_podcast_review(51, 1, 4, "Decent");
 
 
 /*
@@ -428,7 +428,7 @@ Update podcast review
 */
 DELIMITER $$
 DROP PROCEDURE IF EXISTS update_podcast_review $$
-CREATE PROCEDURE update_podcast_review(IN user_id_p INT, IN podcast_id_p INT, IN rating_p INT, IN text_p VARCHAR(255))
+CREATE PROCEDURE update_podcast_review(IN user_id_p INT, IN podcast_id_p INT, IN rating_p INT, IN comment_p VARCHAR(255))
 BEGIN
     IF NOT EXISTS (SELECT * FROM podcast WHERE podcast_id = podcast_id_p) THEN
         SIGNAL SQLSTATE "45000"
@@ -439,7 +439,7 @@ BEGIN
     END IF;
 
     UPDATE podcast_review
-    SET rating = rating_p, text = text_p
+    SET rating = rating_p, comment = comment_p
     WHERE user_id = user_id_p AND podcast_id = podcast_id_p;
 END $$
 DELIMITER ;
@@ -470,7 +470,7 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS get_episode_review $$
 CREATE PROCEDURE get_episode_review(IN user_id_p INT, IN podcast_id_p INT, IN episode_num_p INT)
 BEGIN
-	SELECT rating, text, created_at
+	SELECT rating, comment, created_at
     FROM episode_review
     WHERE user_id = user_id_p AND podcast_id = podcast_id_p AND episode_num = episode_num_p;
 END $$
@@ -483,7 +483,7 @@ Insert episode review
 */
 DELIMITER $$
 DROP PROCEDURE IF EXISTS insert_episode_review $$
-CREATE PROCEDURE insert_episode_review(IN user_id_p INT, IN podcast_id_p INT, IN episode_num_p INT, IN rating_p INT, IN text_p VARCHAR(255))
+CREATE PROCEDURE insert_episode_review(IN user_id_p INT, IN podcast_id_p INT, IN episode_num_p INT, IN rating_p INT, IN comment_p VARCHAR(255))
 BEGIN
     IF NOT EXISTS (SELECT * FROM podcast WHERE podcast_id = podcast_id_p) THEN
         SIGNAL SQLSTATE "45000"
@@ -496,8 +496,8 @@ BEGIN
         SET MESSAGE_TEXT="User not found";
     END IF;
 
-    INSERT INTO episode_review (user_id, podcast_id, episode_num, rating, text) 
-    VALUES (user_id_p, podcast_id_p, episode_num_p, rating_p, text_p);
+    INSERT INTO episode_review (user_id, podcast_id, episode_num, rating, comment) 
+    VALUES (user_id_p, podcast_id_p, episode_num_p, rating_p, comment_p);
 END $$
 DELIMITER ;
 
@@ -508,7 +508,7 @@ Update episode review
 */
 DELIMITER $$
 DROP PROCEDURE IF EXISTS update_episode_review $$
-CREATE PROCEDURE update_episode_review(IN user_id_p INT, IN podcast_id_p INT, IN episode_num_p INT, IN rating_p INT, IN text_p VARCHAR(255))
+CREATE PROCEDURE update_episode_review(IN user_id_p INT, IN podcast_id_p INT, IN episode_num_p INT, IN rating_p INT, IN comment_p VARCHAR(255))
 BEGIN
     IF NOT EXISTS (SELECT * FROM podcast WHERE podcast_id = podcast_id_p) THEN
         SIGNAL SQLSTATE "45000"
@@ -522,7 +522,7 @@ BEGIN
     END IF;
 
     UPDATE episode_review
-    SET rating = rating_p, text = text_p
+    SET rating = rating_p, comment = comment_p
     WHERE user_id = user_id_p AND podcast_id = podcast_id_p AND episode_num = episode_num_p;
 END $$
 DELIMITER ;
@@ -596,8 +596,8 @@ BEGIN
 END $$
 DELIMITER ;
 
-SELECT * FROM episode_review WHERE podcast_id = 2;
-SELECT get_global_podcast_avg_rating_by_episode(2);
+-- SELECT * FROM episode_review WHERE podcast_id = 2;
+-- SELECT get_global_podcast_avg_rating_by_episode(2);
 
 /*
 Get the user's friends' average rating of a podcast

@@ -302,7 +302,7 @@ INSERT INTO playlist (user_id, name, description) VALUES
 (40, 'Philosophy Hour', 'Deep thinking content');
 
 -- Insert Episode Reviews (50 reviews)
-INSERT INTO episode_review (user_id, podcast_id, episode_num, rating, text, created_at) VALUES
+INSERT INTO episode_review (user_id, podcast_id, episode_num, rating, comment, created_at) VALUES
 (1, 1, 1255, 5, 'Absolutely mind-blowing conversation!', '2019-05-02'),
 (2, 4, 1, 5, 'Hooked from the first minute', '2014-10-05'),
 (3, 2, 1051, 4, 'Two legends together, great chemistry', '2019-09-15'),
@@ -357,7 +357,7 @@ INSERT INTO episode_review (user_id, podcast_id, episode_num, rating, text, crea
 (50, 15, 1, 5, 'Changed how I see history', '2006-05-01');
 
 -- Insert Podcast Reviews (40 reviews)
-INSERT INTO podcast_review (user_id, podcast_id, rating, text, created_at) VALUES
+INSERT INTO podcast_review (user_id, podcast_id, rating, comment, created_at) VALUES
 (1, 1, 5, 'Best podcast out there, so much variety', '2020-01-15'),
 (2, 4, 5, 'Changed how I think about journalism', '2015-03-20'),
 (3, 2, 4, 'Marc is a great interviewer', '2019-08-10'),

@@ -77,7 +77,7 @@ CREATE TABLE episode_review (
     podcast_id INT NOT NULL,
     episode_num INT NOT NULL,
 	rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
-    text VARCHAR(255),
+    comment VARCHAR(255),
     created_at DATE NOT NULL DEFAULT (CURRENT_DATE),
     FOREIGN KEY (user_id) REFERENCES user(id)
     ON UPDATE CASCADE ON DELETE CASCADE,
@@ -90,7 +90,7 @@ CREATE TABLE podcast_review (
 	user_id INT NOT NULL,
     podcast_id INT NOT NULL,
 	rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
-    text VARCHAR(255),
+    comment VARCHAR(255),
     created_at DATE NOT NULL DEFAULT (CURRENT_DATE),
     FOREIGN KEY (user_id) REFERENCES user(id)
     ON UPDATE CASCADE ON DELETE CASCADE,
