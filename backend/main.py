@@ -26,13 +26,9 @@ class UserLogin(BaseModel):
 class UserBio(BaseModel):
     bio: str
 
-class Playlist(BaseModel):
-    name: str
-
 class PlaylistEp(BaseModel):
     podcast_id: int
     episode_num: int
-    playlist_name: str
 
 class Review(BaseModel):
     rating: int
@@ -202,51 +198,53 @@ async def searchPodcastEpisodes(
         raise HTTPException(status_code=500, detail=f"Failed to search episodes")
 
 # Create a playlist for a user
-@app.post("/users/{user_id}/playlists")
-async def createPlaylist(user_id: int, playlist: Playlist):
+@app.post("/users/{user_id}/playlists/{playlist_name}")
+async def createPlaylist(user_id: int, playlist_name: str):
     try:
         with db_cursor() as cursor:
-            cursor.callproc("create_playlist", (user_id, playlist.name))
-            return {"playlistCreated": True, "message": "New playlist created succesfully", "playlist_name": playlist.name}
+            cursor.callproc("create_playlist", (user_id, {playlist_name}))
+            return {"playlistCreated": True, "message": "New playlist created succesfully", "playlist_name": {playlist_name}}
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
 # Get all playlists for a user
+#/users/{user_id}/playlists/
 
 # Get all episodes for a playlist
+# /users/{user_id}/playlists/{playlist_name}
 
-# Add an episode to a playlist
-@app.post("/users/{user_id}/playlists/add")
-async def addToPlaylist(user_id: int, playlist_ep: PlaylistEp):
+# Add an episode to a playlist -- TEST
+@app.post("/users/{user_id}/playlists/{playlist_name}/episodes")
+async def addToPlaylist(user_id: int, playlist_name: str, playlist_ep: PlaylistEp):
     try:
         with db_cursor() as cursor:
-            cursor.callproc("add_to_playlist", (user_id, playlist_ep.podcast_id, playlist_ep.episode_num, playlist_ep.playlist_name))
+            cursor.callproc("add_episode_to_playlist", (user_id, playlist_ep.podcast_id, playlist_ep.episode_num, {playlist_name}))
             return {"playlistEpisodeAdded": True,
-                    "message": "New episode added to playlist succesfully", "playlist_name": playlist_ep.playlist_name}
+                    "message": "New episode added to playlist succesfully", "playlist_name": {playlist_name}}
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
-# Remove an episode from a playlist
-@app.delete("/users/{user_id}/playlists/add")
-async def removeFromPlaylist(user_id: int, playlist_ep: PlaylistEp):
+# Remove an episode from a playlist -- TEST
+@app.delete("/users/{user_id}/playlists/{playlist_name}/episodes")
+async def removeFromPlaylist(user_id: int, playlist_name: str, playlist_ep: PlaylistEp):
     try:
         with db_cursor() as cursor:
-            cursor.callproc("remove_from_playlist", (user_id, playlist_ep.podcast_id, playlist_ep.episode_num, playlist_ep.playlist_name))
+            cursor.callproc("remove_episode_from_playlist", (user_id, playlist_ep.podcast_id, playlist_ep.episode_num, {playlist_name}))
             return {"playlistEpisodeAdded": True,
                  "message": "Episode delete from playlist succesfully", "playlist_name": playlist_ep.playlist_name}
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
-# Delete a playlist for a user
-@app.delete("/users/{user_id}/playlists")
-async def deletePlaylist(user_id: int, playlist: Playlist):
+# Delete a playlist for a user -- TEST
+@app.delete("/users/{user_id}/playlists/{playlist_name}")
+async def deletePlaylist(user_id: int, playlist_name: str):
     try:
         with db_cursor() as cursor:
-            cursor.callproc("delete_playlist", (user_id, playlist.name))
-            return {"playlistDelete": True, "message": "Playlist deleted succesfully", "playlist_name": playlist.name}
+            cursor.callproc("delete_playlist", (user_id,))
+            return {"playlistDelete": True, "message": "Playlist deleted succesfully", "playlist_name": {playlist_name}}
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
@@ -325,7 +323,6 @@ async def updateReviewEpisode(user_id: int, podcast_id: int, episode_num: int, r
     try:
         with db_cursor() as cursor:
             cursor.callproc("update_episode_review", (user_id, podcast_id, episode_num, review.rating, review.comment))
-            connection.commit()
             return {"reviewUpdated": True, "message": "Review updated successfully", "rating": review.rating, "comment": review.comment}
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
