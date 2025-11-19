@@ -92,7 +92,7 @@ async def getUser(user_id):
         with db_cursor() as cursor:
             cursor.callproc("get_user_by_id", (user_id,))
             user_info = cursor.fetchone()
-            return {"user_info": user_info}
+            return user_info
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
@@ -104,7 +104,7 @@ async def getUserByUsername(user_name: str):
         with db_cursor() as cursor:
             cursor.callproc("get_user_by_username", (user_name,))
             user_info = cursor.fetchall()
-            return {"user_info": user_info}
+            return user_info
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
@@ -127,7 +127,7 @@ async def getUserFriends(user_id: int):
         with db_cursor() as cursor:
             cursor.callproc("get_friends", (user_id,))
             user_friends = cursor.fetchall()
-            return {"user_friends": user_friends}
+            return user_friends
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
@@ -167,7 +167,7 @@ async def searchPodcasts(
                 
             cursor.callproc("search_podcasts", (name, genre, language, platform, host_first_name, host_last_name, guest_first_name, guest_last_name, year))
             filtered_podcasts = cursor.fetchall()
-            return {"podcasts": filtered_podcasts}
+            return filtered_podcasts
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
@@ -179,7 +179,7 @@ async def getHosts():
         with db_cursor() as cursor:
             cursor.callproc("get_hosts")
             all_hosts = cursor.fetchall()
-            return {"hosts": all_hosts}
+            return all_hosts
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
@@ -191,7 +191,7 @@ async def getHosts():
         with db_cursor() as cursor:
             cursor.callproc("get_guests")
             all_guests = cursor.fetchall()
-            return {"guests": all_guests}
+            return all_guests
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
@@ -221,7 +221,7 @@ async def searchPodcastEpisodes(
         with db_cursor() as cursor:
             cursor.callproc("search_episodes", (podcast_id, num, name, host_first_name, host_last_name, guest_first_name, guest_last_name, year))
             filtered_episodes = cursor.fetchall()
-            return {"episodes": filtered_episodes}
+            return filtered_episodes
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
@@ -243,7 +243,7 @@ async def getPlaylist(user_id: int):
     try:
         with db_cursor() as cursor:
             cursor.callproc("get_playlists", (user_id,))
-            return {"playlists": cursor.fetchall()}
+            return cursor.fetchall()
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
@@ -254,13 +254,13 @@ async def createPlaylist(user_id: int, playlist_name: str):
     try:
         with db_cursor() as cursor:
             cursor.callproc("get_episodes_in_playlist", (user_id, playlist_name))
-            return {"episodes_in_playlist": cursor.fetchall()}
+            return cursor.fetchall()
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
 # Add an episode to a playlist
-@app.post("/users/{user_id}/playlists/{playlist_name}/episodes")
+@app.post("/users/{user_id}/playlists/{playlist_name}/episodes", status_code=201)
 async def addToPlaylist(user_id: int, playlist_name: str, playlist_ep: PlaylistEp):
     try:
         with db_cursor() as cursor:
@@ -289,13 +289,13 @@ async def deletePlaylist(user_id: int, playlist_name: str):
     try:
         with db_cursor() as cursor:
             cursor.callproc("delete_playlist", (user_id, playlist_name,))
-            return {"playlistDelete": True, "message": "Playlist deleted successfully", "playlist_name": {playlist_name}}
+            return {"playlistDelete": True, "message": "Playlist deleted successfully", "playlist_name": playlist_name}
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
 # Create a podcast review
-@app.post("/podcasts/{podcast_id}/reviews/{user_id}")
+@app.post("/podcasts/{podcast_id}/reviews/{user_id}", status_code=201)
 async def addReviewPodcast(user_id: int, podcast_id: int, review: Review):
     try:
         with db_cursor() as cursor:
@@ -311,8 +311,8 @@ async def getReviewPodcast(user_id: int, podcast_id: int):
     try:
         with db_cursor() as cursor:
             cursor.callproc("get_podcast_review", (user_id, podcast_id))
-            podcast_review = cursor.fetchall()
-            return {"review": podcast_review}
+            podcast_review = cursor.fetchone()
+            return podcast_review
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
@@ -334,13 +334,13 @@ async def deleteUserPodcastReview(podcast_id: int, user_id: int):
     try:
         with db_cursor() as cursor:
             cursor.callproc("delete_podcast_review", (user_id, podcast_id,))
-            return {"reviewDelete": True, "message": "Review deleted succesfully"}
+            return {"reviewDelete": True, "message": "Review deleted successfully"}
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
 # Create an episode review
-@app.post("/podcasts/{podcast_id}/episodes/{episode_num}/reviews/{user_id}")
+@app.post("/podcasts/{podcast_id}/episodes/{episode_num}/reviews/{user_id}", status_code=201)
 async def addReviewEpisode(user_id: int, podcast_id: int, episode_num: int, review: Review):
     try:
         with db_cursor() as cursor:
@@ -356,8 +356,8 @@ async def getReviewPodcast(podcast_id: int, episode_num: int, user_id: int):
     try:
         with db_cursor() as cursor:
             cursor.callproc("get_episode_review", (user_id, podcast_id, episode_num))
-            episode_review = cursor.fetchall()
-            return {"podcast_review": episode_review}
+            episode_review = cursor.fetchone()
+            return episode_review
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
@@ -379,7 +379,7 @@ async def deleteUserEpisodeReview(podcast_id: int, episode_num: int, user_id: in
     try:
         with db_cursor() as cursor:
             cursor.callproc("delete_episode_review", (user_id, podcast_id, episode_num,))
-            return {"reviewDelete": True, "message": "Review deleted succesfully"}
+            return {"reviewDelete": True, "message": "Review deleted successfully"}
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
@@ -389,10 +389,12 @@ async def deleteUserEpisodeReview(podcast_id: int, episode_num: int, user_id: in
 async def getPodcastDerivedRatings(podcast_id: int, user_id: int):
     try:
         with db_cursor() as cursor:
-            cursor.callproc("get_global_podcast_avg_rating", (podcast_id,))
+            stmt = "SELECT get_global_podcast_avg_rating(%s)"
+            cursor.execute(stmt, (podcast_id,))
             global_avg_rating = cursor.fetchone()
 
-            cursor.callproc("get_global_podcast_avg_rating_by_episode", (podcast_id,))
+            stmt = "SELECT get_global_podcast_avg_rating_by_episode(%s)"
+            cursor.execute(stmt, (podcast_id,))
             global_avg_rating_by_ep = cursor.fetchone()
             
             stmt = "SELECT get_user_friends_podcast_avg_rating(%s, %s)"
