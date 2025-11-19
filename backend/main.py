@@ -70,8 +70,9 @@ async def createUser(data: UserCreate): # Check if email is already registered
             hashed_password = bcrypt.hashpw(data.password.encode("utf-8"), bcrypt.gensalt())
             cursor.callproc("create_user", (data.email, data.username, hashed_password, data.firstName, data.lastName))
             return {"userCreated": True, "message": f"User {data.username} created successfully"}
-    except pymysql.MySQLError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create account")
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
 
 # Login a registered user
 @app.post("/users/login")
@@ -91,19 +92,21 @@ async def logInUser(data: UserLogin):
                 return {"user_id": user_info["id"], "logged_in": True}
             else:
                 raise HTTPException(status_code=401, detail="Incorrect password")
-    except pymysql.MySQLError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to login")
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
 
 # Get all user details
 @app.get("/users/{user_id}")
 async def getUser(user_id):
     try:
         with db_cursor() as cursor:
-            cursor.callproc("get_user", (user_id,))
+            cursor.callproc("get_user_by_id", (user_id,))
             user_info = cursor.fetchone()
             return {"user_info": user_info}
-    except pymysql.MySQLError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get user")
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
 
 # Get user by username
 @app.get("/users/username/{user_name}")
@@ -113,8 +116,9 @@ async def getUserByUsername(user_name: str):
             cursor.callproc("get_user_by_username", (user_name,))
             user_info = cursor.fetchone()
             return {"user_info": user_info}
-    except pymysql.MySQLError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get user")
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
 
 # Update user bio
 @app.put("/users/{user_id}")
@@ -128,8 +132,9 @@ async def updateBio(user_id: int, data: UserBio):
             cursor.callproc("update_bio", (user_id, data.bio))
 
             return {"bioUpdated": True, "message": "User bio updated successfully", "bio": data.bio}
-    except pymysql.MySQLError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to update bio")
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
 
 # Get all friends for a user
 @app.get("/users/{user_id}/friends")
@@ -143,8 +148,9 @@ async def getUserFriends(user_id: int):
             cursor.callproc("get_friends", (user_id,))
             user_friends = cursor.fetchall()
             return {"user_friends": user_friends}
-    except pymysql.MySQLError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get friends")
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
 
 @app.delete("/users/{user_id}/friends/{friend_id}")
 ### Fill out later ###
@@ -165,8 +171,9 @@ async def searchPodcasts(
             cursor.callproc("search_podcasts", (name, genre, language, platform, host, guest, year))
             filtered_podcasts = cursor.fetchall()
             return {"podcasts": filtered_podcasts}
-    except pymysql.MySQLError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to search podcasts")
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
 
 # Get all hosts
 @app.get("/podcasts/hosts")
@@ -176,8 +183,9 @@ async def getHosts():
             cursor.callproc("get_hosts")
             all_hosts = cursor.fetchall()
             return {"hosts": all_hosts}
-    except pymysql.MySQLError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get hosts")
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
 
 # Get all guests
 @app.get("/podcasts/guests")
@@ -187,8 +195,9 @@ async def getHosts():
             cursor.callproc("get_guests")
             all_guests = cursor.fetchall()
             return {"guests": all_guests}
-    except pymysql.MySQLError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get hosts")
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
 
 # Search for an episode of a podcast
 @app.get("/podcasts/{podcast_id}/episodes")
@@ -205,8 +214,9 @@ async def searchPodcastEpisodes(
             cursor.callproc("search_episodes", (podcast_id, num, name, host, guest, year))
             filtered_episodes = cursor.fetchall()
             return {"episodes": filtered_episodes}
-    except pymysql.MySQLError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to search episodes")
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
 
 # Create a playlist for a user
 @app.post("/users/{user_id}/playlists/{playlist_name}")
@@ -293,8 +303,8 @@ async def getReviewPodcast(user_id: int, podcast_id: int):
     try:
         with db_cursor() as cursor:
             cursor.callproc("get_podcast_review", (user_id, podcast_id))
-            review = cursor.fetchall()
-            return {"review": review}
+            podcast_review = cursor.fetchall()
+            return {"review": podcast_review}
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
@@ -338,8 +348,8 @@ async def getReviewPodcast(podcast_id: int, episode_num: int, user_id: int):
     try:
         with db_cursor() as cursor:
             cursor.callproc("get_episode_review", (user_id, podcast_id, episode_num))
-            review = cursor.fetchall()
-            return {"review": review}
+            episode_review = cursor.fetchall()
+            return {"podcast_review": episode_review}
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
