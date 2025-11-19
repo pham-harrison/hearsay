@@ -1,10 +1,12 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr
-from db import db_cursor
+from ..db import db_cursor
+from .users_playlists import router as playlist_router
 import pymysql
 import bcrypt
 
 router = APIRouter(prefix="/users")
+router.include_router(playlist_router, prefix="/{user_id}/playlists")
 
 class UserCreate(BaseModel):
     email: EmailStr
