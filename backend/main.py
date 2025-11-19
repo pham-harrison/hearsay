@@ -105,6 +105,8 @@ async def getUser(user_id):
     except pymysql.MySQLError as e:
         raise HTTPException(status_code=500, detail=f"Failed to get users")
 
+# Get user by username
+
 # Update user bio
 @app.put("/users/{user_id}")
 async def updateBio(user_id: int, data: UserBio):
@@ -209,12 +211,28 @@ async def createPlaylist(user_id: int, playlist_name: str):
         raise HTTPException(status_code=400, detail=message)
 
 # Get all playlists for a user
-#/users/{user_id}/playlists/
+@app.get("/users/{user_id}/playlists/")
+async def getPlaylist(user_id: int):
+    try:
+        with db_cursor() as cursor:
+            cursor.callproc("get_playlists", (user_id,))
+            return {"playlists": cursor.fetchall()}
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
 
 # Get all episodes for a playlist
-# /users/{user_id}/playlists/{playlist_name}
+@app.get("/users/{user_id}/playlists/{playlist_name}")
+async def createPlaylist(user_id: int, playlist_name: str):
+    try:
+        with db_cursor() as cursor:
+            cursor.callproc("get_episodes_in_playlist", (user_id, {playlist_name}))
+            return {"episodes_in_playlist": cursor.fetchall()}
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
 
-# Add an episode to a playlist -- TEST
+# Add an episode to a playlist
 @app.post("/users/{user_id}/playlists/{playlist_name}/episodes")
 async def addToPlaylist(user_id: int, playlist_name: str, playlist_ep: PlaylistEp):
     try:
@@ -226,24 +244,24 @@ async def addToPlaylist(user_id: int, playlist_name: str, playlist_ep: PlaylistE
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
-# Remove an episode from a playlist -- TEST
+# Remove an episode from a playlist
 @app.delete("/users/{user_id}/playlists/{playlist_name}/episodes")
 async def removeFromPlaylist(user_id: int, playlist_name: str, playlist_ep: PlaylistEp):
     try:
         with db_cursor() as cursor:
             cursor.callproc("remove_episode_from_playlist", (user_id, playlist_ep.podcast_id, playlist_ep.episode_num, {playlist_name}))
             return {"playlistEpisodeAdded": True,
-                 "message": "Episode delete from playlist succesfully", "playlist_name": playlist_ep.playlist_name}
+                 "message": "Episode delete from playlist succesfully", "playlist_name": {playlist_name}}
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
-# Delete a playlist for a user -- TEST
+# Delete a playlist for a user
 @app.delete("/users/{user_id}/playlists/{playlist_name}")
 async def deletePlaylist(user_id: int, playlist_name: str):
     try:
         with db_cursor() as cursor:
-            cursor.callproc("delete_playlist", (user_id,))
+            cursor.callproc("delete_playlist", (user_id, playlist_name,))
             return {"playlistDelete": True, "message": "Playlist deleted succesfully", "playlist_name": {playlist_name}}
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
