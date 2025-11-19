@@ -366,14 +366,14 @@ DELIMITER ;
 
 -- CALL search_episodes
 -- (
---     1, -- IN podcast_id_p INT,
+--     5, -- IN podcast_id_p INT,
 --     NULL, -- IN episode_num_p INT,
 -- 	NULL, -- IN episode_name_p VARCHAR(32),
 --     NULL, -- IN host_first_p VARCHAR(32),
 --     NULL, -- IN host_last_p VARCHAR(32),
---     NULL, -- IN guest_first_p VARCHAR(32),
---     NULL, -- IN guest_last_p VARCHAR(32),
---     2018 -- IN year_p INT
+--     "Michelle", -- IN guest_first_p VARCHAR(32),
+--     "Obama", -- IN guest_last_p VARCHAR(32),
+--     NULL -- IN year_p INT
 -- );
 
 -- SELECT * FROM episode WHERE podcast_id = 1;
@@ -768,12 +768,12 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS get_episodes_in_playlist $$
 CREATE PROCEDURE get_episodes_in_playlist(IN user_id_p INT, IN playlist_name_p VARCHAR(32))
 BEGIN
-    SELECT * FROM episode_to_playlist
+    SELECT podcast_id, episode_num FROM episode_to_playlist
     WHERE user_id = user_id_p AND playlist_name = playlist_name_p;
 END $$
 DELIMITER ;
 
--- CALL get_episodes_in_playlist(51, "Real G tunes");
+-- CALL get_episodes_in_playlist(54, "create new playlist");
 
 
 /*
