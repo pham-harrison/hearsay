@@ -3,7 +3,7 @@ from contextlib import contextmanager
 
 HOST = "localhost"
 DB_USER = "root"
-DB_PASSWORD = "root1234"
+DB_PASSWORD = "your_new_password"
 DATABASE = "hearsay_db"
 
 @contextmanager
