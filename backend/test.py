@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, EmailStr
+from contextlib import contextmanager
+
 import pymysql
 import bcrypt
 from typing import Optional
@@ -24,6 +26,22 @@ class UserLogin(BaseModel):
 class UserBio(BaseModel):
     bio: str
 
+
+@contextmanager
+def db_cursor():
+    connection = pymysql.connect(
+        host=HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DATABASE,
+        cursorclass=pymysql.cursors.DictCursor,
+    )
+    cursor = connection.cursor()
+    try:
+        yield cursor
+        connection.commit()
+    finally:
+        connection.close()
 
 @app.get("/")
 async def root():
@@ -156,19 +174,41 @@ async def searchPodcasts(
     year: Optional[int] = None
 ):
     try:
-        connection = pymysql.connect(
-            host=HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DATABASE,
-            cursorclass=pymysql.cursors.DictCursor
-        )
-        cursor = connection.cursor()
-        cursor.callproc("search_podcasts", (name, genre, language, platform, host, guest, year))
-        filtered_podcasts = cursor.fetchall()
-        return {"podcasts": filtered_podcasts}
+        with db_cursor() as cursor:
+            cursor.callproc("search_podcasts", (name, genre, language, platform, host, guest, year))
+            filtered_podcasts = cursor.fetchall()
+            return {"podcasts": filtered_podcasts}
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
-    finally:
-        connection.close()
+
+
+@app.post("/users/{user_id}/friends/{user_to_add_id}")
+async def sendFriendRequest(user_id: int, user_to_add_id: int):
+    try:
+        with db_cursor() as cursor:
+            cursor.callproc("send_friend_request", (user_id, user_to_add_id))
+            return {"message": "Friend request sent"}
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+
+@app.put("/users/{user_id}/friends/{user_to_accept_id}")
+async def acceptFriendRequest(user_id: int, user_to_accept_id: int):
+    try:
+        with db_cursor() as cursor:
+            cursor.callproc("accept_friend_request", (user_id, user_to_accept_id))
+            return {"message": "Friend request accepted"}
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+    
+@app.delete("/users/{user_id}/friends/{user_to_delete_id}")
+async def deleteFriend(user_id: int, user_to_delete_id: int):
+    try:
+        with db_cursor() as cursor:
+            cursor.callproc("delete_friend", (user_id, user_to_delete_id))
+            return {"message": "Friend deleted"}
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
