@@ -390,13 +390,13 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS get_podcast_review $$
 CREATE PROCEDURE get_podcast_review(IN user_id_p INT, IN podcast_id_p INT)
 BEGIN
-    SELECT *
+    SELECT rating, text, created_at
     FROM podcast_review
     WHERE user_id = user_id_p AND podcast_id = podcast_id_p;
 END $$
 DELIMITER ;
 
--- CALL get_podcast_review(51, 1);
+-- CALL get_podcast_review(1, 1);
 
 
 
@@ -470,7 +470,7 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS get_episode_review $$
 CREATE PROCEDURE get_episode_review(IN user_id_p INT, IN podcast_id_p INT, IN episode_num_p INT)
 BEGIN
-	SELECT *
+	SELECT rating, text, created_at
     FROM episode_review
     WHERE user_id = user_id_p AND podcast_id = podcast_id_p AND episode_num = episode_num_p;
 END $$
