@@ -103,9 +103,18 @@ async def getUser(user_id):
             user_info = cursor.fetchone()
             return {"user_info": user_info}
     except pymysql.MySQLError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get users")
+        raise HTTPException(status_code=500, detail=f"Failed to get user")
 
 # Get user by username
+@app.get("/users/username/{user_name}")
+async def getUserByUsername(user_name: str):
+    try:
+        with db_cursor() as cursor:
+            cursor.callproc("get_user_by_username", (user_name,))
+            user_info = cursor.fetchone()
+            return {"user_info": user_info}
+    except pymysql.MySQLError as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get user")
 
 # Update user bio
 @app.put("/users/{user_id}")
