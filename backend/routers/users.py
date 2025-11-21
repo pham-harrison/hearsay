@@ -3,15 +3,20 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, EmailStr
 from typing import Optional
+from dotenv import load_dotenv
+
 from ..db import db_cursor
 from .playlists import router as playlist_router
 import jwt
 import pymysql
 import bcrypt
+import os
 
-JWT_SECRET = "sIxSeVeNsIxSeVeNsIxSeVeN"
-JWT_ALGORITHM = "HS256"
-JWT_EXPIRE_MINUTES = 120
+load_dotenv()
+
+JWT_SECRET = os.getenv("JWT_SECRET")
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
+JWT_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES"))
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 router = APIRouter(prefix="/users")
