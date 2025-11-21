@@ -289,7 +289,7 @@ BEGIN
 	IF year_p IS NULL THEN SET year_flag = 1; END IF;
 	
     -- Return table based on passed filters
-    SELECT * FROM podcast AS p 
+    SELECT p.podcast_id, p.name, p.description, p.release_date, GROUP_CONCAT(DISTINCT genre_name) AS genres FROM podcast AS p 
 		  LEFT JOIN platform_to_podcast AS ptp USING (podcast_id)
 		  LEFT JOIN platform AS pl USING (platform_name)
           LEFT JOIN genre_to_podcast AS gtp USING (podcast_id)
@@ -308,7 +308,8 @@ BEGIN
           (h.last_name = host_last_p OR host_last_flag) AND
           (gu.first_name = guest_first_p OR guest_first_flag) AND 
           (gu.last_name = guest_last_p OR guest_last_flag) AND 
-          (YEAR(p.release_date) = year_p OR year_flag);
+          (YEAR(p.release_date) = year_p OR year_flag)
+    GROUP BY p.podcast_id;
 END $$
 DELIMITER ;
 
