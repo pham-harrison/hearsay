@@ -1,10 +1,15 @@
 import pymysql
 from contextlib import contextmanager
+from dotenv import load_dotenv
+import os
 
-HOST = "localhost"
-DB_USER = "root"
-DB_PASSWORD = "your_new_password"
-DATABASE = "hearsay_db"
+load_dotenv()
+
+HOST = os.getenv("HOST")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DATABASE = os.getenv("DATABASE")
+
 
 @contextmanager
 def db_cursor():
