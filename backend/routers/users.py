@@ -17,12 +17,14 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 router = APIRouter(prefix="/users")
 router.include_router(playlist_router, prefix="/{user_id}/playlists")
 
+
 class UserCreate(BaseModel):
     email: EmailStr
     username: str
     password: str
     firstName: str
     lastName: str
+
 
 class UserPublic(BaseModel):
     id: int
@@ -31,16 +33,20 @@ class UserPublic(BaseModel):
     firstName: str
     lastName: str
 
+
 class UserLogin(BaseModel):
     username: str
     password: str
 
+
 class UserBio(BaseModel):
     bio: str
+
 
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
 
 # Password helper functions
 def hash_password(plain_password: str) -> str:
@@ -54,10 +60,13 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         plain_password.encode("utf-8"), hashed_password.encode("utf-8")
     )
 
+
 # JWT helper functions
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=JWT_EXPIRE_MINUTES))
+    expire = datetime.utcnow() + (
+        expires_delta or timedelta(minutes=JWT_EXPIRE_MINUTES)
+    )
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
     return encoded_jwt
@@ -68,13 +77,10 @@ def decode_access_token(token: str) -> dict:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         return payload
     except jwt.ExpiredSignatureError:
-        raise HTTPException(
-            status_code=400, detail="Token expired"
-        )
+        raise HTTPException(status_code=400, detail="Token expired")
     except jwt.InvalidTokenError:
-        raise HTTPException(
-            status_code=400, detail="Invalid token"
-        )
+        raise HTTPException(status_code=400, detail="Invalid token")
+
 
 # Get current user
 async def getCurrentUser(token: str = Depends(oauth2_scheme)):
@@ -94,18 +100,34 @@ async def getCurrentUser(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=400, detail="Database error")
     return user_id
 
+
 # Create user account
 @router.post("/register")
 async def createUser(data: UserCreate):
     try:
         with db_cursor() as cursor:
-            hashed_password = bcrypt.hashpw(data.password.encode("utf-8"), bcrypt.gensalt())
-            cursor.callproc("create_user", (data.email, data.username, hashed_password, data.firstName, data.lastName))
-            return {"userCreated": True, "message": f"User {data.username} created successfully"}
+            hashed_password = bcrypt.hashpw(
+                data.password.encode("utf-8"), bcrypt.gensalt()
+            )
+            cursor.callproc(
+                "create_user",
+                (
+                    data.email,
+                    data.username,
+                    hashed_password,
+                    data.firstName,
+                    data.lastName,
+                ),
+            )
+            return {
+                "userCreated": True,
+                "message": f"User {data.username} created successfully",
+            }
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         print("Operation error: ", error_code, message)
         raise HTTPException(status_code=400, detail="Error in create user")
+
 
 # Login a registered user
 @router.post("/login", response_model=Token)
@@ -115,18 +137,34 @@ async def logInUser(data: UserLogin):
             cursor.callproc("get_user_log_in_details", (data.username,))
             db_user = cursor.fetchone()
             if not db_user:
-                raise HTTPException(status_code=400, detail="Invalid username and/or password")
+                raise HTTPException(
+                    status_code=400, detail="Invalid username and/or password"
+                )
             if not verify_password(data.password, db_user["password_hash"]):
-                raise HTTPException(status_code=400, detail="Invalid username and/or password")
-            user_id = str(db_user["id"])
-            print (user_id, type(user_id))
+                raise HTTPException(
+                    status_code=400, detail="Invalid username and/or password"
+                )
             access_token = create_access_token(data={"sub": str(db_user["id"])})
             return Token(access_token=access_token)
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail="Login operational error")
 
-# Get all user details
+
+# Get all users
+@router.get("/all")
+async def getAllUsers():
+    try:
+        with db_cursor() as cursor:
+            cursor.execute("SELECT id, username, first_name, last_name, bio FROM user")
+            users = cursor.fetchall()
+            return users
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+
+
+# Get all user details by ID
 @router.get("/{user_id}")
 async def getUser(user_id: int):
     try:
@@ -137,31 +175,42 @@ async def getUser(user_id: int):
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
-    
+
+
 # Get user by username
 @router.get("/username/{user_name}")
 async def getUserByUsername(user_name: str):
     try:
         with db_cursor() as cursor:
             cursor.callproc("get_user_by_username", (user_name,))
-            user_info = cursor.fetchone()
+            user_info = cursor.fetchall()
             return user_info
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail="Error in get user by username")
 
+
 # Update user bio
 @router.put("/{user_id}")
-async def updateBio(user_id: int, data: UserBio, current_user: int = Depends(getCurrentUser)):
-    if (current_user != user_id): 
-        raise HTTPException(status_code=400, detail="Unauthorized to make changes to user")
+async def updateBio(
+    user_id: int, data: UserBio, current_user: int = Depends(getCurrentUser)
+):
+    if current_user != user_id:
+        raise HTTPException(
+            status_code=400, detail="Unauthorized to make changes to user"
+        )
     try:
         with db_cursor() as cursor:
             cursor.callproc("update_bio", (user_id, data.bio))
-            return {"bioUpdated": True, "message": "User bio updated successfully", "bio": data.bio}
+            return {
+                "bioUpdated": True,
+                "message": "User bio updated successfully",
+                "bio": data.bio,
+            }
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
+
 
 # Get all friends for a user
 @router.get("/{user_id}/friends")
@@ -175,11 +224,16 @@ async def getUserFriends(user_id: int):
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
+
 # Delete a user's friends
 @router.delete("/{user_id}/friends/{user_to_delete_id}")
-async def deleteFriend(user_id: int, user_to_delete_id: int, current_user: int = Depends(getCurrentUser)):
-    if (current_user != user_id): 
-        raise HTTPException(status_code=400, detail="Unauthorized to make changes to user")
+async def deleteFriend(
+    user_id: int, user_to_delete_id: int, current_user: int = Depends(getCurrentUser)
+):
+    if current_user != user_id:
+        raise HTTPException(
+            status_code=400, detail="Unauthorized to make changes to user"
+        )
     try:
         with db_cursor() as cursor:
             cursor.callproc("delete_friend", (user_id, user_to_delete_id))
