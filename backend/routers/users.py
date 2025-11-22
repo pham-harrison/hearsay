@@ -101,8 +101,8 @@ async def getCurrentUser(token: str = Depends(oauth2_scheme)):
             stmt = "CALL get_user_by_id(%s)"
             cursor.execute(stmt, (user_id,))
     except pymysql.MySQLError as e:
-        print("SQL Error:", e.args)
-        raise HTTPException(status_code=400, detail="Database error")
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
     return user_id
 
 
@@ -131,7 +131,7 @@ async def createUser(data: UserCreate):
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         print("Operation error: ", error_code, message)
-        raise HTTPException(status_code=400, detail="Error in create user")
+        raise HTTPException(status_code=400, detail=message)
 
 
 # Login a registered user
@@ -153,7 +153,7 @@ async def logInUser(data: UserLogin):
             return Token(access_token=access_token)
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
-        raise HTTPException(status_code=400, detail="Login operational error")
+        raise HTTPException(status_code=400, detail=message)
 
 
 # Get all users
@@ -192,7 +192,7 @@ async def getUserByUsername(user_name: str):
             return user_info
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
-        raise HTTPException(status_code=400, detail="Error in get user by username")
+        raise HTTPException(status_code=400, detail=message)
 
 
 # Update user bio
