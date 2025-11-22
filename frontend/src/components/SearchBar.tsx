@@ -77,7 +77,7 @@ export default function SearchBar() {
 
   function handleHostSearch(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
-    searchFilters.host = value;
+    setSearchFilters({ ...searchFilters, host: value });
 
     if (value.trim() === "") {
       setFilteredHosts([]);
@@ -88,7 +88,7 @@ export default function SearchBar() {
 
   function handleGuestSearch(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
-    searchFilters.guest = value;
+    setSearchFilters({ ...searchFilters, guest: value });
 
     if (value.trim() === "") {
       setFilteredGuests([]);
