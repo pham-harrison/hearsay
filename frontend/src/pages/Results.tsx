@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import PodcastCard from "../components/PodcastCard";
 import UserCard from "../components/UserCard";
 const API_URL_BASE = import.meta.env.VITE_API_URL;
@@ -22,6 +22,7 @@ type UserResults = {
 
 export default function Results() {
   const location = useLocation();
+  const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
   const searchType = params.get("type");
   params.delete("type");
@@ -63,6 +64,7 @@ export default function Results() {
             description={podcast.description}
             release_date={podcast.release_date}
             genres={podcast.genres}
+            onClick={() => navigate(`/podcasts/${podcast.podcast_id}`)}
           />
         ))}
       {searchType === "users" &&
