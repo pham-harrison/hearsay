@@ -1,45 +1,56 @@
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
+import { LoginContext } from "../contexts/LogInContext";
+
+type friendReview = {
+  userID: string;
+  username: string;
+  first_name: string;
+  last_name: string;
+  podcast_id: string;
+  episode_num: string;
+  rating: string;
+  comment: string;
+  created_at: string;
+};
+
+const API_URL_BASE = import.meta.env.VITE_API_URL;
 
 export default function Home() {
-  const [podcasts, setPodcasts] = useState<any[]>([])
-  const [showPodcasts, setShowPodcasts] = useState(false);
-  const [username, setUsername] = useState("");
-  
-  async function handleClick() {
-    try {
-      const response = await fetch("http://localhost:8000/podcasts/");
+  const { loggedIn, userID } = useContext(LoginContext);
+  const [feed, setFeed] = useState<friendReview[]>([]);
+
+  useEffect(() => {
+    if (!loggedIn) return;
+
+    async function getFeed() {
+      const response: Response = await fetch(`${API_URL_BASE}/users/${userID}/feed`);
       const data = await response.json();
       console.log(data);
-      setShowPodcasts(!showPodcasts)
-      setPodcasts(data)
-    } catch (error) {
-      console.error(error)
+      setFeed(data);
     }
-  }
-
-  async function handleUserSearch() {
-    try {
-      const response = await fetch(`http://localhost:8000/users/username/${username}`);
-      const data = await response.json();
-      console.log(data);
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
+    getFeed();
+  }, [loggedIn]);
 
   return (
     <>
-      <button onClick={handleClick}>Get Podcasts</button>
-      {showPodcasts && (
-        <ul>
-          {podcasts.map((podcast) => (
-            <li key={podcast.podcast_id}>{podcast.name}</li>
-          ))}
-        </ul>
+      {loggedIn ? (
+        <div>
+          Your feed
+          {feed.length > 0 ? (
+            <ul>
+              {feed.map((review) => (
+                <li>
+                  {review.first_name} rated {review.episode_num} a {review.rating} and said {review.comment}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div>Build a feed by following your friends!</div>
+          )}
+        </div>
+      ) : (
+        <div>Create an account or log in to see a feed</div>
       )}
-      <input type="text" placeholder="Enter username" value={username} onChange={(e) => setUsername(e.target.value)} />
-      <button onClick={handleUserSearch}></button>
     </>
-  )
+  );
 }
