@@ -64,31 +64,6 @@ async def searchPodcasts(
         raise HTTPException(status_code=400, detail=message)
 
 
-# # Get all hosts
-# @router.get("/hosts")
-# async def getHosts():
-#     try:
-#         with db_cursor() as cursor:
-#             cursor.callproc("get_hosts")
-#             all_hosts = cursor.fetchall()
-#             return all_hosts
-#     except pymysql.err.OperationalError as e:
-#         error_code, message = e.args
-#         raise HTTPException(status_code=400, detail=message)
-
-# # Get all guests
-# @router.get("/guests")
-# async def getHosts():
-#     try:
-#         with db_cursor() as cursor:
-#             cursor.callproc("get_guests")
-#             all_guests = cursor.fetchall()
-#             return all_guests
-#     except pymysql.err.OperationalError as e:
-#         error_code, message = e.args
-#         raise HTTPException(status_code=400, detail=message)
-
-
 @router.get("/filters")
 async def getFilters():
     try:
@@ -132,9 +107,20 @@ async def getFilters():
         raise HTTPException(status_code=400, detail=message)
 
 
+@router.get("/{podcast_id}")
+async def getPodcast(podcast_id: int):
+    try:
+        with db_cursor() as cursor:
+            cursor.callproc("get_podcast", (podcast_id,))
+            return cursor.fetchone()
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+
+
 # Get all derived podcast ratings for a user
-@router.get("/{podcast_id}/ratings/{user_id}")
-async def getPodcastDerivedRatings(podcast_id: int, user_id: int):
+@router.get("/{podcast_id}/ratings/")
+async def getPodcastGlobalRatings(podcast_id: int):
     try:
         with db_cursor() as cursor:
             stmt = "SELECT get_global_podcast_avg_rating(%s)"
@@ -145,6 +131,20 @@ async def getPodcastDerivedRatings(podcast_id: int, user_id: int):
             cursor.execute(stmt, (podcast_id,))
             global_avg_rating_by_ep = cursor.fetchone()
 
+            return {
+                "global_avg_rating": list(global_avg_rating.values())[0],
+                "global_avg_rating_by_ep": list(global_avg_rating_by_ep.values())[0],
+            }
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+
+
+# Get all derived podcast friend ratings for a user
+@router.get("/{podcast_id}/ratings/{user_id}")
+async def getPodcastUserFriendsRatings(podcast_id: int, user_id: int):
+    try:
+        with db_cursor() as cursor:
             stmt = "SELECT get_user_friends_podcast_avg_rating(%s, %s)"
             cursor.execute(
                 stmt,
@@ -165,8 +165,6 @@ async def getPodcastDerivedRatings(podcast_id: int, user_id: int):
             )
             friends_avg_rating_by_ep = cursor.fetchone()
             return {
-                "global_avg_rating": list(global_avg_rating.values())[0],
-                "global_avg_rating_by_ep": list(global_avg_rating_by_ep.values())[0],
                 "friends_avg_rating": list(friends_avg_rating.values())[0],
                 "friends_avg_rating_by_ep": list(friends_avg_rating_by_ep.values())[0],
             }
