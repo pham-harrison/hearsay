@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import microphoneIcon from "../assets/microphone.png";
 import SearchBar from "./SearchBar";
-import { LoginContext } from "../contexts/LogInContext";
+import { LoginContext } from "../contexts/LoginContext";
 import { jwtDecode } from "jwt-decode";
 
 const API_URL_BASE = import.meta.env.VITE_API_URL;

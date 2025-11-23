@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { LoginContext } from "../contexts/LogInContext";
+import { LoginContext } from "../contexts/LoginContext";
 
 type friendReview = {
   userID: string;
