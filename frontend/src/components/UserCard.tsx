@@ -16,7 +16,7 @@ export default function UserCard({
   onClick,
 }: UserCardProps) {
   return (
-    <div className="bg-green-200" onClick={onClick}>
+    <div className="bg-green-200 cursor-pointer" onClick={onClick}>
       {username}
     </div>
   );
