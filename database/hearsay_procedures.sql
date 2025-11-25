@@ -236,6 +236,63 @@ DELIMITER ;
 
 CALL get_user_friends_reviews(1);
 
+/*
+Get all friend reviews of a podcast
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_user_friends_podcast_reviews $$
+CREATE PROCEDURE get_user_friends_podcast_reviews(IN user_id_p INT, IN podcast_id_p INT)
+BEGIN
+    IF NOT EXISTS (SELECT * FROM user WHERE id = user_id_p) THEN
+        SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT = "User not found";
+    END IF;
+    
+    IF NOT EXISTS (SELECT * FROM podcast WHERE podcast_id = podcast_id_p) THEN
+        SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT = "Podcast not found";
+    END IF;
+    
+    SELECT id2 AS id, rating, comment, created_at, username, first_name, last_name FROM user_to_user
+    JOIN podcast_review ON id2 = podcast_review.user_id
+    JOIN user ON id = id2
+    WHERE id1 = user_id_p AND podcast_id = podcast_id_p;
+END $$
+DELIMITER ;
+
+-- CALL get_user_friends_podcast_reviews(1, 2);
+
+
+/*
+Get all friend reviews of an episode
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_user_friends_episode_review $$
+CREATE PROCEDURE get_user_friends_episode_review(IN user_id_p INT, IN podcast_id_p INT, IN episode_num_p INT)
+BEGIN
+    IF NOT EXISTS (SELECT * FROM user WHERE id = user_id_p) THEN
+        SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT = "User not found";
+    END IF;
+    
+    IF NOT EXISTS (SELECT * FROM podcast WHERE podcast_id = podcast_id_p) THEN
+        SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT = "Podcast not found";
+    END IF;
+    
+    IF NOT EXISTS (SELECT * FROM episode WHERE podcast_id = podcast_id_p AND episode_num = episode_num_p) THEN
+        SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT = "Episode not found";
+    END IF;
+    
+    SELECT id, rating, comment, created_at, username, first_name, last_name FROM user_to_user
+    JOIN episode_review ON id2 = user_id
+    JOIN user ON id = id2
+    WHERE id1 = user_id_p AND podcast_id = podcast_id_p AND episode_num = episode_num_p;
+END $$
+DELIMITER ;
+
+CALL get_user_friends_episode_review(1, 1, 1169);
 -- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /*
 PODCAST PROCEDURES
