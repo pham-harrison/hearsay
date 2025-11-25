@@ -235,6 +235,43 @@ END $$
 DELIMITER ;
 
 CALL get_user_friends_reviews(1);
+/*
+Get a users podcast reviews
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_user_podcast_reviews $$
+CREATE PROCEDURE get_user_podcast_reviews(IN user_id_p INT)
+BEGIN
+    IF NOT EXISTS (SELECT * FROM user WHERE id = user_id_p) THEN
+        SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT = "User not found";
+    END IF;
+    
+    SELECT user_id, username, podcast_id, rating, comment, created_at FROM user AS u
+    JOIN podcast_review AS pr ON u.id = pr.user_id
+    WHERE pr.user_id = user_id_p;
+END $$
+DELIMITER ;
+-- CALL get_user_podcast_reviews(1);
+
+/*
+Get a users episode reviews
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_user_episode_reviews $$
+CREATE PROCEDURE get_user_episode_reviews(IN user_id_p INT)
+BEGIN
+    IF NOT EXISTS (SELECT * FROM user WHERE id = user_id_p) THEN
+        SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT = "User not found";
+    END IF;
+    
+    SELECT user_id, username, podcast_id, episode_num, rating, comment, created_at FROM user AS u
+    JOIN episode_review AS er ON u.id = er.user_id
+    WHERE er.user_id = user_id_p;
+END $$
+DELIMITER ;
+-- CALL get_user_episode_reviews(1);
 
 /*
 Get all friend reviews of a podcast
