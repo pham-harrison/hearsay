@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useContext } from "react";
+import { LoginContext } from "../contexts/LoginContext";
 import UserCard from "../components/UserCard";
 
 type Friend = {
@@ -13,15 +14,16 @@ type Friend = {
 const API_URL_BASE = import.meta.env.VITE_API_URL;
 
 export default function Friends() {
+  const { loggedIn, userID } = useContext(LoginContext);
   const navigate = useNavigate();
-  const userID = useParams().userID;
+  const urlID = useParams().userID;
   const [results, setResults] = useState<Friend[]>([]);
 
   useEffect(() => {
     // Friends data (Delete friends)
     async function getUserFriends() {
       const f_response: Response = await fetch(
-        `${API_URL_BASE}/users/${userID}/friends`
+        `${API_URL_BASE}/users/${urlID}/friends`
       );
       const allFriendsData = await f_response.json();
       setResults(allFriendsData);
@@ -42,7 +44,7 @@ export default function Friends() {
   }
   */
     getUserFriends();
-  });
+  }, [loggedIn]);
 
   return (
     <div>
