@@ -580,6 +580,8 @@ END $$
 DELIMITER ;
 
 -- CALL insert_podcast_review(51, 1, 4, "Decent");
+-- CALL insert_podcast_review(51, 5, 5, "Conan is amazing"); 
+-- SELECT * FROM podcast_review WHERE user_id = 51;
 
 
 /*
@@ -598,14 +600,12 @@ BEGIN
     END IF;
 
     UPDATE podcast_review
-    SET rating = rating_p, comment = comment_p
+    SET rating = rating_p, comment = comment_p, created_at = CURRENT_DATE
     WHERE user_id = user_id_p AND podcast_id = podcast_id_p;
 END $$
 DELIMITER ;
 
 -- CALL update_podcast_review(51, 1, 5, "better than I remember");
-
-
 
 /*
 Delete podcast review
