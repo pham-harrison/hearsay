@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { LoginContext } from "../contexts/LoginContext";
+import NewSearchBar from "../components/NewSearchBar";
 
 type ActiveModal = "createReview" | "updateReview" | "episode" | null;
 
@@ -86,6 +87,7 @@ export default function Podcast() {
     }
 
     async function fetchFriendReviews() {
+      if (!loggedIn) return;
       try {
         const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/reviews/${userID}/friends`);
         const data = await response.json();
@@ -106,6 +108,7 @@ export default function Podcast() {
     }
 
     async function getUserPodcastReview() {
+      if (!loggedIn) return;
       try {
         const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/reviews/${userID}`);
         const data: UserReview = await response.json();
@@ -242,6 +245,7 @@ export default function Podcast() {
           </form>
         </div>
       )}
+      <NewSearchBar searchType="episodes" onSearch={() => {}} podcastID={podcastID}></NewSearchBar>
     </>
   );
 }
