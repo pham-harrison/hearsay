@@ -68,6 +68,30 @@ export default function Playlists() {
     });
   }
 
+  async function handleEpisodeDelete(
+    playlist: string,
+    podcast_id: string,
+    episode_num: string
+  ) {
+    try {
+      const response = await fetch(
+        `${API_URL_BASE}/users/${urlID}/playlists/${playlist}/episodes`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ podcast_id, episode_num }),
+        }
+      );
+      if (!response.ok) {
+        console.error("Response from delete episode from playlist not ok");
+      }
+    } catch (error) {
+      console.error("Failed to delete episode from playlist", error);
+    }
+  }
+
   function isOpen(playlist: string) {
     return expandedPlaylists.has(playlist);
   }
@@ -89,9 +113,8 @@ export default function Playlists() {
               {(episodes as Episode[]).map(
                 (episode) =>
                   isOpen(playlist.name) && (
-                    <ul>
+                    <ul key={episode.episode_num}>
                       <EpisodeCard
-                        key={episode.episode_num}
                         podcast_id={episode.podcast_id}
                         podcast_name={episode.podcast_name}
                         episode_num={episode.episode_num}
@@ -100,6 +123,13 @@ export default function Playlists() {
                             `/podcasts/${episode.podcast_id}/episodes/${episode.episode_num}`
                           )
                         }
+                        onDelete={() => {
+                          handleEpisodeDelete(
+                            playlist.name,
+                            episode.podcast_id,
+                            episode.episode_num
+                          );
+                        }}
                       />
                     </ul>
                   )
