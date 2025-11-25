@@ -29,6 +29,7 @@ export default function Playlists() {
   const [expandedPlaylists, setExpandedPlaylists] = useState<Set<string>>(
     new Set()
   );
+  const [deletedEpisodes, setDeletedEpisodes] = useState(0);
 
   useEffect(() => {
     async function getUserPlaylists() {
@@ -40,11 +41,10 @@ export default function Playlists() {
       setPlaylists(data);
     }
     getUserPlaylists();
-  }, [urlID, userID]);
+  }, [urlID, userID, deletedEpisodes]);
 
   // Episode data
   async function getEpisodes(playlist: string) {
-    if (episodesByPlaylist[playlist]) return;
     const response = await fetch(
       `${API_URL_BASE}/users/${urlID}/playlists/${playlist}/episodes`
     );
@@ -86,6 +86,11 @@ export default function Playlists() {
       );
       if (!response.ok) {
         console.error("Response from delete episode from playlist not ok");
+      } else {
+        getEpisodes(playlist);
+        setDeletedEpisodes(() => {
+          return deletedEpisodes + 1;
+        });
       }
     } catch (error) {
       console.error("Failed to delete episode from playlist", error);
@@ -113,7 +118,7 @@ export default function Playlists() {
               {(episodes as Episode[]).map(
                 (episode) =>
                   isOpen(playlist.name) && (
-                    <ul key={episode.episode_num}>
+                    <ul key={episode.podcast_id + episode.episode_num}>
                       <EpisodeCard
                         podcast_id={episode.podcast_id}
                         podcast_name={episode.podcast_name}
