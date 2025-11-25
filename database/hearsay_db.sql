@@ -1,4 +1,4 @@
--- DROP DATABASE hearsay_db;
+DROP DATABASE IF EXISTS hearsay_db;
 CREATE DATABASE IF NOT EXISTS hearsay_db;
 USE hearsay_db;
 

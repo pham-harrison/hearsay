@@ -72,7 +72,7 @@ async def removeFromPlaylist(user_id: int, playlist_name: str, playlist_ep: Play
     try:
         with db_cursor() as cursor:
             cursor.callproc("remove_episode_from_playlist", (user_id, playlist_ep.podcast_id, playlist_ep.episode_num, playlist_name))
-            return {"playlistEpisodeAdded": True,
+            return {"playlistEpisodeDeleted": True,
                  "message": "Episode deleted from playlist successfully", "playlist_name": playlist_name}
     except pymysql.err.OperationalError as e:
         error_code, message = e.args

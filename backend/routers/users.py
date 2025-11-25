@@ -247,7 +247,6 @@ async def deleteFriend(
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
-
 # Get a user's feed (all reviews from the friends of a user)
 @router.get("/{user_id}/feed")
 async def getUserFeed(user_id: int):

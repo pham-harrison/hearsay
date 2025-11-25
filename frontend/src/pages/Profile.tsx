@@ -6,7 +6,7 @@ import Friends from "./Friends";
 import Playlists from "./Playlists";
 import Reviews from "./Reviews";
 
-type displayType = "reviews" | "playlists";
+type DisplayType = "reviews" | "playlists";
 
 type User = {
   id: string;
@@ -21,7 +21,7 @@ const API_URL_BASE = import.meta.env.VITE_API_URL;
 export default function Profile() {
   const { loggedIn, userID } = useContext(LoginContext);
   const [profile, setProfile] = useState<User>([]);
-  const [displayType, setDisplayType] = useState<displayType>("reviews");
+  const [displayType, setDisplayType] = useState<DisplayType>("reviews");
   const urlID = useParams().userID;
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export default function Profile() {
     }
 
     getUserInfo();
-  }, [loggedIn]);
+  }, [urlID, userID]);
   return (
     <>
       <div>
@@ -47,14 +47,13 @@ export default function Profile() {
 
       <select
         value={displayType}
-        onChange={(e) => setDisplayType(e.target.value as displayType)}
+        onChange={(e) => setDisplayType(e.target.value as DisplayType)}
       >
-        <option value={"Reviews"}>Reviews</option>
-        <option value={"Playlists"}>Playlists</option>
+        <option value={"reviews"}>Reviews</option>
+        <option value={"playlists"}>Playlists</option>
       </select>
-      <div>Playlists</div>
-      <Playlists />
-      <div>Reviews</div>
+      {displayType === "reviews" && <Reviews />}
+      {displayType === "playlists" && <Playlists />}
     </>
   );
 }
