@@ -4,6 +4,7 @@ import { LoginContext } from "../contexts/LoginContext";
 import avatar from "../assets/avatar.png";
 import Friends from "./Friends";
 import Playlists from "./Playlists";
+import Reviews from "./Reviews";
 
 type displayType = "reviews" | "playlists";
 
@@ -53,6 +54,7 @@ export default function Profile() {
       </select>
       <div>Playlists</div>
       <Playlists />
+      <div>Reviews</div>
     </>
   );
 }

@@ -29,11 +29,11 @@ export default function Playlists() {
 
     async function getPlaylistEpisodes(playlist: Playlist) {
       // Episode data
-      const ep_response = await fetch(
+      const response = await fetch(
         `${API_URL_BASE}/users/${userID}/playlists/${playlist.name}/episodes`
       );
-      const epData: Episode = await ep_response.json();
-      return epData;
+      const data: Episode = await response.json();
+      return data;
     }
     getUserPlaylists();
   });
