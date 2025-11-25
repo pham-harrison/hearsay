@@ -248,8 +248,9 @@ BEGIN
         SET MESSAGE_TEXT = "User not found";
     END IF;
     
-    SELECT user_id, username, podcast_id, rating, comment, created_at FROM user AS u
+    SELECT user_id, username, podcast.name, rating, comment, created_at FROM user AS u
     JOIN podcast_review AS pr ON u.id = pr.user_id
+    JOIN podcast USING (podcast_id)
     WHERE pr.user_id = user_id_p
     ORDER BY created_at DESC;
 END $$
@@ -268,8 +269,9 @@ BEGIN
         SET MESSAGE_TEXT = "User not found";
     END IF;
     
-    SELECT user_id, username, podcast_id, episode_num, rating, comment, created_at FROM user AS u
+    SELECT user_id, username, podcast.name, episode_num, rating, comment, created_at FROM user AS u
     JOIN episode_review AS er ON u.id = er.user_id
+    JOIN podcast USING (podcast_id)
     WHERE er.user_id = user_id_p
     ORDER BY created_at DESC;
 END $$
@@ -927,13 +929,13 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS get_episodes_in_playlist $$
 CREATE PROCEDURE get_episodes_in_playlist(IN user_id_p INT, IN playlist_name_p VARCHAR(32))
 BEGIN
-    SELECT p.name AS podcast_name, episode_num FROM episode_to_playlist AS etp
+    SELECT p.podcast_id AS podcast_id, p.name AS podcast_name, episode_num FROM episode_to_playlist AS etp
     JOIN podcast AS p ON p.podcast_id = etp.podcast_id
     WHERE etp.user_id = user_id_p AND playlist_name = playlist_name_p;
 END $$
 DELIMITER ;
 
-CALL get_episodes_in_playlist(1, "Morning Commute");
+-- CALL get_episodes_in_playlist(1, "Morning Commute");
 
 
 /*
