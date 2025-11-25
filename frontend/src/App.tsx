@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Results from "./pages/Results";
 import Podcast from "./pages/Podcast";
 import { LoginProvider } from "./contexts/LogInContext";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/results" element={<Results />} />
           <Route path="/podcasts/:podcastID" element={<Podcast />} />
+          <Route path="/users/:userID" element={<Profile />} />
         </Routes>
       </LoginProvider>
     </BrowserRouter>
