@@ -4,7 +4,7 @@ import NavBar from "./components/NavBar";
 import Home from "./pages/Home";
 import Results from "./pages/Results";
 import Podcast from "./pages/Podcast";
-import { LoginProvider } from "./contexts/LogInContext";
+import { LoginProvider } from "./contexts/LoginContext";
 
 function App() {
   return (
