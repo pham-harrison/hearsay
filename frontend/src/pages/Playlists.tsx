@@ -1,6 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useContext } from "react";
-import UserCard from "../components/UserCard";
 import PlaylistCard from "../components/PlaylistCard";
 
 type Playlist = {
