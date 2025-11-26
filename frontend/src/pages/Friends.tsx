@@ -14,10 +14,10 @@ type Friend = {
 const API_URL_BASE = import.meta.env.VITE_API_URL;
 
 export default function Friends() {
-  const { loggedIn, userID } = useContext(LoginContext);
+  const { loggedIn, userID, token } = useContext(LoginContext);
   const navigate = useNavigate();
   const urlID = useParams().userID;
-  const [results, setResults] = useState<Friend[]>([]);
+  const [friends, setFriends] = useState<Friend[]>([]);
 
   useEffect(() => {
     // Friends data (Delete friends)
@@ -26,39 +26,60 @@ export default function Friends() {
         `${API_URL_BASE}/users/${urlID}/friends`
       );
       const allFriendsData = await f_response.json();
-      setResults(allFriendsData);
+      setFriends(allFriendsData);
     }
-    /*
-  // Individual friend data
-  async function getFriendInfo(allFriendsData: Friend[]) {
-    const friendsData = await Promise.all(
-      allFriendsData.map(async (friend: Friend) => {
-        const fr_response: Response = await fetch(
-          `${API_URL_BASE}/users/${friend.id}`
-        );
-        const friendData = await fr_response.json();
-        return friendData;
-      })
-    );
-    return friendsData;
-  }
-  */
     getUserFriends();
-  }, [loggedIn]);
+  }, [urlID, userID]);
+
+  async function handleDeleteFriend(friend: Friend) {
+    try {
+      const response = await fetch(
+        `${API_URL_BASE}/users/${userID}/friends/${friend.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        console.error("Response from delete friend not ok");
+      } else {
+        setFriends((prev) => prev.filter((fr) => fr.id !== friend.id));
+      }
+    } catch (error) {
+      console.error("Failed to delete friend for user", error);
+    }
+  }
 
   return (
-    <div>
-      {(results as Friend[]).map((user) => (
-        <UserCard
-          key={user.id}
-          id={user.id}
-          username={user.username}
-          first_name={user.first_name}
-          last_name={user.last_name}
-          bio={user.bio}
-          onClick={() => navigate(`/users/${user.id}`)}
-        />
-      ))}
-    </div>
+    <>
+      {(friends as Friend[]).map((user) => {
+        return (
+          <>
+            <div key={user.id} className="flex items-center">
+              <UserCard
+                key={user.id}
+                id={user.id}
+                username={user.username}
+                first_name={user.first_name}
+                last_name={user.last_name}
+                bio={user.bio}
+                onClick={() => navigate(`/users/${user.id}`)}
+              />
+              {urlID === userID && (
+                <button
+                  className="bg-red-500 hover:bg-red-700 text-white py-0.5 px-1 rounded"
+                  onClick={() => handleDeleteFriend(user)}
+                >
+                  Remove Friend
+                </button>
+              )}
+            </div>
+          </>
+        );
+      })}
+    </>
   );
 }
