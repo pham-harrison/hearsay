@@ -6,6 +6,10 @@ import pymysql
 
 router = APIRouter()
 
+class PlaylistCreate(BaseModel):
+    description: str
+
+    
 class PlaylistEp(BaseModel):
     podcast_id: int
     episode_num: int
@@ -23,18 +27,20 @@ async def getPlaylist(user_id: int):
     
 # Create a playlist for a user
 @router.post("/{playlist_name}", status_code=201)
-async def createPlaylist(user_id: int, playlist_name: str, current_user: int = Depends(getCurrentUser)):
+async def createPlaylist(user_id: int, playlist_name: str, body : PlaylistCreate, current_user: int = Depends(getCurrentUser)):
     if (user_id != current_user) :
         raise HTTPException(
             status_code=400, detail="Unauthorized to make changes to user"
         )
     try:
         with db_cursor() as cursor:
-            cursor.callproc("create_playlist", (user_id, playlist_name))
+            cursor.callproc("create_playlist", (user_id, playlist_name, body.description))
             return {"playlistCreated": True, "message": "New playlist created successfully", "playlist_name": playlist_name}
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
+    except pymysql.err.IntegrityError:
+        raise HTTPException(status_code=400, detail="Playlist already exists")
 
 # Delete a playlist for a user
 @router.delete("/{playlist_name}")
@@ -81,8 +87,6 @@ async def addToPlaylist(user_id: int, playlist_name: str, playlist_ep: PlaylistE
 # Remove an episode from a playlist
 @router.delete("/{playlist_name}/episodes")
 async def removeFromPlaylist(user_id: int, playlist_name: str, playlist_ep: PlaylistEp, current_user: int = Depends(getCurrentUser)):
-    print("current user: " + current_user)
-    print("url user: " + user_id)
     if (user_id != current_user) :
         raise HTTPException(
             status_code=400, detail="Unauthorized to make changes to user"

@@ -875,10 +875,10 @@ Create a playlist
 */
 DELIMITER $$
 DROP PROCEDURE IF EXISTS create_playlist $$
-CREATE PROCEDURE create_playlist (IN user_id_p INT, IN playlist_name_p VARCHAR(32))
+CREATE PROCEDURE create_playlist (IN user_id_p INT, IN playlist_name_p VARCHAR(32), IN description_p VARCHAR(32))
 BEGIN
 	IF playlist_name_p NOT IN (SELECT name FROM playlist AS pl WHERE pl.user_id = user_id_p) THEN
-		INSERT INTO playlist(user_id, name) VALUES (user_id_p, playlist_name_p);
+		INSERT INTO playlist(user_id, name, description) VALUES (user_id_p, playlist_name_p, description_p);
     ELSE 
         SIGNAL SQLSTATE "45000"
         SET MESSAGE_TEXT="Playlist already exists";
@@ -886,7 +886,7 @@ BEGIN
 END $$
 DELIMITER ;
 
--- CALL create_playlist(51, "Real G tunes");
+-- CALL create_playlist(51, "Real G tunes", "For Real Gs by Real Gs");
 -- SELECT * FROM playlist;
 
 /*
