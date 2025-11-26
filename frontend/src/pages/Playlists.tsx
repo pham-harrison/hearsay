@@ -18,7 +18,7 @@ type Episode = {
 const API_URL_BASE = import.meta.env.VITE_API_URL;
 
 export default function Playlists() {
-  const { loggedIn, userID } = useContext(LoginContext);
+  const { loggedIn, userID, token } = useContext(LoginContext);
   const urlID = useParams().userID;
   const navigate = useNavigate();
 
@@ -30,7 +30,6 @@ export default function Playlists() {
     new Set()
   );
   const [refreshOnDelete, setRefreshOnDelete] = useState(0);
-  const token = localStorage.getItem("jwt");
   console.log(token);
 
   useEffect(() => {
