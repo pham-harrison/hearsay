@@ -782,7 +782,7 @@ BEGIN
     END IF;
 
     UPDATE episode_review
-    SET rating = rating_p, comment = comment_p
+    SET rating = rating_p, comment = comment_p, created_at = CURRENT_DATE
     WHERE user_id = user_id_p AND podcast_id = podcast_id_p AND episode_num = episode_num_p;
 END $$
 DELIMITER ;

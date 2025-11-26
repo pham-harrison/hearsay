@@ -55,7 +55,6 @@ export default function NavBar() {
         alert(data.detail);
         return;
       }
-      // console.log(data.access_token);
       localStorage.setItem("jwt", data.access_token);
       const decodedToken = jwtDecode(data.access_token);
       if (decodedToken.sub) setUserID(decodedToken.sub);
