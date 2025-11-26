@@ -116,6 +116,17 @@ async def acceptFriendRequest(user_id: int, requester_id: int):
         raise HTTPException(status_code=400, detail=message)
     except pymysql.err.IntegrityError as e:
         raise HTTPException(status_code=400, detail="Request already accepted. "+ message)
+    
+# Reject a friend request for a user
+@router.delete("/{user_id}/accept/{requester_id}")
+async def acceptFriendRequest(user_id: int, requester_id: int):
+    try:
+        with db_cursor() as cursor:
+            cursor.callproc("reject_friend_request", (user_id, requester_id))
+            return {"friendRequestRejected": True}
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
 
 # Delete a user's friends
 @router.delete("/{user_id}/friends/{user_to_delete_id}")
