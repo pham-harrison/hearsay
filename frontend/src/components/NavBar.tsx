@@ -4,6 +4,18 @@ import microphoneIcon from "../assets/microphone.png";
 import SearchBar from "./SearchBar";
 import { LoginContext } from "../contexts/LoginContext";
 import { jwtDecode } from "jwt-decode";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const API_URL_BASE = import.meta.env.VITE_API_URL;
 
@@ -124,106 +136,126 @@ export default function NavBar() {
             </button>
           </div>
         ) : (
-          <div className="flex gap-1">
-            <button className="cursor-pointer" onClick={() => setActiveModal(activeModal !== "login" ? "login" : null)}>
-              log in
-            </button>
-            <button
-              className="cursor-pointer"
-              onClick={() => setActiveModal(activeModal !== "register" ? "register" : null)}
-            >
-              register
-            </button>
-            {activeModal === "login" && (
-              <div className="bg-red-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <form className="flex flex-col" onSubmit={handleLogin}>
-                  <label>Username</label>
-                  <input
-                    type="text"
-                    onChange={(e) => setLoginInfo({ ...loginInfo, username: e.target.value })}
-                    placeholder="Username"
-                  ></input>
-                  <label>Password</label>
-                  <input
-                    type="password"
-                    onChange={(e) => setLoginInfo({ ...loginInfo, password: e.target.value })}
-                    placeholder="Password"
-                  ></input>
-                  <button type="submit">Log In</button>
-                </form>
-              </div>
-            )}
-            {activeModal === "register" && (
-              <div className="bg-red-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <form className="flex flex-col" onSubmit={handleRegister}>
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    value={registerInfo.email}
-                    onChange={(e) =>
-                      setRegisterInfo({
-                        ...registerInfo,
-                        email: e.target.value,
-                      })
-                    }
-                    placeholder="Email"
-                  ></input>
-                  <label>Username</label>
-                  <input
-                    type="text"
-                    value={registerInfo.username}
-                    onChange={(e) =>
-                      setRegisterInfo({
-                        ...registerInfo,
-                        username: e.target.value,
-                      })
-                    }
-                    placeholder="Username"
-                  ></input>
-                  <label>Password</label>
-                  <input
-                    type="password"
-                    value={registerInfo.password}
-                    onChange={(e) =>
-                      setRegisterInfo({
-                        ...registerInfo,
-                        password: e.target.value,
-                      })
-                    }
-                    placeholder="Password"
-                  ></input>
-                  <label>First Name</label>
-                  <input
-                    type="text"
-                    value={registerInfo.firstName}
-                    onChange={(e) =>
-                      setRegisterInfo({
-                        ...registerInfo,
-                        firstName: e.target.value,
-                      })
-                    }
-                    placeholder="First Name"
-                  ></input>
-                  <label>Last Name</label>
-                  <input
-                    type="text"
-                    value={registerInfo.lastName}
-                    onChange={(e) =>
-                      setRegisterInfo({
-                        ...registerInfo,
-                        lastName: e.target.value,
-                      })
-                    }
-                    placeholder="Last Name"
-                  ></input>
-                  <button type="submit">Create Account</button>
-                  <button type="button" onClick={handleReset}>
-                    Reset
-                  </button>
-                </form>
-              </div>
-            )}
-          </div>
+          //   <div className="flex gap-1">
+          //     <button className="cursor-pointer" onClick={() => setActiveModal(activeModal !== "login" ? "login" : null)}>
+          //       log in
+          //     </button>
+          //     <button
+          //       className="cursor-pointer"
+          //       onClick={() => setActiveModal(activeModal !== "register" ? "register" : null)}
+          //     >
+          //       register
+          //     </button>
+          //     {activeModal === "login" && (
+          //       <div className="bg-red-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          //         <form className="flex flex-col" onSubmit={handleLogin}>
+          //           <label>Username</label>
+          //           <input
+          //             type="text"
+          //             onChange={(e) => setLoginInfo({ ...loginInfo, username: e.target.value })}
+          //             placeholder="Username"
+          //           ></input>
+          //           <label>Password</label>
+          //           <input
+          //             type="password"
+          //             onChange={(e) => setLoginInfo({ ...loginInfo, password: e.target.value })}
+          //             placeholder="Password"
+          //           ></input>
+          //           <button type="submit">Log In</button>
+          //         </form>
+          //       </div>
+          //     )}
+          //     {activeModal === "register" && (
+          //       <div className="bg-red-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          //         <form className="flex flex-col" onSubmit={handleRegister}>
+          //           <label>Email</label>
+          //           <input
+          //             type="email"
+          //             value={registerInfo.email}
+          //             onChange={(e) =>
+          //               setRegisterInfo({
+          //                 ...registerInfo,
+          //                 email: e.target.value,
+          //               })
+          //             }
+          //             placeholder="Email"
+          //           ></input>
+          //           <label>Username</label>
+          //           <input
+          //             type="text"
+          //             value={registerInfo.username}
+          //             onChange={(e) =>
+          //               setRegisterInfo({
+          //                 ...registerInfo,
+          //                 username: e.target.value,
+          //               })
+          //             }
+          //             placeholder="Username"
+          //           ></input>
+          //           <label>Password</label>
+          //           <input
+          //             type="password"
+          //             value={registerInfo.password}
+          //             onChange={(e) =>
+          //               setRegisterInfo({
+          //                 ...registerInfo,
+          //                 password: e.target.value,
+          //               })
+          //             }
+          //             placeholder="Password"
+          //           ></input>
+          //           <label>First Name</label>
+          //           <input
+          //             type="text"
+          //             value={registerInfo.firstName}
+          //             onChange={(e) =>
+          //               setRegisterInfo({
+          //                 ...registerInfo,
+          //                 firstName: e.target.value,
+          //               })
+          //             }
+          //             placeholder="First Name"
+          //           ></input>
+          //           <label>Last Name</label>
+          //           <input
+          //             type="text"
+          //             value={registerInfo.lastName}
+          //             onChange={(e) =>
+          //               setRegisterInfo({
+          //                 ...registerInfo,
+          //                 lastName: e.target.value,
+          //               })
+          //             }
+          //             placeholder="Last Name"
+          //           ></input>
+          //           <button type="submit">Create Account</button>
+          //           <button type="button" onClick={handleReset}>
+          //             Reset
+          //           </button>
+          //         </form>
+          //       </div>
+          // )}
+          // </div>
+          <Dialog>
+            <form>
+              <DialogTrigger asChild>
+                <Button variant="outline">Log in/Sign up</Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Log in</DialogTitle>
+                </DialogHeader>
+                <Label className="text-sm">Username</Label>
+                <Input type="text" onChange={(e) => setLoginInfo({ ...loginInfo, username: e.target.value })}></Input>
+                <Label>Password</Label>
+                <Input
+                  type="password"
+                  onChange={(e) => setLoginInfo({ ...loginInfo, password: e.target.value })}
+                ></Input>
+                <Button type="submit">Log In</Button>
+              </DialogContent>
+            </form>
+          </Dialog>
         )}
       </div>
     </div>
