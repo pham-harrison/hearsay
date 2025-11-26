@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException
-from typing import Optional
+from fastapi import APIRouter, HTTPException, Depends
 from ..db import db_cursor
+from .auth import getCurrentUser
 from pydantic import BaseModel
 import pymysql
 
@@ -23,7 +23,11 @@ async def getPlaylist(user_id: int):
     
 # Create a playlist for a user
 @router.post("/{playlist_name}", status_code=201)
-async def createPlaylist(user_id: int, playlist_name: str):
+async def createPlaylist(user_id: int, playlist_name: str, current_user: int = Depends(getCurrentUser)):
+    if (user_id != current_user) :
+        raise HTTPException(
+            status_code=400, detail="Unauthorized to make changes to user"
+        )
     try:
         with db_cursor() as cursor:
             cursor.callproc("create_playlist", (user_id, playlist_name))
@@ -34,7 +38,11 @@ async def createPlaylist(user_id: int, playlist_name: str):
 
 # Delete a playlist for a user
 @router.delete("/{playlist_name}")
-async def deletePlaylist(user_id: int, playlist_name: str):
+async def deletePlaylist(user_id: int, playlist_name: str, current_user: int = Depends(getCurrentUser)):
+    if (user_id != current_user) :
+        raise HTTPException(
+            status_code=400, detail="Unauthorized to make changes to user"
+        )
     try:
         with db_cursor() as cursor:
             cursor.callproc("delete_playlist", (user_id, playlist_name,))
@@ -56,7 +64,11 @@ async def createPlaylist(user_id: int, playlist_name: str):
 
 # Add an episode to a playlist
 @router.post("/{playlist_name}/episodes", status_code=201)
-async def addToPlaylist(user_id: int, playlist_name: str, playlist_ep: PlaylistEp):
+async def addToPlaylist(user_id: int, playlist_name: str, playlist_ep: PlaylistEp, current_user: int = Depends(getCurrentUser)):
+    if (user_id != current_user) :
+        raise HTTPException(
+            status_code=400, detail="Unauthorized to make changes to user"
+        )
     try:
         with db_cursor() as cursor:
             cursor.callproc("add_episode_to_playlist", (user_id, playlist_ep.podcast_id, playlist_ep.episode_num, playlist_name))
@@ -68,7 +80,13 @@ async def addToPlaylist(user_id: int, playlist_name: str, playlist_ep: PlaylistE
 
 # Remove an episode from a playlist
 @router.delete("/{playlist_name}/episodes")
-async def removeFromPlaylist(user_id: int, playlist_name: str, playlist_ep: PlaylistEp):
+async def removeFromPlaylist(user_id: int, playlist_name: str, playlist_ep: PlaylistEp, current_user: int = Depends(getCurrentUser)):
+    print("current user: " + current_user)
+    print("url user: " + user_id)
+    if (user_id != current_user) :
+        raise HTTPException(
+            status_code=400, detail="Unauthorized to make changes to user"
+        )
     try:
         with db_cursor() as cursor:
             cursor.callproc("remove_episode_from_playlist", (user_id, playlist_ep.podcast_id, playlist_ep.episode_num, playlist_name))

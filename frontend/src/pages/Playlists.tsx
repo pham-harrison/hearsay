@@ -18,7 +18,7 @@ type Episode = {
 const API_URL_BASE = import.meta.env.VITE_API_URL;
 
 export default function Playlists() {
-  const { loggedIn, userID } = useContext(LoginContext);
+  const { loggedIn, userID, token } = useContext(LoginContext);
   const urlID = useParams().userID;
   const navigate = useNavigate();
 
@@ -30,10 +30,11 @@ export default function Playlists() {
     new Set()
   );
   const [refreshOnDelete, setRefreshOnDelete] = useState(0);
+  console.log(token);
 
   useEffect(() => {
+    // Playlist data
     async function getUserPlaylists() {
-      // Playlist data (Create, Delete playlist, Add Ep, Delete Ep)
       const response: Response = await fetch(
         `${API_URL_BASE}/users/${urlID}/playlists`
       );
@@ -41,7 +42,7 @@ export default function Playlists() {
       setPlaylists(data);
     }
     getUserPlaylists();
-  }, [urlID, userID, refreshOnDelete]);
+  }, [urlID, loggedIn, userID, refreshOnDelete]);
 
   // Episode data
   async function getEpisodes(playlist: string) {
@@ -76,6 +77,7 @@ export default function Playlists() {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
