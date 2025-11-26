@@ -57,7 +57,7 @@ export default function Profile() {
 
     getUserInfo();
     getUserPlaylists();
-  }, [urlID, userID]);
+  }, [urlID, loggedIn, userID]);
 
   async function handlePlaylistCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -129,7 +129,7 @@ export default function Profile() {
         <option value={"reviews"}>Reviews</option>
         <option value={"playlists"}>Playlists</option>
       </select>
-      {displayType === "playlists" && (
+      {loggedIn && userID === urlID && displayType === "playlists" && (
         <button
           className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
           onClick={
