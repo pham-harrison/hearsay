@@ -21,7 +21,6 @@ export default function Playlists() {
   const { loggedIn, userID, token } = useContext(LoginContext);
   const urlID = useParams().userID;
   const navigate = useNavigate();
-
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [episodesByPlaylist, setEpisodesByPlaylist] = useState<
     Record<string, Episode[]>
@@ -105,6 +104,7 @@ export default function Playlists() {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ podcast_id, episode_num }),
         }
