@@ -215,6 +215,26 @@ DELIMITER ;
 -- CALL get_friends(51);
 
 /*
+Get pending friend requests
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_pending_friend_requests $$
+CREATE PROCEDURE get_pending_friend_requests(user_id_p INT)
+BEGIN
+	IF NOT EXISTS (SELECT * FROM user WHERE id = user_id_p) THEN
+		SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT="User not found";
+	END IF;
+    SELECT id, date_added, username, first_name, last_name, bio FROM user_to_user
+    JOIN user ON id2 = user.id
+    WHERE id1 = user_id_p AND status = "pending";
+END $$
+DELIMITER ;
+
+-- CALL get_pending_friend_requests(2);
+-- CALL get_pending_friend_requests(51);
+
+/*
 Get user friends' reviews
 */
 DELIMITER $$
