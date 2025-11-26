@@ -4,7 +4,7 @@ type BaseReviewProps = {
   rating: string;
   comment: string;
   created_at: string;
-  onClick: () => void;
+  //onClick: () => void;
 };
 
 type PodcastReviewProps = BaseReviewProps & {
@@ -23,7 +23,7 @@ type ReviewCardProps = {
 export default function ReviewCard({ review }: ReviewCardProps) {
   return (
     <>
-      <div className="bg-green-300 cursor-pointer" onClick={review.onClick}>
+      <div className="bg-green-300 cursor-pointer">
         {review.podcast_name}
         {review.type === "episode" && review.episode_num}
         Rating: {review.rating}

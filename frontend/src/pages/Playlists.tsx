@@ -114,6 +114,9 @@ export default function Playlists() {
                 onClick={() => {
                   handlePlaylistClick(playlist.name);
                 }}
+                onDelete={() => {
+                  handlePlaylistDelete(playlist.name);
+                }}
               />
               {(episodes as Episode[]).map(
                 (episode) =>
