@@ -7,6 +7,8 @@ type Login = {
   userID: string;
   setUserID: (value: string) => void;
   onLogout: () => void;
+  token: string | null;
+  setToken: (value: string) => void;
 };
 
 export const LoginContext = createContext<Login>({
@@ -15,11 +17,14 @@ export const LoginContext = createContext<Login>({
   userID: "",
   setUserID: () => {},
   onLogout: () => {},
+  token: null,
+  setToken: () => {},
 });
 
 export function LoginProvider({ children }: { children: React.ReactNode }) {
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
   const [userID, setUserID] = useState<string>("");
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("jwt");
@@ -28,6 +33,7 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
       if (decodedToken.exp && decodedToken.sub && Date.now() < decodedToken.exp * 1000) {
         setUserID(decodedToken.sub);
         setLoggedIn(true);
+        setToken(token);
       }
     }
   }, []);
@@ -39,7 +45,9 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <LoginContext.Provider value={{ loggedIn, setLoggedIn, userID, setUserID, onLogout: handleLogout }}>
+    <LoginContext.Provider
+      value={{ loggedIn, setLoggedIn, userID, setUserID, onLogout: handleLogout, token, setToken }}
+    >
       {children}
     </LoginContext.Provider>
   );

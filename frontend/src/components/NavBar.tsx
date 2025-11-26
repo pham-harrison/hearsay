@@ -25,7 +25,8 @@ type RegisterInfo = {
 export default function NavBar() {
   const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState<activeModal>(null);
-  const { loggedIn, setLoggedIn, setUserID, onLogout } = useContext(LoginContext);
+  const { loggedIn, setLoggedIn, setUserID, onLogout, setToken } = useContext(LoginContext);
+
   const [loginInfo, setLoginInfo] = useState<LoginInfo>({
     username: "",
     password: "",
@@ -60,6 +61,7 @@ export default function NavBar() {
       if (decodedToken.sub) setUserID(decodedToken.sub);
       setLoggedIn(true);
       setActiveModal(null);
+      setToken(data.access_token);
     } catch (error) {
       console.log("Failed to log in", error);
     }
@@ -158,35 +160,60 @@ export default function NavBar() {
                   <input
                     type="email"
                     value={registerInfo.email}
-                    onChange={(e) => setRegisterInfo({ ...registerInfo, email: e.target.value })}
+                    onChange={(e) =>
+                      setRegisterInfo({
+                        ...registerInfo,
+                        email: e.target.value,
+                      })
+                    }
                     placeholder="Email"
                   ></input>
                   <label>Username</label>
                   <input
                     type="text"
                     value={registerInfo.username}
-                    onChange={(e) => setRegisterInfo({ ...registerInfo, username: e.target.value })}
+                    onChange={(e) =>
+                      setRegisterInfo({
+                        ...registerInfo,
+                        username: e.target.value,
+                      })
+                    }
                     placeholder="Username"
                   ></input>
                   <label>Password</label>
                   <input
                     type="password"
                     value={registerInfo.password}
-                    onChange={(e) => setRegisterInfo({ ...registerInfo, password: e.target.value })}
+                    onChange={(e) =>
+                      setRegisterInfo({
+                        ...registerInfo,
+                        password: e.target.value,
+                      })
+                    }
                     placeholder="Password"
                   ></input>
                   <label>First Name</label>
                   <input
                     type="text"
                     value={registerInfo.firstName}
-                    onChange={(e) => setRegisterInfo({ ...registerInfo, firstName: e.target.value })}
+                    onChange={(e) =>
+                      setRegisterInfo({
+                        ...registerInfo,
+                        firstName: e.target.value,
+                      })
+                    }
                     placeholder="First Name"
                   ></input>
                   <label>Last Name</label>
                   <input
                     type="text"
                     value={registerInfo.lastName}
-                    onChange={(e) => setRegisterInfo({ ...registerInfo, lastName: e.target.value })}
+                    onChange={(e) =>
+                      setRegisterInfo({
+                        ...registerInfo,
+                        lastName: e.target.value,
+                      })
+                    }
                     placeholder="Last Name"
                   ></input>
                   <button type="submit">Create Account</button>

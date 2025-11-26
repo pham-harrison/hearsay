@@ -16,12 +16,16 @@ type User = {
   bio: string;
 };
 
+type activeModal = "create" | null;
+
 const API_URL_BASE = import.meta.env.VITE_API_URL;
 
 export default function Profile() {
-  const { loggedIn, userID } = useContext(LoginContext);
+  const { loggedIn, userID, token } = useContext(LoginContext);
   const [profile, setProfile] = useState<User>([]);
   const [displayType, setDisplayType] = useState<DisplayType>("reviews");
+  const [activeModal, setActiveModal] = useState<activeModal>(null);
+  const [playlistName, setPlaylistName] = useState<string>("");
   const urlID = useParams().userID;
 
   useEffect(() => {
@@ -36,6 +40,31 @@ export default function Profile() {
 
     getUserInfo();
   }, [urlID, userID]);
+
+  async function handlePlaylistCreate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!playlistName) {
+      alert("Please enter a playlist name");
+      return;
+    }
+    try {
+      const response = await fetch(
+        `${API_URL_BASE}/users/${userID}/playlists/${playlistName}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        console.error("Response not ok from create playlist");
+      }
+    } catch (error) {
+      console.error("Failed to create playlist", error);
+    }
+  }
   return (
     <>
       <div>
@@ -52,8 +81,33 @@ export default function Profile() {
         <option value={"reviews"}>Reviews</option>
         <option value={"playlists"}>Playlists</option>
       </select>
+      {displayType === "playlists" && (
+        <button
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          onClick={
+            activeModal === null
+              ? () => setActiveModal("create")
+              : () => setActiveModal(null)
+          }
+        >
+          Create
+        </button>
+      )}
       {displayType === "reviews" && <Reviews />}
       {displayType === "playlists" && <Playlists />}
+      {activeModal === "create" && (
+        <div className="bg-yellow-200 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <form className="flex flex-col" onSubmit={handlePlaylistCreate}>
+            <label>Name of new playlist</label>
+            <input
+              type="text"
+              onChange={(e) => setPlaylistName(e.target.value)}
+              placeholder="Title..."
+            ></input>
+            <button type="submit">Confirm</button>
+          </form>
+        </div>
+      )}
     </>
   );
 }

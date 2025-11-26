@@ -321,6 +321,7 @@ export default function Episode() {
                   name={playlist.name}
                   description={playlist.description ? playlist.description : "No description provided"}
                   onClick={() => {}}
+                  onDelete={() => {}}
                 ></PlaylistCard>
                 <button className="cursor-pointer" onClick={() => handleAddToPlaylist(playlist.name)}>
                   Add

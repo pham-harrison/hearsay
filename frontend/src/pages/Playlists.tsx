@@ -18,10 +18,9 @@ type Episode = {
 const API_URL_BASE = import.meta.env.VITE_API_URL;
 
 export default function Playlists() {
-  const { loggedIn, userID } = useContext(LoginContext);
+  const { loggedIn, userID, token } = useContext(LoginContext);
   const urlID = useParams().userID;
   const navigate = useNavigate();
-
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [episodesByPlaylist, setEpisodesByPlaylist] = useState<
     Record<string, Episode[]>
@@ -29,10 +28,12 @@ export default function Playlists() {
   const [expandedPlaylists, setExpandedPlaylists] = useState<Set<string>>(
     new Set()
   );
+  const [refreshOnDelete, setRefreshOnDelete] = useState(0);
+  console.log(token);
 
   useEffect(() => {
+    // Playlist data
     async function getUserPlaylists() {
-      // Playlist data (Create, Delete playlist, Add Ep, Delete Ep)
       const response: Response = await fetch(
         `${API_URL_BASE}/users/${urlID}/playlists`
       );
@@ -40,11 +41,10 @@ export default function Playlists() {
       setPlaylists(data);
     }
     getUserPlaylists();
-  }, [urlID, userID]);
+  }, [urlID, loggedIn, userID, refreshOnDelete]);
 
   // Episode data
   async function getEpisodes(playlist: string) {
-    if (episodesByPlaylist[playlist]) return;
     const response = await fetch(
       `${API_URL_BASE}/users/${urlID}/playlists/${playlist}/episodes`
     );
@@ -68,6 +68,30 @@ export default function Playlists() {
     });
   }
 
+  async function handlePlaylistDelete(playlist: string) {
+    try {
+      const response = await fetch(
+        `${API_URL_BASE}/users/${urlID}/playlists/${playlist}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        console.error("Response from delete playlist not ok");
+      } else {
+        setRefreshOnDelete(() => {
+          return refreshOnDelete + 1;
+        });
+      }
+    } catch (error) {
+      console.error("Failed to delete playlist", error);
+    }
+  }
+
   async function handleEpisodeDelete(
     playlist: string,
     podcast_id: string,
@@ -80,12 +104,18 @@ export default function Playlists() {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ podcast_id, episode_num }),
         }
       );
       if (!response.ok) {
         console.error("Response from delete episode from playlist not ok");
+      } else {
+        getEpisodes(playlist);
+        setRefreshOnDelete(() => {
+          return refreshOnDelete + 1;
+        });
       }
     } catch (error) {
       console.error("Failed to delete episode from playlist", error);
@@ -109,11 +139,14 @@ export default function Playlists() {
                 onClick={() => {
                   handlePlaylistClick(playlist.name);
                 }}
+                onDelete={() => {
+                  handlePlaylistDelete(playlist.name);
+                }}
               />
               {(episodes as Episode[]).map(
                 (episode) =>
                   isOpen(playlist.name) && (
-                    <ul key={episode.episode_num}>
+                    <ul key={episode.podcast_id + episode.episode_num}>
                       <EpisodeCard
                         podcast_id={episode.podcast_id}
                         podcast_name={episode.podcast_name}
