@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 
 type friendReview = {
   userID: string;
@@ -41,14 +42,17 @@ export default function Home() {
   }, [loggedIn]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background scheme-dark">
       {loggedIn ? (
-        <div>
-          Your feed
+        <div className="flex flex-col px-15 gap-5">
+          <Label className="text-xl font-bold mb-5">Your feed</Label>
           {feed.length > 0 ? (
             feed.map((review) => (
               <Card>
-                <CardHeader>{review.username}</CardHeader>
+                <CardHeader>
+                  <CardTitle>{review.first_name} rated</CardTitle>
+                </CardHeader>
+                <CardContent></CardContent>
               </Card>
             ))
           ) : (
