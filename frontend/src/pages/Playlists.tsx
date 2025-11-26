@@ -15,13 +15,20 @@ type Episode = {
   episode_num: string;
 };
 
+type PlaylistProps = {
+  playlists: Playlist[];
+  onPlaylistDelete: (name: string) => void;
+};
+
 const API_URL_BASE = import.meta.env.VITE_API_URL;
 
-export default function Playlists() {
+export default function Playlists({
+  playlists,
+  onPlaylistDelete,
+}: PlaylistProps) {
   const { loggedIn, userID, token } = useContext(LoginContext);
   const urlID = useParams().userID;
   const navigate = useNavigate();
-  const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [episodesByPlaylist, setEpisodesByPlaylist] = useState<
     Record<string, Episode[]>
   >({});
@@ -29,19 +36,8 @@ export default function Playlists() {
     new Set()
   );
   const [refreshOnDelete, setRefreshOnDelete] = useState(0);
-  console.log(token);
 
-  useEffect(() => {
-    // Playlist data
-    async function getUserPlaylists() {
-      const response: Response = await fetch(
-        `${API_URL_BASE}/users/${urlID}/playlists`
-      );
-      const data = await response.json();
-      setPlaylists(data);
-    }
-    getUserPlaylists();
-  }, [urlID, loggedIn, userID, refreshOnDelete]);
+  useEffect(() => {}, [urlID, loggedIn, userID, refreshOnDelete]);
 
   // Episode data
   async function getEpisodes(playlist: string) {
@@ -66,30 +62,6 @@ export default function Playlists() {
       }
       return next;
     });
-  }
-
-  async function handlePlaylistDelete(playlist: string) {
-    try {
-      const response = await fetch(
-        `${API_URL_BASE}/users/${urlID}/playlists/${playlist}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (!response.ok) {
-        console.error("Response from delete playlist not ok");
-      } else {
-        setRefreshOnDelete(() => {
-          return refreshOnDelete + 1;
-        });
-      }
-    } catch (error) {
-      console.error("Failed to delete playlist", error);
-    }
   }
 
   async function handleEpisodeDelete(
@@ -129,7 +101,7 @@ export default function Playlists() {
   return (
     <>
       <div>
-        {(playlists as Playlist[]).map((playlist) => {
+        {playlists.map((playlist) => {
           const episodes = episodesByPlaylist[playlist.name] ?? [];
           return (
             <div key={playlist.name}>
@@ -140,9 +112,20 @@ export default function Playlists() {
                   handlePlaylistClick(playlist.name);
                 }}
                 onDelete={() => {
-                  handlePlaylistDelete(playlist.name);
+                  onPlaylistDelete(playlist.name);
                 }}
               />
+              {loggedIn && userID === urlID && (
+                <button
+                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onPlaylistDelete(playlist.name);
+                  }}
+                >
+                  Delete Playlist
+                </button>
+              )}
               {(episodes as Episode[]).map(
                 (episode) =>
                   isOpen(playlist.name) && (

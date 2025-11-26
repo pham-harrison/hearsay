@@ -21,7 +21,7 @@ export default function EpisodeCard({
 
   return (
     <li className="bg-green-300 cursor-pointer" onClick={onClick}>
-      {podcast_name} : Episode {episode_num}{" "}
+      - {podcast_name} : Episode {episode_num}{" "}
       {loggedIn && userID === urlID && (
         <button
           className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
@@ -30,7 +30,7 @@ export default function EpisodeCard({
             onDelete();
           }}
         >
-          Delete
+          Delete Episode
         </button>
       )}
     </li>
