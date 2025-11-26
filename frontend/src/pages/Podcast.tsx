@@ -63,29 +63,6 @@ export default function Podcast() {
     setUserReview(null);
     setFriendReviews([]);
 
-    async function fetchPodcastRatings() {
-      try {
-        let response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/ratings`);
-        let data = await response.json();
-        setRatings((prevRatings) => ({
-          ...prevRatings,
-          globalAvgRating: data.global_avg_rating,
-          globalAvgRatingByEp: data.global_avg_rating_by_ep,
-        }));
-        if (loggedIn) {
-          response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/ratings/${userID}`);
-          data = await response.json();
-          setRatings((prevRatings) => ({
-            ...prevRatings,
-            friendsAvgRating: data.friends_avg_rating,
-            friendsAvgRatingByEp: data.friends_avg_rating_by_ep,
-          }));
-        }
-      } catch (error) {
-        console.log(`Failed to fetch podcast ratings`, error);
-      }
-    }
-
     async function fetchFriendReviews() {
       if (!loggedIn) return;
       try {
@@ -127,12 +104,28 @@ export default function Podcast() {
     getUserPodcastReview();
   }, [loggedIn]);
 
-  // useEffect(() => {
-  //   console.log("ratings:", ratings);
-  //   console.log("podcast info:", podcastInfo);
-  //   console.log("friend reviews:", friendReviews);
-  //   console.log("user review:", userReview);
-  // }, [ratings, podcastInfo, friendReviews]);
+  async function fetchPodcastRatings() {
+    try {
+      let response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/ratings`);
+      let data = await response.json();
+      setRatings((prevRatings) => ({
+        ...prevRatings,
+        globalAvgRating: data.global_avg_rating,
+        globalAvgRatingByEp: data.global_avg_rating_by_ep,
+      }));
+      if (loggedIn) {
+        response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/ratings/${userID}`);
+        data = await response.json();
+        setRatings((prevRatings) => ({
+          ...prevRatings,
+          friendsAvgRating: data.friends_avg_rating,
+          friendsAvgRatingByEp: data.friends_avg_rating_by_ep,
+        }));
+      }
+    } catch (error) {
+      console.log(`Failed to fetch podcast ratings`, error);
+    }
+  }
 
   async function handleCreateReview(e: React.FormEvent) {
     e.preventDefault();
@@ -154,6 +147,7 @@ export default function Podcast() {
       }
       setActiveModal(null);
       setUserReview({ rating: formReview.rating, comment: formReview.comment, createdAt: Date.now().toString() });
+      fetchPodcastRatings();
     } catch (error) {
       console.log("Failed to insert the user's podcast review", error);
     }
@@ -178,6 +172,7 @@ export default function Podcast() {
       }
       setActiveModal(null);
       setUserReview({ rating: formReview.rating, comment: formReview.comment, createdAt: Date.now().toString() });
+      fetchPodcastRatings();
     } catch (error) {
       console.log("Failed to update user's podcast review", error);
     }
