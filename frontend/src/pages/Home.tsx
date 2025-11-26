@@ -1,5 +1,14 @@
 import { useState, useEffect, useContext } from "react";
 import { LoginContext } from "../contexts/LoginContext";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 type friendReview = {
   userID: string;
@@ -32,18 +41,16 @@ export default function Home() {
   }, [loggedIn]);
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       {loggedIn ? (
         <div>
           Your feed
           {feed.length > 0 ? (
-            <ul>
-              {feed.map((review) => (
-                <li>
-                  {review.first_name} rated {review.episode_num} a {review.rating} and said {review.comment}
-                </li>
-              ))}
-            </ul>
+            feed.map((review) => (
+              <Card>
+                <CardHeader>{review.username}</CardHeader>
+              </Card>
+            ))
           ) : (
             <div>Build a feed by following your friends!</div>
           )}
@@ -51,6 +58,6 @@ export default function Home() {
       ) : (
         <div>Create an account or log in to see a feed</div>
       )}
-    </>
+    </div>
   );
 }
