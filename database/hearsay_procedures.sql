@@ -139,7 +139,8 @@ BEGIN
     VALUES (user_id_p, user_to_request_id_p, "pending");
 END $$
 DELIMITER ;
-
+-- SELECT * FROM user_to_user;
+-- CALL send_friend_request(51, 1);
 -- CALL send_friend_request(1, 51);
 
 /*
@@ -166,7 +167,8 @@ BEGIN
 END $$
 DELIMITER ;
 
--- CALL accept_friend_request(51, 1);
+-- SELECT * FROM user_to_user WHERE id1 = 51 AND id2 = 1;
+-- CALL accept_friend_request(1, 51);
 -- CALL accept_friend_request(1, 51);
 
 /*
@@ -183,12 +185,14 @@ BEGIN
 		DELETE FROM user_to_user WHERE id1 = user_to_reject_id_p AND id2 = user_id_p;
 	ELSE
 		SIGNAL SQLSTATE "45000"
-		SET MESSAGE_TEXT="Unable to add friend";
+		SET MESSAGE_TEXT="Unable to reject friend";
 	END IF;
 END $$
 DELIMITER ;
 
--- CALL reject_friend_request(51, 1);
+SELECT * FROM user_to_user;
+-- CALL reject_friend_request(3, 2);
+-- CALL reject_friend_request(2, 51);
 -- CALL reject_friend_request(1, 51);
 
 /*
@@ -248,11 +252,12 @@ BEGIN
         SET MESSAGE_TEXT="User not found";
 	END IF;
     SELECT id1, date_added, username, first_name, last_name, bio FROM user_to_user
-    JOIN user ON id2 = user.id
+    JOIN user ON id1 = user.id
     WHERE id2 = user_id_p AND status = "pending";
 END $$
 DELIMITER ;
 
+-- SELECT * FROM user_to_user WHERE id2 = 51;
 -- CALL get_pending_friend_requests(3);
 -- CALL get_pending_friend_requests(51);
 
@@ -926,7 +931,7 @@ DELIMITER ;
 -- CALL create_user("testuser@email.com", "testUser", "root1234", "Test", "User");
 -- CALL send_friend_request(1, 52);
 -- CALL accept_friend_request(52, 1);
--- CALL get_friends(1);
+CALL get_friends(1);
 -- CALL insert_podcast_review(52, 1, 3, NULL);
 -- CALL get_user_podcast_review(52, 1);
 -- SELECT * FROM user_to_user JOIN podcast_review ON id2 = user_id WHERE id1 = 1 AND podcast_id = 1;
