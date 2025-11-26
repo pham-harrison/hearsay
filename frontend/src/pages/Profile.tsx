@@ -106,7 +106,7 @@ export default function Profile() {
       if (!response.ok) {
         console.error("Response from delete playlist not ok");
       } else {
-        setPlaylists((prev) => prev.filter((pl) => pl.name !== playlistName));
+        setPlaylists((prev) => prev.filter((pl) => pl.name !== playlist));
       }
     } catch (error) {
       console.error("Failed to delete playlist", error);
