@@ -16,6 +16,15 @@ type User = {
   bio: string;
 };
 
+type Friend = {
+  id: string;
+  date_added: string;
+  username: string;
+  first_name: string;
+  last_name: string;
+  bio: string;
+};
+
 type Playlist = {
   name: string;
   description: string;
@@ -33,6 +42,10 @@ export default function Profile() {
   const [playlistName, setPlaylistName] = useState<string>("");
   const [playlistDesc, setPlaylistDesc] = useState<string>("");
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
+
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [pendingFriends, setPendingFriends] = useState<Friend[]>([]);
+
   const urlID = useParams().userID;
 
   useEffect(() => {
@@ -52,6 +65,27 @@ export default function Profile() {
       const data = await response.json();
       setPlaylists(data);
     }
+    // Friends data
+    async function getUserFriends() {
+      const response: Response = await fetch(
+        `${API_URL_BASE}/users/${urlID}/friends`
+      );
+      const data = await response.json();
+      setFriends(data);
+    }
+    // Pending friends data
+    async function getUserPendingRequests() {
+      const response: Response = await fetch(
+        `${API_URL_BASE}/users/${urlID}/pending`
+      );
+      const data = await response.json();
+      setPendingFriends(data);
+    }
+    // Sent friend requests data
+    async function getUserSentRequests() {}
+
+    getUserFriends();
+    getUserPendingRequests();
 
     getUserInfo();
     getUserPlaylists();
@@ -111,6 +145,28 @@ export default function Profile() {
     }
   }
 
+  async function handleDeleteFriend(friend: Friend) {
+    try {
+      const response = await fetch(
+        `${API_URL_BASE}/users/${userID}/friends/${friend.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        console.error("Response from delete friend not ok");
+      } else {
+        setFriends((prev) => prev.filter((fr) => fr.id !== friend.id));
+      }
+    } catch (error) {
+      console.error("Failed to delete friend for user", error);
+    }
+  }
+
   return (
     <>
       <div>
@@ -119,7 +175,7 @@ export default function Profile() {
         <p>{profile.bio}</p>
       </div>
       <div>Friends list</div>
-      <Friends />
+      <Friends friends={friends} onFriendDelete={handleDeleteFriend} />
 
       <select
         value={displayType}

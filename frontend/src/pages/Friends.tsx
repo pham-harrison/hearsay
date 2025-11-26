@@ -11,47 +11,40 @@ type Friend = {
   last_name: string;
   bio: string;
 };
-const API_URL_BASE = import.meta.env.VITE_API_URL;
 
-export default function Friends() {
-  const { loggedIn, userID, token } = useContext(LoginContext);
+type FriendProps = {
+  friends: Friend[];
+  onFriendDelete: (name: Friend) => void;
+};
+
+export default function Friends({ friends, onFriendDelete }: FriendProps) {
+  const { loggedIn, userID } = useContext(LoginContext);
   const navigate = useNavigate();
   const urlID = useParams().userID;
-  const [friends, setFriends] = useState<Friend[]>([]);
 
-  useEffect(() => {
-    // Friends data (Delete friends)
-    async function getUserFriends() {
-      const f_response: Response = await fetch(
-        `${API_URL_BASE}/users/${urlID}/friends`
-      );
-      const allFriendsData = await f_response.json();
-      setFriends(allFriendsData);
-    }
-    getUserFriends();
-  }, [urlID, userID]);
+  useEffect(() => {}, [urlID, userID]);
 
-  async function handleDeleteFriend(friend: Friend) {
-    try {
-      const response = await fetch(
-        `${API_URL_BASE}/users/${userID}/friends/${friend.id}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (!response.ok) {
-        console.error("Response from delete friend not ok");
-      } else {
-        setFriends((prev) => prev.filter((fr) => fr.id !== friend.id));
-      }
-    } catch (error) {
-      console.error("Failed to delete friend for user", error);
-    }
-  }
+  // async function handleSendRequest(friend: Friend) {
+  //   try {
+  //     const response = await fetch(
+  //       `${API_URL_BASE}/users/${userID}/request/${friend.id}`,
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+  //     if (!response.ok) {
+  //       console.error("Response from send friend request not ok");
+  //     } else {
+  //       setFriends((prev) => prev.filter((fr) => fr.id !== friend.id));
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to delete friend for user", error);
+  //   }
+  // }
 
   return (
     <>
@@ -71,7 +64,7 @@ export default function Friends() {
               {urlID === userID && (
                 <button
                   className="bg-red-500 hover:bg-red-700 text-white py-0.5 px-1 rounded"
-                  onClick={() => handleDeleteFriend(user)}
+                  onClick={() => onFriendDelete(user)}
                 >
                   Remove Friend
                 </button>
