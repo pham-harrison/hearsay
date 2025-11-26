@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from typing import Optional
 from ..db import db_cursor
+from .auth import getCurrentUser
 from pydantic import BaseModel
 import pymysql
 
@@ -15,7 +16,11 @@ router = APIRouter()
 
 # Create a podcast review
 @router.post("/{user_id}", status_code=201)
-async def addReviewPodcast(user_id: int, podcast_id: int, review: Review):
+async def addReviewPodcast(user_id: int, podcast_id: int, review: Review, current_user: int = Depends(getCurrentUser)):
+    if current_user != user_id:
+        raise HTTPException(
+            status_code=400, detail="Unauthorized to make changes to user"
+        )
     try:
         with db_cursor() as cursor:
             cursor.callproc(
@@ -48,7 +53,11 @@ async def getReviewPodcast(user_id: int, podcast_id: int):
 
 # Update a podcast review
 @router.put("/{user_id}")
-async def updateReviewPodcast(user_id: int, podcast_id: int, review: Review):
+async def updateReviewPodcast(user_id: int, podcast_id: int, review: Review, current_user: int = Depends(getCurrentUser)):
+    if current_user != user_id:
+        raise HTTPException(
+            status_code=400, detail="Unauthorized to make changes to user"
+        )
     try:
         with db_cursor() as cursor:
             cursor.callproc(
@@ -68,7 +77,11 @@ async def updateReviewPodcast(user_id: int, podcast_id: int, review: Review):
 
 # Delete a podcast review
 @router.delete("/{user_id}")
-async def deleteUserPodcastReview(podcast_id: int, user_id: int):
+async def deleteUserPodcastReview(podcast_id: int, user_id: int, current_user: int = Depends(getCurrentUser)):
+    if current_user != user_id:
+        raise HTTPException(
+            status_code=400, detail="Unauthorized to make changes to user"
+        )
     try:
         with db_cursor() as cursor:
             cursor.callproc(
