@@ -29,7 +29,7 @@ export default function Playlists() {
   const [expandedPlaylists, setExpandedPlaylists] = useState<Set<string>>(
     new Set()
   );
-  const [deletedEpisodes, setDeletedEpisodes] = useState(0);
+  const [refreshOnDelete, setRefreshOnDelete] = useState(0);
 
   useEffect(() => {
     async function getUserPlaylists() {
@@ -41,7 +41,7 @@ export default function Playlists() {
       setPlaylists(data);
     }
     getUserPlaylists();
-  }, [urlID, userID, deletedEpisodes]);
+  }, [urlID, userID, refreshOnDelete]);
 
   // Episode data
   async function getEpisodes(playlist: string) {
@@ -68,6 +68,29 @@ export default function Playlists() {
     });
   }
 
+  async function handlePlaylistDelete(playlist: string) {
+    try {
+      const response = await fetch(
+        `${API_URL_BASE}/users/${urlID}/playlists/${playlist}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        console.error("Response from delete playlist not ok");
+      } else {
+        setRefreshOnDelete(() => {
+          return refreshOnDelete + 1;
+        });
+      }
+    } catch (error) {
+      console.error("Failed to delete playlist", error);
+    }
+  }
+
   async function handleEpisodeDelete(
     playlist: string,
     podcast_id: string,
@@ -88,8 +111,8 @@ export default function Playlists() {
         console.error("Response from delete episode from playlist not ok");
       } else {
         getEpisodes(playlist);
-        setDeletedEpisodes(() => {
-          return deletedEpisodes + 1;
+        setRefreshOnDelete(() => {
+          return refreshOnDelete + 1;
         });
       }
     } catch (error) {
