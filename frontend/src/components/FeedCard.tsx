@@ -13,6 +13,7 @@ import podcast from "../assets/minimalistMicrophone.jpg";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
+import dateFormat from "@/utils/dateFormat";
 
 type BaseReviewProps = {
   id: string;
@@ -40,13 +41,6 @@ type EpisodeReviewProps = BaseReviewProps & {
 type FeedCardProps = {
   review: PodcastReviewProps | EpisodeReviewProps;
 };
-
-var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-function dateFormat(dateStr: string) {
-  var dateObj = new Date(dateStr);
-  return monthNames[dateObj.getMonth()] + " " + dateObj.getDate() + ", " + dateObj.getFullYear();
-}
 
 export default function FeedCard({ review }: FeedCardProps) {
   const navigate = useNavigate();
