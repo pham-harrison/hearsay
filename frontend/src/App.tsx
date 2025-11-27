@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Results from "./pages/Results";
 import Podcast from "./pages/Podcast";
 import { LoginProvider } from "./contexts/LoginContext";
+import { Toaster } from "./components/ui/sonner";
 import Profile from "./pages/Profile";
 import Episode from "./pages/Episode";
 
@@ -12,6 +13,7 @@ function App() {
   return (
     <BrowserRouter>
       <LoginProvider>
+        <Toaster />
         <NavBar />
         <Routes>
           <Route path="/" element={<Home />} />

@@ -17,10 +17,16 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SearchBar from "./SearchBar";
-import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
 import avatar from "../assets/avatar.png";
-import { Command, CommandGroup } from "./ui/command";
-import { CommandItem } from "cmdk";
+import { UserIcon, LogOutIcon } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 const API_URL_BASE = import.meta.env.VITE_API_URL;
 
@@ -44,7 +50,6 @@ type SearchType = "podcasts" | "users" | "episodes";
 export default function NavBar() {
   const navigate = useNavigate();
   const [searchType, setSearchType] = useState<SearchType>("podcasts");
-  const [activeModal, setActiveModal] = useState<activeModal>(null);
   const { loggedIn, setLoggedIn, userID, setUserID, onLogout, setToken } = useContext(LoginContext);
 
   const [loginInfo, setLoginInfo] = useState<LoginInfo>({
@@ -59,32 +64,37 @@ export default function NavBar() {
     lastName: "",
   });
 
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    if (!areAllFieldsFilled(loginInfo)) {
-      alert("All fields must be filled");
-      return;
-    }
+  async function login(username: string, password: string) {
     try {
       const response = await fetch(`${API_URL_BASE}/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(loginInfo),
+        body: JSON.stringify({ username, password }),
       });
       const data = await response.json();
       if (!response.ok) {
-        alert(data.detail);
+        toast.error(data.detail);
         return;
       }
       localStorage.setItem("jwt", data.access_token);
       const decodedToken = jwtDecode(data.access_token);
       if (decodedToken.sub) setUserID(decodedToken.sub);
       setLoggedIn(true);
-      setActiveModal(null);
       setToken(data.access_token);
     } catch (error) {
       console.log("Failed to log in", error);
     }
+  }
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    if (!areAllFieldsFilled(loginInfo)) {
+      toast.error("All fields must be filled");
+      return;
+    }
+    handleReset();
+    setLoginInfo({ username: "", password: "" });
+    login(loginInfo.username, loginInfo.password);
   }
 
   function areAllFieldsFilled(object: Record<string, string>) {
@@ -94,11 +104,11 @@ export default function NavBar() {
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
     if (!areAllFieldsFilled(registerInfo)) {
-      alert("All fields must be filled");
+      toast.error("All fields must be filled");
       return;
     }
     if (!registerInfo.email.endsWith(".com")) {
-      alert("Email must end with .com");
+      toast.error("Email must end with .com");
       return;
     }
     try {
@@ -109,10 +119,10 @@ export default function NavBar() {
       });
       const data = await response.json();
       if (!response.ok) {
-        alert(data.detail);
+        toast.error(data.detail);
         return;
       }
-      handleLogin(e);
+      login(registerInfo.username, registerInfo.password);
     } catch (error) {
       console.log("Failed to register", error);
     }
@@ -129,20 +139,28 @@ export default function NavBar() {
   }
 
   return (
-    <div className="flex bg-popover h-16 top-0 left-0 justify-between items-center pr-3">
-      <div>
-        <img src={microphoneIcon} className="w-15 h-14.5 cursor-pointer" onClick={() => navigate("/")} />
-      </div>
+    <div className="flex bg-popover h-16 top-0 left-0 justify-between items-center px-3">
+      <Button
+        className="rounded-full p-0 bg-white w-10 h-10 cursor-pointer flex justify-center items-center"
+        onClick={() => navigate("/")}
+      >
+        <img src={microphoneIcon} />
+      </Button>
       <div className="flex items-center">
         <Select value={searchType} onValueChange={(value: SearchType) => setSearchType(value)}>
-          <SelectTrigger>
+          <SelectTrigger className="cursor-pointer">
             <SelectValue placeholder={searchType} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="podcasts">Podcasts</SelectItem>
-            <SelectItem value="users">Users</SelectItem>
+            <SelectItem className="cursor-pointer" value="podcasts">
+              Podcasts
+            </SelectItem>
+            <SelectItem className="cursor-pointer" value="users">
+              Users
+            </SelectItem>
           </SelectContent>
         </Select>
+        <div className="px-2"></div>
         <SearchBar
           searchType={searchType}
           onSearch={(searchFilters) => {
@@ -161,36 +179,39 @@ export default function NavBar() {
       </div>
       <div className="relative">
         {loggedIn ? (
-          <Popover>
-            <PopoverTrigger asChild>
-              <img src={avatar} className="w-7 cursor-pointer hover:scale-105 transition-all duration-200"></img>
-            </PopoverTrigger>
-
-            <PopoverContent className="w-30">
-              <Command>
-                <CommandGroup>
-                  <CommandItem
+          <div className="relative">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <img src={avatar} className="w-7 cursor-pointer hover:scale-105 transition-all duration-200"></img>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="absolute transform -translate-x-25">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
                     className="cursor-pointer hover:bg-primary"
-                    onSelect={() => navigate(`/users/${userID}`)}
+                    onClick={() => navigate(`/users/${userID}`)}
                   >
-                    View Profile
-                  </CommandItem>
-                  <CommandItem className="cursor-pointer hover:bg-primary" onSelect={() => onLogout()}>
-                    Sign Out
-                  </CommandItem>
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
+                    <UserIcon></UserIcon>
+                    <span className="text-popover-foreground">View Account</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer hover:bg-primary" onClick={() => onLogout()}>
+                    <LogOutIcon></LogOutIcon>
+                    <span className="text-popover-foreground">Sign out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         ) : (
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="outline">Log in/Sign up</Button>
+              <Button className="cursor-pointer" variant="outline">
+                Log in/Sign up
+              </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
               <DialogDescription></DialogDescription>
               <Tabs defaultValue="login">
-                <TabsList className="w-full bg-background rounded-none border-b p-0 mt-3">
+                <TabsList className="w-full bg-background rounded-none border-b p-0 mt-1">
                   <TabsTrigger
                     value="login"
                     className="bg-background data-[state=active]:border-primary dark:data-[state=active]:border-primary h-full rounded-none border-0 border-b-2 border-transparent data-[state=active]:shadow-none cursor-pointer"
