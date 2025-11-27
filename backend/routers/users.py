@@ -5,9 +5,11 @@ from pydantic import BaseModel, EmailStr
 from ..db import db_cursor
 from .auth import getCurrentUser
 from .playlists import router as playlist_router
+from ..utils.convertSnakeToCamel import convertListKeyToCamel
 
 router = APIRouter(prefix="/users")
 router.include_router(playlist_router, prefix="/{user_id}/playlists")
+
 
 class UserPublic(BaseModel):
     id: int
@@ -16,8 +18,10 @@ class UserPublic(BaseModel):
     firstName: str
     lastName: str
 
+
 class UserBio(BaseModel):
     bio: str
+
 
 # Get all users
 @router.get("/all")
@@ -110,17 +114,19 @@ async def deleteFriend(
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
+
 # Get a user's feed (all reviews from the friends of a user)
 @router.get("/{user_id}/feed")
 async def getUserFeed(user_id: int):
     try:
         with db_cursor() as cursor:
             cursor.callproc("get_user_friends_reviews", (user_id,))
-            return cursor.fetchall()
+            return convertListKeyToCamel(cursor.fetchall())
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
-    
+
+
 # Get a user's latest podcast reviews
 @router.get("/{user_id}/reviews/podcasts")
 async def getUserReviews(user_id: int):
@@ -131,7 +137,8 @@ async def getUserReviews(user_id: int):
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
-    
+
+
 # Get a user's latest episode reviews
 @router.get("/{user_id}/reviews/episodes")
 async def getUserReviews(user_id: int):
