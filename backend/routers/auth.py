@@ -20,9 +20,11 @@ JWT_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES"))
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -31,9 +33,11 @@ class UserCreate(BaseModel):
     firstName: str
     lastName: str
 
+
 class UserLogin(BaseModel):
     username: str
     password: str
+
 
 # Create user account
 @router.post("/register")
@@ -61,6 +65,8 @@ async def createUser(data: UserCreate):
         error_code, message = e.args
         print("Operation error: ", error_code, message)
         raise HTTPException(status_code=400, detail=message)
+    except pymysql.err.IntegrityError as e:
+        raise HTTPException(status_code=400, detail="Account already exists")
 
 
 # Login a registered user
@@ -103,6 +109,7 @@ async def getCurrentUser(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=400, detail=message)
     return user_id
 
+
 # Password helper functions
 def hash_password(plain_password: str) -> str:
     salt = bcrypt.gensalt()
@@ -114,6 +121,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(
         plain_password.encode("utf-8"), hashed_password.encode("utf-8")
     )
+
 
 # JWT helper functions
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
