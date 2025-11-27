@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { faMagnifyingGlass, faFilter } from "@fortawesome/free-solid-svg-icons";
 import { Label } from "@radix-ui/react-label";
 import { SelectGroup } from "@radix-ui/react-select";
 import {
@@ -41,7 +41,6 @@ type SearchBarProps = {
 const API_URL_BASE = import.meta.env.VITE_API_URL;
 
 export default function SearchBar({ searchType, onSearch, podcastID }: SearchBarProps) {
-  const [showFilters, setShowFilters] = useState<boolean>(false);
   const [genres, setGenres] = useState<string[]>([]);
   const [languages, setLanguages] = useState<string[]>([]);
   const [platforms, setPlatforms] = useState<string[]>([]);
@@ -58,7 +57,6 @@ export default function SearchBar({ searchType, onSearch, podcastID }: SearchBar
     host: "",
     guest: "",
   });
-  const navigate = useNavigate();
   let placeholder = "";
   if (searchType === "podcasts") {
     placeholder = "Search podcasts";
@@ -144,229 +142,233 @@ export default function SearchBar({ searchType, onSearch, podcastID }: SearchBar
           <FontAwesomeIcon icon={faMagnifyingGlass} className="pt-0.25 text-lg" />
         </Button>
         <Input
-          className="w-100 h-7 pl-11 pr-2 py-4 rounded-xs text-base"
+          className="w-100 h-7 pl-11 pr-8 py-4 text-base"
           type="search"
           value={searchFilters.name}
           onChange={(e) => setSearchFilters({ ...searchFilters, name: e.target.value })}
           placeholder={placeholder}
           onKeyDown={handleKeyPress}
         ></Input>
-      </div>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button className="rounded-xs" disabled={searchType === "users"}>
-            Filters
-          </Button>
-        </PopoverTrigger>
-        {searchType === "podcasts" && (
-          <PopoverContent className="grid grid-cols-3 w-lg gap-4">
-            <div>
-              <Label>Genre</Label>
-              <Select
-                value={searchFilters.genre}
-                onValueChange={(value) => setSearchFilters({ ...searchFilters, genre: value !== "any" ? value : "" })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Any" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem key="any" value="any">
-                      Any
-                    </SelectItem>
-                    {genres.map((genre) => (
-                      <SelectItem key={genre} value={genre}>
-                        {genre}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Language</Label>
-              <Select
-                value={searchFilters.language}
-                onValueChange={(value) =>
-                  setSearchFilters({ ...searchFilters, language: value !== "any" ? value : "" })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Any" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem key="any" value="any">
-                      Any
-                    </SelectItem>
-                    {languages.map((language) => (
-                      <SelectItem key={language} value={language}>
-                        {language}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Platform</Label>
-              <Select
-                value={searchFilters.platform}
-                onValueChange={(value) =>
-                  setSearchFilters({ ...searchFilters, platform: value !== "any" ? value : "" })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Any" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem key="any" value="any">
-                      Any
-                    </SelectItem>
-                    {platforms.map((platform) => (
-                      <SelectItem key={platform} value={platform}>
-                        {platform}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col">
-              <Label>Year</Label>
-              <Input
-                className="w-24"
-                type="number"
-                min={0}
-                max={9999}
-                placeholder="Any"
-                value={searchFilters.year}
-                onChange={(e) => setSearchFilters({ ...searchFilters, year: e.target.value })}
-              />
-            </div>
-            <div className="relative">
-              <Label>Host</Label>
-              <Input type="search" value={searchFilters.host} onChange={handleHostSearch} placeholder="Any" />
-              {filteredHosts.length > 0 && (
-                <div className="absolute">
-                  <Command>
-                    <CommandList>
-                      {filteredHosts.map((host) => (
-                        <CommandItem
-                          key={host}
-                          onSelect={() => {
-                            setSearchFilters({ ...searchFilters, host: host });
-                            setFilteredHosts([]);
-                          }}
-                        >
-                          {host}
-                        </CommandItem>
-                      ))}
-                    </CommandList>
-                  </Command>
-                </div>
-              )}
-            </div>
-            <div className="relative">
-              <Label>Guest</Label>
-              <Input type="search" value={searchFilters.guest} onChange={handleGuestSearch} placeholder="Any" />
-              {filteredGuests.length > 0 && (
-                <div className="absolute">
-                  <Command>
-                    <CommandList>
-                      {filteredGuests.map((guest) => (
-                        <CommandItem
-                          key={guest}
-                          onSelect={() => {
-                            setSearchFilters({ ...searchFilters, guest: guest });
-                            setFilteredGuests([]);
-                          }}
-                        >
-                          {guest}
-                        </CommandItem>
-                      ))}
-                    </CommandList>
-                  </Command>
-                </div>
-              )}
-            </div>
-            <div></div>
-            <div></div>
-            <Button className="mt-2 w-15 justify-self-end" onClick={handleReset}>
-              Reset
-            </Button>
-          </PopoverContent>
-        )}
 
-        {searchType === "episodes" && (
-          <PopoverContent className="grid grid-cols-3 w-lg gap-4">
-            <div className="flex flex-col">
-              <Label>Year</Label>
-              <Input
-                className="w-24"
-                type="number"
-                min={0}
-                max={9999}
-                placeholder="Any"
-                value={searchFilters.year}
-                onChange={(e) => setSearchFilters({ ...searchFilters, year: e.target.value })}
-              />
-            </div>
-            <div className="relative">
-              <Label>Host</Label>
-              <Input type="search" value={searchFilters.host} onChange={handleHostSearch} placeholder="Any" />
-              {filteredHosts.length > 0 && (
-                <div className="absolute">
-                  <Command>
-                    <CommandList>
-                      {filteredHosts.map((host) => (
-                        <CommandItem
-                          key={host}
-                          onSelect={() => {
-                            setSearchFilters({ ...searchFilters, host: host });
-                            setFilteredHosts([]);
-                          }}
-                        >
-                          {host}
-                        </CommandItem>
-                      ))}
-                    </CommandList>
-                  </Command>
-                </div>
-              )}
-            </div>
-            <div className="relative">
-              <Label>Guest</Label>
-              <Input type="search" value={searchFilters.guest} onChange={handleGuestSearch} placeholder="Any" />
-              {filteredGuests.length > 0 && (
-                <div className="absolute">
-                  <Command>
-                    <CommandList>
-                      {filteredGuests.map((guest) => (
-                        <CommandItem
-                          key={guest}
-                          onSelect={() => {
-                            setSearchFilters({ ...searchFilters, guest: guest });
-                            setFilteredGuests([]);
-                          }}
-                        >
-                          {guest}
-                        </CommandItem>
-                      ))}
-                    </CommandList>
-                  </Command>
-                </div>
-              )}
-            </div>
-            <div></div>
-            <div></div>
-            <Button className="mt-2 w-15 justify-self-end" onClick={handleReset}>
-              Reset
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full p-0 w-7 h-7 cursor-pointer disabled:cursor-not-allowed"
+              disabled={searchType === "users"}
+            >
+              <FontAwesomeIcon icon={faFilter} />
             </Button>
-          </PopoverContent>
-        )}
-      </Popover>
+          </PopoverTrigger>
+          {searchType === "podcasts" && (
+            <PopoverContent className="grid grid-cols-3 w-lg gap-4">
+              <div>
+                <Label>Genre</Label>
+                <Select
+                  value={searchFilters.genre}
+                  onValueChange={(value) => setSearchFilters({ ...searchFilters, genre: value !== "any" ? value : "" })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Any" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem key="any" value="any">
+                        Any
+                      </SelectItem>
+                      {genres.map((genre) => (
+                        <SelectItem key={genre} value={genre}>
+                          {genre}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Language</Label>
+                <Select
+                  value={searchFilters.language}
+                  onValueChange={(value) =>
+                    setSearchFilters({ ...searchFilters, language: value !== "any" ? value : "" })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Any" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem key="any" value="any">
+                        Any
+                      </SelectItem>
+                      {languages.map((language) => (
+                        <SelectItem key={language} value={language}>
+                          {language}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Platform</Label>
+                <Select
+                  value={searchFilters.platform}
+                  onValueChange={(value) =>
+                    setSearchFilters({ ...searchFilters, platform: value !== "any" ? value : "" })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Any" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem key="any" value="any">
+                        Any
+                      </SelectItem>
+                      {platforms.map((platform) => (
+                        <SelectItem key={platform} value={platform}>
+                          {platform}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col">
+                <Label>Year</Label>
+                <Input
+                  className="w-24"
+                  type="number"
+                  min={0}
+                  max={9999}
+                  placeholder="Any"
+                  value={searchFilters.year}
+                  onChange={(e) => setSearchFilters({ ...searchFilters, year: e.target.value })}
+                />
+              </div>
+              <div className="relative">
+                <Label>Host</Label>
+                <Input type="search" value={searchFilters.host} onChange={handleHostSearch} placeholder="Any" />
+                {filteredHosts.length > 0 && (
+                  <div className="absolute">
+                    <Command className="rounded-xs w-34">
+                      <CommandList className="no-scrollbar">
+                        {filteredHosts.map((host) => (
+                          <CommandItem
+                            key={host}
+                            onSelect={() => {
+                              setSearchFilters({ ...searchFilters, host: host });
+                              setFilteredHosts([]);
+                            }}
+                          >
+                            {host}
+                          </CommandItem>
+                        ))}
+                      </CommandList>
+                    </Command>
+                  </div>
+                )}
+              </div>
+              <div className="relative">
+                <Label>Guest</Label>
+                <Input type="search" value={searchFilters.guest} onChange={handleGuestSearch} placeholder="Any" />
+                {filteredGuests.length > 0 && (
+                  <div className="absolute">
+                    <Command className="rounded-xs">
+                      <CommandList className="no-scrollbar w-34">
+                        {filteredGuests.map((guest) => (
+                          <CommandItem
+                            key={guest}
+                            onSelect={() => {
+                              setSearchFilters({ ...searchFilters, guest: guest });
+                              setFilteredGuests([]);
+                            }}
+                          >
+                            {guest}
+                          </CommandItem>
+                        ))}
+                      </CommandList>
+                    </Command>
+                  </div>
+                )}
+              </div>
+              <div></div>
+              <div></div>
+              <Button className="mt-2 w-15 justify-self-end" onClick={handleReset}>
+                Reset
+              </Button>
+            </PopoverContent>
+          )}
+
+          {searchType === "episodes" && (
+            <PopoverContent className="grid grid-cols-3 w-lg gap-4">
+              <div className="flex flex-col">
+                <Label>Year</Label>
+                <Input
+                  className="w-24"
+                  type="number"
+                  min={0}
+                  max={9999}
+                  placeholder="Any"
+                  value={searchFilters.year}
+                  onChange={(e) => setSearchFilters({ ...searchFilters, year: e.target.value })}
+                />
+              </div>
+              <div className="relative">
+                <Label>Host</Label>
+                <Input type="search" value={searchFilters.host} onChange={handleHostSearch} placeholder="Any" />
+                {filteredHosts.length > 0 && (
+                  <div className="absolute">
+                    <Command>
+                      <CommandList>
+                        {filteredHosts.map((host) => (
+                          <CommandItem
+                            key={host}
+                            onSelect={() => {
+                              setSearchFilters({ ...searchFilters, host: host });
+                              setFilteredHosts([]);
+                            }}
+                          >
+                            {host}
+                          </CommandItem>
+                        ))}
+                      </CommandList>
+                    </Command>
+                  </div>
+                )}
+              </div>
+              <div className="relative">
+                <Label>Guest</Label>
+                <Input type="search" value={searchFilters.guest} onChange={handleGuestSearch} placeholder="Any" />
+                {filteredGuests.length > 0 && (
+                  <div className="absolute">
+                    <Command>
+                      <CommandList>
+                        {filteredGuests.map((guest) => (
+                          <CommandItem
+                            key={guest}
+                            onSelect={() => {
+                              setSearchFilters({ ...searchFilters, guest: guest });
+                              setFilteredGuests([]);
+                            }}
+                          >
+                            {guest}
+                          </CommandItem>
+                        ))}
+                      </CommandList>
+                    </Command>
+                  </div>
+                )}
+              </div>
+              <div></div>
+              <div></div>
+              <Button className="mt-2 w-15 justify-self-end" onClick={handleReset}>
+                Reset
+              </Button>
+            </PopoverContent>
+          )}
+        </Popover>
+      </div>
     </>
   );
 }
