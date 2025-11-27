@@ -323,7 +323,7 @@ export default function Profile() {
             Add Friend
           </button>
         )}
-        {relationship === "received" && (
+        {/* {relationship === "received" && (
           <button
             className="bg-green-500 hover:bg-green-700 text-white font-bold py-.5 px-1 rounded"
             onClick={() => handleAcceptRequest()}
@@ -346,7 +346,7 @@ export default function Profile() {
           >
             Request Sent
           </button>
-        )}
+        )} */}
       </div>
       {<div>Friends list</div>}
       <Friends friends={friends} onFriendDelete={handleDeleteFriend} />
