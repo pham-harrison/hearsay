@@ -11,54 +11,46 @@ type Friend = {
   last_name: string;
   bio: string;
 };
-const API_URL_BASE = import.meta.env.VITE_API_URL;
 
-export default function Friends() {
+type FriendProps = {
+  friends: Friend[];
+  onFriendDelete: (name: Friend) => void;
+};
+
+export default function Friends({ friends, onFriendDelete }: FriendProps) {
   const { loggedIn, userID } = useContext(LoginContext);
   const navigate = useNavigate();
   const urlID = useParams().userID;
-  const [results, setResults] = useState<Friend[]>([]);
 
-  useEffect(() => {
-    // Friends data (Delete friends)
-    async function getUserFriends() {
-      const f_response: Response = await fetch(
-        `${API_URL_BASE}/users/${urlID}/friends`
-      );
-      const allFriendsData = await f_response.json();
-      setResults(allFriendsData);
-    }
-    /*
-  // Individual friend data
-  async function getFriendInfo(allFriendsData: Friend[]) {
-    const friendsData = await Promise.all(
-      allFriendsData.map(async (friend: Friend) => {
-        const fr_response: Response = await fetch(
-          `${API_URL_BASE}/users/${friend.id}`
-        );
-        const friendData = await fr_response.json();
-        return friendData;
-      })
-    );
-    return friendsData;
-  }
-  */
-    getUserFriends();
-  }, [loggedIn]);
+  useEffect(() => {}, [urlID, userID]);
 
   return (
-    <div>
-      {(results as Friend[]).map((user) => (
-        <UserCard
-          key={user.id}
-          id={user.id}
-          username={user.username}
-          first_name={user.first_name}
-          last_name={user.last_name}
-          bio={user.bio}
-          onClick={() => navigate(`/users/${user.id}`)}
-        />
-      ))}
-    </div>
+    <>
+      {(friends as Friend[]).map((user) => {
+        return (
+          <>
+            <div key={user.id} className="flex items-center">
+              <UserCard
+                key={user.id}
+                id={user.id}
+                username={user.username}
+                first_name={user.first_name}
+                last_name={user.last_name}
+                bio={user.bio}
+                onClick={() => navigate(`/users/${user.id}`)}
+              />
+              {urlID === userID && (
+                <button
+                  className="bg-red-500 hover:bg-red-700 text-white py-0.5 px-1 rounded"
+                  onClick={() => onFriendDelete(user)}
+                >
+                  Remove Friend
+                </button>
+              )}
+            </div>
+          </>
+        );
+      })}
+    </>
   );
 }

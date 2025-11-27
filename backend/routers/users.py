@@ -35,7 +35,6 @@ async def getAllUsers():
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
-
 # Get all user details by ID
 @router.get("/{user_id}")
 async def getUser(user_id: int):
@@ -83,7 +82,6 @@ async def updateBio(
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
-
 # Get all friends for a user
 @router.get("/{user_id}/friends")
 async def getUserFriends(user_id: int):
@@ -96,8 +94,82 @@ async def getUserFriends(user_id: int):
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
+# Get pending friend requests for a user
+@router.get("/{user_id}/pending")
+async def getUserPending(user_id: int):
+    try:
+        with db_cursor() as cursor:
+            cursor.callproc("get_pending_friend_requests", (user_id,))
+            user_pending = cursor.fetchall()
+            return user_pending
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
 
-# Delete a user's friends
+# Get sent friend requests for a user
+@router.get("/{user_id}/sent")
+async def getUserSent(user_id: int):
+    try:
+        with db_cursor() as cursor:
+            cursor.callproc("get_sent_friend_requests", (user_id,))
+            user_sent = cursor.fetchall()
+            return user_sent
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+
+
+# Send a friend request for a user
+@router.post("/{requester_id}/request/{user_id}")
+async def sendFriendRequest(user_id: int, requester_id: int, current_user: int = Depends(getCurrentUser)):
+    if current_user != requester_id:
+        raise HTTPException(
+            status_code=400, detail="Unauthorized to make changes to user"
+        )
+    try:
+        with db_cursor() as cursor:
+            cursor.callproc("send_friend_request", (requester_id, user_id))
+            return {"friendRequestSent": True}
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+    except pymysql.err.IntegrityError as e:
+        raise HTTPException(status_code=400, detail="Request already sent. "+ message)
+
+
+# Accept a friend request for a user
+@router.put("/{user_id}/request/{requester_id}")
+async def acceptFriendRequest(user_id: int, requester_id: int, current_user: int = Depends(getCurrentUser)):
+    if current_user != user_id:
+        raise HTTPException(
+            status_code=400, detail="Unauthorized to make changes to user"
+        )
+    try:
+        with db_cursor() as cursor:
+            cursor.callproc("accept_friend_request", (user_id, requester_id))
+            return {"friendRequestAccepted": True}
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+    except pymysql.err.IntegrityError as e:
+        raise HTTPException(status_code=400, detail="Request already accepted. "+ message)
+    
+# Reject a friend request for a user
+@router.delete("/{user_id}/request/{requester_id}")
+async def acceptFriendRequest(user_id: int, requester_id: int, current_user: int = Depends(getCurrentUser)):
+    if current_user != user_id:
+        raise HTTPException(
+            status_code=400, detail="Unauthorized to make changes to user"
+        )
+    try:
+        with db_cursor() as cursor:
+            cursor.callproc("reject_friend_request", (user_id, requester_id))
+            return {"friendRequestRejected": True}
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        raise HTTPException(status_code=400, detail=message)
+
+# Delete a user's friend
 @router.delete("/{user_id}/friends/{user_to_delete_id}")
 async def deleteFriend(
     user_id: int, user_to_delete_id: int, current_user: int = Depends(getCurrentUser)

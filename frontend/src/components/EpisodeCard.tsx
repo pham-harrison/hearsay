@@ -20,7 +20,7 @@ export default function EpisodeCard({
   const urlID = useParams().userID;
 
   return (
-    <li className="bg-green-300 cursor-pointer" onClick={onClick}>
+    <li className="bg-grey-300 cursor-pointer" onClick={onClick}>
       - {podcast_name} : Episode {episode_num}{" "}
       {loggedIn && userID === urlID && (
         <button

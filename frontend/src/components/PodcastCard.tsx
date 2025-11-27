@@ -16,7 +16,7 @@ export default function PodcastCard({
   onClick,
 }: PodcastCardProps) {
   return (
-    <div className="bg-green-300 cursor-pointer" onClick={onClick}>
+    <div className="bg-red-900 cursor-pointer" onClick={onClick}>
       {name}
     </div>
   );

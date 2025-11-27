@@ -139,7 +139,8 @@ BEGIN
     VALUES (user_id_p, user_to_request_id_p, "pending");
 END $$
 DELIMITER ;
-
+-- SELECT * FROM user_to_user;
+-- CALL send_friend_request(8, 51);
 -- CALL send_friend_request(1, 51);
 
 /*
@@ -166,8 +167,33 @@ BEGIN
 END $$
 DELIMITER ;
 
--- CALL accept_friend_request(51, 1);
+-- SELECT * FROM user_to_user WHERE id1 = 51 AND id2 = 1;
 -- CALL accept_friend_request(1, 51);
+-- CALL accept_friend_request(1, 51);
+
+/*
+Reject a friend request
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS reject_friend_request $$
+CREATE PROCEDURE reject_friend_request(IN user_id_p INT, IN user_to_reject_id_p INT)
+BEGIN
+	IF EXISTS (
+		SELECT * FROM user_to_user
+        WHERE id1 = user_to_reject_id_p AND id2 = user_id_p
+	) THEN
+		DELETE FROM user_to_user WHERE id1 = user_to_reject_id_p AND id2 = user_id_p;
+	ELSE
+		SIGNAL SQLSTATE "45000"
+		SET MESSAGE_TEXT="Unable to reject friend";
+	END IF;
+END $$
+DELIMITER ;
+
+-- SELECT * FROM user_to_user;
+-- CALL reject_friend_request(3, 2);
+-- CALL reject_friend_request(2, 51);
+-- CALL reject_friend_request(1, 51);
 
 /*
 Delete friend
@@ -213,6 +239,47 @@ DELIMITER ;
 
 -- CALL get_friends(1);
 -- CALL get_friends(51);
+
+/*
+Get pending friend requests
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_pending_friend_requests $$
+CREATE PROCEDURE get_pending_friend_requests(user_id_p INT)
+BEGIN
+	IF NOT EXISTS (SELECT * FROM user WHERE id = user_id_p) THEN
+		SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT="User not found";
+	END IF;
+    SELECT id, date_added, username, first_name, last_name, bio FROM user_to_user
+    JOIN user ON id1 = user.id
+    WHERE id2 = user_id_p AND status = "pending";
+END $$
+DELIMITER ;
+
+-- SELECT * FROM user_to_user WHERE id2 = 51;
+-- CALL get_pending_friend_requests(3);
+-- CALL get_pending_friend_requests(51);
+
+/*
+Get sent friend requests
+*/
+DELIMITER $$
+DROP PROCEDURE IF EXISTS get_sent_friend_requests $$
+CREATE PROCEDURE get_sent_friend_requests(user_id_p INT)
+BEGIN
+	IF NOT EXISTS (SELECT * FROM user WHERE id = user_id_p) THEN
+		SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT="User not found";
+	END IF;
+    SELECT id, date_added, username, first_name, last_name, bio FROM user_to_user JOIN user ON id2 = user.id WHERE id1 = user_id_p;
+END $$
+DELIMITER ;
+
+-- SELECT * FROM user_to_user;
+-- SELECT id, date_added, username, first_name, last_name, bio FROM user_to_user JOIN user ON id2 = user.id WHERE id1 = 1;
+-- CALL get_sent_friend_requests(1);
+-- CALL get_sent_friend_requests(51);
 
 /*
 Get user friends' reviews
@@ -897,7 +964,7 @@ DELIMITER ;
 -- CALL create_user("testuser@email.com", "testUser", "root1234", "Test", "User");
 -- CALL send_friend_request(1, 52);
 -- CALL accept_friend_request(52, 1);
--- CALL get_friends(1);
+CALL get_friends(1);
 -- CALL insert_podcast_review(52, 1, 3, NULL);
 -- CALL get_user_podcast_review(52, 1);
 -- SELECT * FROM user_to_user JOIN podcast_review ON id2 = user_id WHERE id1 = 1 AND podcast_id = 1;

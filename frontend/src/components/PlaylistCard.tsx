@@ -11,7 +11,7 @@ export default function PlaylistCard({
   onClick,
 }: PlaylistCardProps) {
   return (
-    <div className="bg-green-300 cursor-pointer" onClick={onClick}>
+    <div className="bg-purple-900 cursor-pointer" onClick={onClick}>
       {name} : {description}{" "}
     </div>
   );
