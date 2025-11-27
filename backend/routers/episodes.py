@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import Optional
+from .auth import getCurrentUser
 from ..db import db_cursor
 from pydantic import BaseModel
 import pymysql
@@ -90,10 +91,14 @@ async def getPodcast(podcast_id: int, episode_num: int):
 
 
 # Create an episode review
-@router.post("/{episode_num}/reviews/{user_id}", status_code=201)
+@router.post("/{episode_num}/reviews/{user_id}")
 async def addReviewEpisode(
-    user_id: int, podcast_id: int, episode_num: int, review: Review
+    user_id: int, podcast_id: int, episode_num: int, review: Review, status_code=201, current_user: int = Depends(getCurrentUser)
 ):
+    if current_user != user_id:
+        raise HTTPException(
+            status_code=400, detail="Unauthorized to make changes to user"
+        )
     try:
         with db_cursor() as cursor:
             cursor.callproc(
@@ -127,8 +132,12 @@ async def getReviewPodcast(podcast_id: int, episode_num: int, user_id: int):
 # Update an episode review
 @router.put("/{episode_num}/reviews/{user_id}")
 async def updateReviewEpisode(
-    user_id: int, podcast_id: int, episode_num: int, review: Review
+    user_id: int, podcast_id: int, episode_num: int, review: Review, current_user: int = Depends(getCurrentUser)
 ):
+    if current_user != user_id:
+        raise HTTPException(
+            status_code=400, detail="Unauthorized to make changes to user"
+        )
     try:
         with db_cursor() as cursor:
             cursor.callproc(
@@ -148,7 +157,11 @@ async def updateReviewEpisode(
 
 # Delete an episode review
 @router.delete("/{episode_num}/reviews/{user_id}")
-async def deleteUserEpisodeReview(podcast_id: int, episode_num: int, user_id: int):
+async def deleteUserEpisodeReview(podcast_id: int, episode_num: int, user_id: int, current_user: int = Depends(getCurrentUser)):
+    if current_user != user_id:
+        raise HTTPException(
+            status_code=400, detail="Unauthorized to make changes to user"
+        )
     try:
         with db_cursor() as cursor:
             cursor.callproc(

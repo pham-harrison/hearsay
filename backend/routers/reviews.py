@@ -113,3 +113,4 @@ async def getAllFriendsReviewsPodcast(podcast_id: int, user_id: int):
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
+
