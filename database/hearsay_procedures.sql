@@ -226,14 +226,27 @@ BEGIN
         SET MESSAGE_TEXT = "User not found";
     END IF;
     
-    SELECT user_id, username, first_name, last_name, podcast_id, episode_num, rating, comment, created_at FROM user_to_user 
+    SELECT id2 AS id, 
+           username, 
+           first_name, 
+           last_name, 
+           episode_review.podcast_id AS podcast_id, 
+           episode_review.episode_num AS episode_num, 
+           podcast.name AS podcast_name, 
+           episode.name AS episode_name, 
+           rating, 
+           comment, 
+           created_at
+    FROM user_to_user 
     JOIN episode_review ON id2 = episode_review.user_id
     JOIN user ON id2 = id
+    JOIN episode ON episode_review.podcast_id = episode.podcast_id AND episode_review.episode_num = episode.episode_num
+    JOIN podcast ON episode_review.podcast_id = podcast.podcast_id
     WHERE id1 = user_id_p AND status = "accepted";
 END $$
 DELIMITER ;
 
--- CALL get_user_friends_reviews(1);
+CALL get_user_friends_reviews(1);
 
 -- CALL get_user_friends_reviews(1);
 /*
