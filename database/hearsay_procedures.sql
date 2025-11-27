@@ -235,7 +235,7 @@ DELIMITER ;
 
 -- CALL get_user_friends_reviews(1);
 
-CALL get_user_friends_reviews(1);
+-- CALL get_user_friends_reviews(1);
 /*
 Get a users podcast reviews
 */
