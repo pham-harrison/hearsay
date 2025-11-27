@@ -1,8 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { LoginContext } from "../contexts/LoginContext";
-import NewSearchBar from "../components/NewSearchBar";
-
+import SearchBar from "@/components/SearchBar";
 type ActiveModal = "createReview" | "updateReview" | "episode" | null;
 
 type PodcastInfo = {
@@ -73,9 +72,7 @@ export default function Podcast() {
     async function fetchFriendReviews() {
       if (!loggedIn) return;
       try {
-        const response = await fetch(
-          `${API_URL_BASE}/podcasts/${podcastID}/reviews/${userID}/friends`
-        );
+        const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/reviews/${userID}/friends`);
         const data = await response.json();
         setFriendReviews(data);
       } catch (error) {
@@ -96,9 +93,7 @@ export default function Podcast() {
     async function getUserPodcastReview() {
       if (!loggedIn) return;
       try {
-        const response = await fetch(
-          `${API_URL_BASE}/podcasts/${podcastID}/reviews/${userID}`
-        );
+        const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/reviews/${userID}`);
         const data: UserReview = await response.json();
         if (data) {
           setFormReview({ rating: data.rating, comment: data.comment });
@@ -117,9 +112,7 @@ export default function Podcast() {
 
   async function fetchPodcastRatings() {
     try {
-      let response = await fetch(
-        `${API_URL_BASE}/podcasts/${podcastID}/ratings`
-      );
+      let response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/ratings`);
       let data = await response.json();
       setRatings((prevRatings) => ({
         ...prevRatings,
@@ -127,9 +120,7 @@ export default function Podcast() {
         globalAvgRatingByEp: data.global_avg_rating_by_ep,
       }));
       if (loggedIn) {
-        response = await fetch(
-          `${API_URL_BASE}/podcasts/${podcastID}/ratings/${userID}`
-        );
+        response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/ratings/${userID}`);
         data = await response.json();
         setRatings((prevRatings) => ({
           ...prevRatings,
@@ -150,20 +141,17 @@ export default function Podcast() {
     }
 
     try {
-      const response = await fetch(
-        `${API_URL_BASE}/podcasts/${podcastID}/reviews/${userID}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            rating: formReview.rating,
-            comment: formReview.comment,
-          }),
-        }
-      );
+      const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/reviews/${userID}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          rating: formReview.rating,
+          comment: formReview.comment,
+        }),
+      });
       const data = await response.json();
       if (!response.ok) {
         alert(data.detail);
@@ -188,20 +176,17 @@ export default function Podcast() {
       return;
     }
     try {
-      const response = await fetch(
-        `${API_URL_BASE}/podcasts/${podcastID}/reviews/${userID}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            rating: formReview.rating,
-            comment: formReview.comment,
-          }),
-        }
-      );
+      const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/reviews/${userID}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          rating: formReview.rating,
+          comment: formReview.comment,
+        }),
+      });
       const data = await response.json();
       if (!response.ok) {
         alert(data.detail);
@@ -221,16 +206,13 @@ export default function Podcast() {
 
   async function handleDeleteReview() {
     try {
-      const response = await fetch(
-        `${API_URL_BASE}/podcasts/${podcastID}/reviews/${userID}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/reviews/${userID}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const data = await response.json();
       if (!response.ok) {
         console.log(data.detail);
@@ -247,37 +229,19 @@ export default function Podcast() {
     <>
       <h1>podcast page</h1>
       {loggedIn && userReview ? (
-        <button onClick={() => setActiveModal("updateReview")}>
-          Update review
-        </button>
+        <button onClick={() => setActiveModal("updateReview")}>Update review</button>
       ) : (
-        <button
-          disabled={!loggedIn}
-          onClick={() => setActiveModal("createReview")}
-        >
+        <button disabled={!loggedIn} onClick={() => setActiveModal("createReview")}>
           Review
         </button>
       )}
       {activeModal === "createReview" && (
         <div className="fixed bg-purple-300 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <form
-            className="flex flex-col"
-            onSubmit={(e) => handleCreateReview(e)}
-          >
+          <form className="flex flex-col" onSubmit={(e) => handleCreateReview(e)}>
             <label>Rating</label>
-            <input
-              type="number"
-              onChange={(e) =>
-                setFormReview({ ...formReview, rating: e.target.value })
-              }
-            ></input>
+            <input type="number" onChange={(e) => setFormReview({ ...formReview, rating: e.target.value })}></input>
             <label>Comment</label>
-            <input
-              type="text"
-              onChange={(e) =>
-                setFormReview({ ...formReview, comment: e.target.value })
-              }
-            ></input>
+            <input type="text" onChange={(e) => setFormReview({ ...formReview, comment: e.target.value })}></input>
             <button type="submit">Submit</button>
           </form>
         </div>
@@ -286,25 +250,18 @@ export default function Podcast() {
       {activeModal === "updateReview" && (
         <div className="fixed bg-purple-300 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
           <div>Written on {userReview?.createdAt}</div>
-          <form
-            className="flex flex-col"
-            onSubmit={(e) => handleUpdateReview(e)}
-          >
+          <form className="flex flex-col" onSubmit={(e) => handleUpdateReview(e)}>
             <label>Rating</label>
             <input
               type="number"
               value={formReview.rating}
-              onChange={(e) =>
-                setFormReview({ ...formReview, rating: e.target.value })
-              }
+              onChange={(e) => setFormReview({ ...formReview, rating: e.target.value })}
             ></input>
             <label>Comment</label>
             <input
               type="text"
               value={formReview.comment}
-              onChange={(e) =>
-                setFormReview({ ...formReview, comment: e.target.value })
-              }
+              onChange={(e) => setFormReview({ ...formReview, comment: e.target.value })}
             ></input>
             <button type="submit">Update</button>
             <button type="button" onClick={handleDeleteReview}>
@@ -313,11 +270,19 @@ export default function Podcast() {
           </form>
         </div>
       )}
-      <NewSearchBar
+      <SearchBar
         searchType="episodes"
-        onSearch={() => {}}
+        onSearch={async (searchFilters) => {
+          const params = new URLSearchParams();
+          Object.entries(searchFilters).forEach(([filter, value]) => {
+            if (value) params.append(filter, value);
+          });
+          const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/episodes?${params.toString()}`);
+          const data = await response.json();
+          console.log(data);
+        }}
         podcastID={podcastID}
-      ></NewSearchBar>
+      ></SearchBar>
     </>
   );
 }

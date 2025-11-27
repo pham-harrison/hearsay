@@ -1,6 +1,26 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-type SearchType = "podcasts" | "users";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { Label } from "@radix-ui/react-label";
+import { SelectGroup } from "@radix-ui/react-select";
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from "@/components/ui/command";
+
+type SearchType = "podcasts" | "users" | "episodes";
 
 type SearchFilters = {
   name: string;
@@ -12,11 +32,16 @@ type SearchFilters = {
   guest: string;
 };
 
+type SearchBarProps = {
+  searchType: "podcasts" | "users" | "episodes";
+  onSearch: (filters: SearchFilters) => void;
+  podcastID?: string;
+};
+
 const API_URL_BASE = import.meta.env.VITE_API_URL;
 
-export default function SearchBar() {
-  const [searchType, setSearchType] = useState<SearchType>("podcasts");
-  const [showFilters, setShowFilters] = useState(false);
+export default function SearchBar({ searchType, onSearch, podcastID }: SearchBarProps) {
+  const [showFilters, setShowFilters] = useState<boolean>(false);
   const [genres, setGenres] = useState<string[]>([]);
   const [languages, setLanguages] = useState<string[]>([]);
   const [platforms, setPlatforms] = useState<string[]>([]);
@@ -33,42 +58,54 @@ export default function SearchBar() {
     host: "",
     guest: "",
   });
-
   const navigate = useNavigate();
+  let placeholder = "";
+  if (searchType === "podcasts") {
+    placeholder = "Search podcasts";
+  } else if (searchType === "users") {
+    placeholder = "Search users by username";
+  } else {
+    placeholder = "Search episodes";
+  }
 
   useEffect(() => {
     async function loadFilters() {
       try {
-        const response: Response = await fetch(`${API_URL_BASE}/podcasts/filters`);
-        const data = await response.json();
-        setGenres(data.genres);
-        setLanguages(data.languages);
-        setPlatforms(data.platforms);
-        setHosts(data.hosts);
-        setGuests(data.guests);
-        setFilteredHosts(data.hosts);
-        setFilteredGuests(data.guests);
+        let data;
+        if (searchType === "podcasts") {
+          const response = await fetch(`${API_URL_BASE}/podcasts/filters`);
+          data = await response.json();
+          setGenres(data.genres);
+          setLanguages(data.languages);
+          setPlatforms(data.platforms);
+        } else if (searchType === "episodes") {
+          const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/episodes/filters`);
+          data = await response.json();
+        }
+        if (data) {
+          setHosts(data.hosts ?? []);
+          setGuests(data.guests ?? []);
+          setFilteredHosts([]);
+          setFilteredGuests([]);
+        }
       } catch (error) {
-        console.log("Failed to fetch filters", error);
+        console.error("Failed to fetch filters", error);
       }
     }
     loadFilters();
-  }, []);
+  }, [searchType, podcastID]);
 
   async function handleSearch() {
-    const params = new URLSearchParams();
-    params.append("type", searchType);
-
-    if (searchType === "podcasts") {
-      Object.entries(searchFilters).forEach(([filter, value]) => {
-        if (value) {
-          params.append(filter, value);
-        }
-      });
-    } else {
-      params.append("name", searchFilters.name);
+    if (onSearch) {
+      onSearch(searchFilters);
+      return;
     }
-    navigate(`/results?${params.toString()}`);
+  }
+
+  function handleKeyPress(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
   }
 
   function handleReset() {
@@ -99,121 +136,237 @@ export default function SearchBar() {
 
   return (
     <>
-      <button className="border" onClick={handleSearch}>
-        Search
-      </button>
-      <div>
-        <select value={searchType} onChange={(e) => setSearchType(e.target.value as SearchType)}>
-          <option value="podcasts">Podcasts</option>
-          <option value="users">Users</option>
-        </select>
-        <input
-          className="w-100 h-7 px-2"
+      <div className="relative">
+        <Button
+          className="absolute top-1/2 transform -translate-y-1/2 bg-transparent hover:bg-transparent cursor-pointer"
+          onClick={handleSearch}
+        >
+          <FontAwesomeIcon icon={faMagnifyingGlass} className="pt-0.25 text-lg" />
+        </Button>
+        <Input
+          className="w-100 h-7 pl-11 pr-2 py-4 rounded-xs text-base"
           type="search"
-          placeholder={`Search ${searchType} ${searchType === "users" ? "by username" : ""}`}
           value={searchFilters.name}
           onChange={(e) => setSearchFilters({ ...searchFilters, name: e.target.value })}
-        />
-
-        <button disabled={searchType === "users"} onClick={() => setShowFilters(!showFilters)}>
-          Filters
-        </button>
-        <div className="relative">
-          {showFilters && searchType === "podcasts" && (
-            <div className="absolute bg-cyan-100">
-              <label>Genre</label>
-              <select
+          placeholder={placeholder}
+          onKeyDown={handleKeyPress}
+        ></Input>
+      </div>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button className="rounded-xs" disabled={searchType === "users"}>
+            Filters
+          </Button>
+        </PopoverTrigger>
+        {searchType === "podcasts" && (
+          <PopoverContent className="grid grid-cols-3 w-lg gap-4">
+            <div>
+              <Label>Genre</Label>
+              <Select
                 value={searchFilters.genre}
-                onChange={(e) => setSearchFilters({ ...searchFilters, genre: e.target.value })}
+                onValueChange={(value) => setSearchFilters({ ...searchFilters, genre: value !== "any" ? value : "" })}
               >
-                <option value="">Any</option>
-                {genres.map((genre) => (
-                  <option key={genre} value={genre}>
-                    {genre}
-                  </option>
-                ))}
-              </select>
-              <label>Language</label>
-              <select
+                <SelectTrigger>
+                  <SelectValue placeholder="Any" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem key="any" value="any">
+                      Any
+                    </SelectItem>
+                    {genres.map((genre) => (
+                      <SelectItem key={genre} value={genre}>
+                        {genre}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Language</Label>
+              <Select
                 value={searchFilters.language}
-                onChange={(e) => setSearchFilters({ ...searchFilters, language: e.target.value })}
+                onValueChange={(value) =>
+                  setSearchFilters({ ...searchFilters, language: value !== "any" ? value : "" })
+                }
               >
-                <option value="">Any</option>
-                {languages.map((language) => (
-                  <option key={language} value={language}>
-                    {language}
-                  </option>
-                ))}
-              </select>
-              <label>Platform</label>
-              <select
+                <SelectTrigger>
+                  <SelectValue placeholder="Any" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem key="any" value="any">
+                      Any
+                    </SelectItem>
+                    {languages.map((language) => (
+                      <SelectItem key={language} value={language}>
+                        {language}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Platform</Label>
+              <Select
                 value={searchFilters.platform}
-                onChange={(e) => setSearchFilters({ ...searchFilters, platform: e.target.value })}
+                onValueChange={(value) =>
+                  setSearchFilters({ ...searchFilters, platform: value !== "any" ? value : "" })
+                }
               >
-                <option value="">Any</option>
-                {platforms.map((platform) => (
-                  <option key={platform} value={platform}>
-                    {platform}
-                  </option>
-                ))}
-              </select>
-              <label>Year</label>
-              <input
+                <SelectTrigger>
+                  <SelectValue placeholder="Any" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem key="any" value="any">
+                      Any
+                    </SelectItem>
+                    {platforms.map((platform) => (
+                      <SelectItem key={platform} value={platform}>
+                        {platform}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col">
+              <Label>Year</Label>
+              <Input
+                className="w-24"
                 type="number"
                 min={0}
                 max={9999}
+                placeholder="Any"
                 value={searchFilters.year}
                 onChange={(e) => setSearchFilters({ ...searchFilters, year: e.target.value })}
               />
-              <label>Host</label>
-              <input
-                type="text"
-                value={searchFilters.host}
-                onChange={handleHostSearch}
-                placeholder="Search for a host"
-              />
-              {searchFilters.host && (
-                <ul>
-                  {filteredHosts.slice(0, 3).map((host) => (
-                    <li
-                      key={host}
-                      onClick={() => {
-                        setSearchFilters({ ...searchFilters, host: host });
-                        setFilteredHosts([]);
-                      }}
-                    >
-                      {host}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <label>Guest</label>
-              <input
-                type="text"
-                value={searchFilters.guest}
-                onChange={handleGuestSearch}
-                placeholder="Search for a guest"
-              />
-              {searchFilters.guest && (
-                <ul>
-                  {filteredGuests.slice(0, 3).map((guest) => (
-                    <li
-                      key={guest}
-                      onClick={() => {
-                        setSearchFilters({ ...searchFilters, guest: guest });
-                        setFilteredGuests([]);
-                      }}
-                    >
-                      {guest}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <button onClick={handleReset}>Reset</button>
             </div>
-          )}
-        </div>
-      </div>
+            <div className="relative">
+              <Label>Host</Label>
+              <Input type="search" value={searchFilters.host} onChange={handleHostSearch} placeholder="Any" />
+              {filteredHosts.length > 0 && (
+                <div className="absolute">
+                  <Command>
+                    <CommandList>
+                      {filteredHosts.map((host) => (
+                        <CommandItem
+                          key={host}
+                          onSelect={() => {
+                            setSearchFilters({ ...searchFilters, host: host });
+                            setFilteredHosts([]);
+                          }}
+                        >
+                          {host}
+                        </CommandItem>
+                      ))}
+                    </CommandList>
+                  </Command>
+                </div>
+              )}
+            </div>
+            <div className="relative">
+              <Label>Guest</Label>
+              <Input type="search" value={searchFilters.guest} onChange={handleGuestSearch} placeholder="Any" />
+              {filteredGuests.length > 0 && (
+                <div className="absolute">
+                  <Command>
+                    <CommandList>
+                      {filteredGuests.map((guest) => (
+                        <CommandItem
+                          key={guest}
+                          onSelect={() => {
+                            setSearchFilters({ ...searchFilters, guest: guest });
+                            setFilteredGuests([]);
+                          }}
+                        >
+                          {guest}
+                        </CommandItem>
+                      ))}
+                    </CommandList>
+                  </Command>
+                </div>
+              )}
+            </div>
+            <div></div>
+            <div></div>
+            <Button className="mt-2 w-15 justify-self-end" onClick={handleReset}>
+              Reset
+            </Button>
+          </PopoverContent>
+        )}
+
+        {searchType === "episodes" && (
+          <PopoverContent className="grid grid-cols-3 w-lg gap-4">
+            <div className="flex flex-col">
+              <Label>Year</Label>
+              <Input
+                className="w-24"
+                type="number"
+                min={0}
+                max={9999}
+                placeholder="Any"
+                value={searchFilters.year}
+                onChange={(e) => setSearchFilters({ ...searchFilters, year: e.target.value })}
+              />
+            </div>
+            <div className="relative">
+              <Label>Host</Label>
+              <Input type="search" value={searchFilters.host} onChange={handleHostSearch} placeholder="Any" />
+              {filteredHosts.length > 0 && (
+                <div className="absolute">
+                  <Command>
+                    <CommandList>
+                      {filteredHosts.map((host) => (
+                        <CommandItem
+                          key={host}
+                          onSelect={() => {
+                            setSearchFilters({ ...searchFilters, host: host });
+                            setFilteredHosts([]);
+                          }}
+                        >
+                          {host}
+                        </CommandItem>
+                      ))}
+                    </CommandList>
+                  </Command>
+                </div>
+              )}
+            </div>
+            <div className="relative">
+              <Label>Guest</Label>
+              <Input type="search" value={searchFilters.guest} onChange={handleGuestSearch} placeholder="Any" />
+              {filteredGuests.length > 0 && (
+                <div className="absolute">
+                  <Command>
+                    <CommandList>
+                      {filteredGuests.map((guest) => (
+                        <CommandItem
+                          key={guest}
+                          onSelect={() => {
+                            setSearchFilters({ ...searchFilters, guest: guest });
+                            setFilteredGuests([]);
+                          }}
+                        >
+                          {guest}
+                        </CommandItem>
+                      ))}
+                    </CommandList>
+                  </Command>
+                </div>
+              )}
+            </div>
+            <div></div>
+            <div></div>
+            <Button className="mt-2 w-15 justify-self-end" onClick={handleReset}>
+              Reset
+            </Button>
+          </PopoverContent>
+        )}
+      </Popover>
     </>
   );
 }

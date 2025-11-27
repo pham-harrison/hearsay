@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import microphoneIcon from "../assets/microphone.png";
-import SearchBar from "./SearchBar";
 import { LoginContext } from "../contexts/LoginContext";
 import { jwtDecode } from "jwt-decode";
 import {
@@ -16,18 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Field,
-  FieldContent,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-  FieldLegend,
-  FieldSeparator,
-  FieldSet,
-  FieldTitle,
-} from "@/components/ui/field";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import SearchBar from "./SearchBar";
 
 const API_URL_BASE = import.meta.env.VITE_API_URL;
 
@@ -46,8 +35,11 @@ type RegisterInfo = {
   lastName: string;
 };
 
+type SearchType = "podcasts" | "users" | "episodes";
+
 export default function NavBar() {
   const navigate = useNavigate();
+  const [searchType, setSearchType] = useState<SearchType>("podcasts");
   const [activeModal, setActiveModal] = useState<activeModal>(null);
   const { loggedIn, setLoggedIn, setUserID, onLogout, setToken } = useContext(LoginContext);
 
@@ -133,9 +125,36 @@ export default function NavBar() {
   }
 
   return (
-    <div className="flex bg-yellow-100 h-16 sticky top-0 left-0 justify-between items-center pr-3">
-      <img src={microphoneIcon} className="w-15 h-14.5 cursor-pointer" onClick={() => navigate("/")} />
-      <SearchBar />
+    <div className="flex bg-popover h-16 top-0 left-0 justify-between items-center pr-3">
+      <div>
+        <img src={microphoneIcon} className="w-15 h-14.5 cursor-pointer" onClick={() => navigate("/")} />
+      </div>
+      <div className="flex items-center">
+        <Select value={searchType} onValueChange={(value: SearchType) => setSearchType(value)}>
+          <SelectTrigger>
+            <SelectValue placeholder={searchType} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="podcasts">Podcasts</SelectItem>
+            <SelectItem value="users">Users</SelectItem>
+          </SelectContent>
+        </Select>
+        <SearchBar
+          searchType={searchType}
+          onSearch={(searchFilters) => {
+            const params = new URLSearchParams();
+            params.append("type", searchType);
+            if (searchType === "podcasts") {
+              Object.entries(searchFilters).forEach(([filter, value]) => {
+                if (value) {
+                  params.append(filter, value);
+                }
+              });
+            }
+            navigate(`/results?${params.toString()}`);
+          }}
+        />
+      </div>
       <div className="relative">
         {loggedIn ? (
           <div>
@@ -153,6 +172,7 @@ export default function NavBar() {
               <Button variant="outline">Log in/Sign up</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
+              <DialogDescription></DialogDescription>
               <Tabs defaultValue="login">
                 <TabsList className="w-full bg-background rounded-none border-b p-0 mt-3">
                   <TabsTrigger
