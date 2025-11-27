@@ -266,11 +266,44 @@ export default function Profile() {
       if (!response.ok) {
         console.error("Response from accept friend request not ok");
       } else {
-        setSentRequests(sentRequests);
+        setSentRequests((prev) => {
+          const next = new Set(prev);
+          next.delete(Number(urlID));
+          return next;
+        });
         setRefreshToken(refreshtoken + 1);
       }
     } catch (error) {
       console.error("Failed to accept friend for user", error);
+    }
+  }
+
+  // Reject friend request
+  async function handleRejectRequest() {
+    if (!urlID) return;
+    try {
+      const response = await fetch(
+        `${API_URL_BASE}/users/${userID}/request/${urlID}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "applications/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        console.error("Response from reject friend request not ok");
+      } else {
+        setPendingRequests((prev) => {
+          const next = new Set(prev);
+          next.delete(Number(urlID));
+          return next;
+        });
+        setRefreshToken(refreshtoken + 1);
+      }
+    } catch (error) {
+      console.error("Failed to reject friend for user", error);
     }
   }
 
@@ -309,12 +342,20 @@ export default function Profile() {
           </button>
         )}
         {relationship === "received" && (
-          <button
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-.5 px-1 rounded"
-            onClick={() => handleAcceptRequest()}
-          >
-            Accept Request
-          </button>
+          <>
+            <button
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-.5 px-1 rounded"
+              onClick={() => handleAcceptRequest()}
+            >
+              Accept Request
+            </button>
+            <button
+              className="bg-red-500 hover:bg-red-700 text-white font-bold py-.5 px-1 rounded"
+              onClick={() => handleRejectRequest()}
+            >
+              Reject Request
+            </button>
+          </>
         )}
         {/* {relationship === "friends" && (
           <button
