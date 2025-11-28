@@ -161,7 +161,7 @@ export default function SearchBar({ searchType, onSearch, podcastID }: SearchBar
           </PopoverTrigger>
           {searchType === "podcasts" && (
             <PopoverContent className="grid grid-cols-3 w-lg gap-4">
-              <div>
+              <div className="flex flex-col gap-1">
                 <Label>Genre</Label>
                 <Select
                   value={searchFilters.genre}
@@ -172,11 +172,19 @@ export default function SearchBar({ searchType, onSearch, podcastID }: SearchBar
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem key="any" value="any">
+                      <SelectItem
+                        className="data-highlighted:bg-primary data-highlighted:text-primary-foreground"
+                        key="any"
+                        value="any"
+                      >
                         Any
                       </SelectItem>
                       {genres.map((genre) => (
-                        <SelectItem key={genre} value={genre}>
+                        <SelectItem
+                          className="data-highlighted:bg-primary data-highlighted:text-primary-foreground"
+                          key={genre}
+                          value={genre}
+                        >
                           {genre}
                         </SelectItem>
                       ))}
@@ -184,7 +192,7 @@ export default function SearchBar({ searchType, onSearch, podcastID }: SearchBar
                   </SelectContent>
                 </Select>
               </div>
-              <div>
+              <div className="flex flex-col gap-1">
                 <Label>Language</Label>
                 <Select
                   value={searchFilters.language}
@@ -197,11 +205,19 @@ export default function SearchBar({ searchType, onSearch, podcastID }: SearchBar
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem key="any" value="any">
+                      <SelectItem
+                        className="data-highlighted:bg-primary data-highlighted:text-primary-foreground"
+                        key="any"
+                        value="any"
+                      >
                         Any
                       </SelectItem>
                       {languages.map((language) => (
-                        <SelectItem key={language} value={language}>
+                        <SelectItem
+                          className="data-highlighted:bg-primary data-highlighted:text-primary-foreground"
+                          key={language}
+                          value={language}
+                        >
                           {language}
                         </SelectItem>
                       ))}
@@ -209,7 +225,7 @@ export default function SearchBar({ searchType, onSearch, podcastID }: SearchBar
                   </SelectContent>
                 </Select>
               </div>
-              <div>
+              <div className="flex flex-col gap-1">
                 <Label>Platform</Label>
                 <Select
                   value={searchFilters.platform}
@@ -222,11 +238,19 @@ export default function SearchBar({ searchType, onSearch, podcastID }: SearchBar
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem key="any" value="any">
+                      <SelectItem
+                        className="data-highlighted:bg-primary data-highlighted:text-primary-foreground"
+                        key="any"
+                        value="any"
+                      >
                         Any
                       </SelectItem>
                       {platforms.map((platform) => (
-                        <SelectItem key={platform} value={platform}>
+                        <SelectItem
+                          className="data-highlighted:bg-primary data-highlighted:text-primary-foreground"
+                          key={platform}
+                          value={platform}
+                        >
                           {platform}
                         </SelectItem>
                       ))}
@@ -234,7 +258,7 @@ export default function SearchBar({ searchType, onSearch, podcastID }: SearchBar
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col gap-1">
                 <Label>Year</Label>
                 <Input
                   className="w-24"
@@ -248,13 +272,20 @@ export default function SearchBar({ searchType, onSearch, podcastID }: SearchBar
               </div>
               <div className="relative">
                 <Label>Host</Label>
-                <Input type="search" value={searchFilters.host} onChange={handleHostSearch} placeholder="Any" />
+                <Input
+                  type="search"
+                  className="mt-1"
+                  value={searchFilters.host}
+                  onChange={handleHostSearch}
+                  placeholder="Any"
+                />
                 {filteredHosts.length > 0 && (
                   <div className="absolute">
-                    <Command className="rounded-xs w-34">
+                    <Command className="rounded-sm w-34 border">
                       <CommandList className="no-scrollbar">
                         {filteredHosts.map((host) => (
                           <CommandItem
+                            className="data-[selected=true]:bg-primary data-[selected=true]:text-white"
                             key={host}
                             onSelect={() => {
                               setSearchFilters({ ...searchFilters, host: host });
@@ -271,13 +302,20 @@ export default function SearchBar({ searchType, onSearch, podcastID }: SearchBar
               </div>
               <div className="relative">
                 <Label>Guest</Label>
-                <Input type="search" value={searchFilters.guest} onChange={handleGuestSearch} placeholder="Any" />
+                <Input
+                  type="search"
+                  className="mt-1"
+                  value={searchFilters.guest}
+                  onChange={handleGuestSearch}
+                  placeholder="Any"
+                />
                 {filteredGuests.length > 0 && (
                   <div className="absolute">
-                    <Command className="rounded-xs">
+                    <Command className="rounded-xs border">
                       <CommandList className="no-scrollbar w-34">
                         {filteredGuests.map((guest) => (
                           <CommandItem
+                            className="data-[selected=true]:bg-primary data-[selected=true]:text-white"
                             key={guest}
                             onSelect={() => {
                               setSearchFilters({ ...searchFilters, guest: guest });

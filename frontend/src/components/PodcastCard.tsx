@@ -15,7 +15,7 @@ type PodcastCardProps = {
 export default function PodcastCard({ podcastId, name, description, releaseDate, genres, onClick }: PodcastCardProps) {
   const genreList = genres.split(",");
   return (
-    <Card className="h-50 flex flex-row hover:scale-102 duration-150" onClick={onClick}>
+    <Card className="h-50 flex flex-row cursor-pointer hover:scale-102 duration-150 active:scale-98" onClick={onClick}>
       <div className="w-50 flex items-center">
         <CardContent>
           <img src={podcast} className="h-40 object-cover rounded-sm" />
@@ -30,7 +30,10 @@ export default function PodcastCard({ podcastId, name, description, releaseDate,
         <CardFooter className="flex flex-col items-baseline">
           <div className="flex flex-row gap-1">
             {genreList.map((genre) => (
-              <Button key={genre} className="text-xs bg-transparent border text-gray-300">
+              <Button
+                key={genre}
+                className="text-xs bg-transparent border text-gray-300 hover:bg-transparent cursor-pointer hover:scale-97 duration-150"
+              >
                 {genre}
               </Button>
             ))}

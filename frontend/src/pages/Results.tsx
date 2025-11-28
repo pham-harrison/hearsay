@@ -54,7 +54,7 @@ export default function Results() {
   }, [location.search]);
 
   return (
-    <div className="flex flex-col gap-5 px-5 pt-5">
+    <div className="flex flex-col gap-5 px-5 py-5">
       {searchType === "podcasts" &&
         (results as PodcastResults[]).map((podcast) => (
           <PodcastCard
@@ -63,7 +63,7 @@ export default function Results() {
             name={podcast.name}
             description={podcast.description}
             releaseDate={podcast.releaseDate}
-            genres={podcast.genres}
+            genres={podcast.genres ?? ""}
             onClick={() => navigate(`/podcasts/${podcast.podcastId}`)}
           />
         ))}

@@ -75,7 +75,10 @@ export default function FeedCard({ review }: FeedCardProps) {
                 onClick={() => navigate(`/podcasts/${review.podcastId}`)}
               />
               <div className="mt-3">
-                <p className="font-bold cursor-pointer" onClick={() => navigate(`/podcasts/${review.podcastId}`)}>
+                <p
+                  className="font-bold cursor-pointer hover:underline"
+                  onClick={() => navigate(`/podcasts/${review.podcastId}`)}
+                >
                   {review.podcastName}
                 </p>
                 <p className="italic text-sm">{review.type === "episode" && review.episodeName}</p>

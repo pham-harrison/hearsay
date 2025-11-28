@@ -38,7 +38,6 @@ export default function Home() {
     async function getFeed() {
       const response: Response = await fetch(`${API_URL_BASE}/users/${userID}/feed`);
       const data = await response.json();
-      console.log(data);
       setFeed(data);
     }
     getFeed();
