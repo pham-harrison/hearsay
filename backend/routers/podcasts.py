@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from .episodes import router as episodes_router
 from .reviews import router as reviews_router
 import pymysql
+from ..utils.convertSnakeToCamel import convertListKeyToCamel
 
 
 class Review(BaseModel):
@@ -57,8 +58,7 @@ async def searchPodcasts(
                     year,
                 ),
             )
-            filtered_podcasts = cursor.fetchall()
-            return filtered_podcasts
+            return convertListKeyToCamel(cursor.fetchall())
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)

@@ -5,10 +5,10 @@ import UserCard from "../components/UserCard";
 const API_URL_BASE = import.meta.env.VITE_API_URL;
 
 type PodcastResults = {
-  podcast_id: string;
+  podcastId: string;
   name: string;
   description: string;
-  release_date: string;
+  releaseDate: string;
   genres: string;
 };
 
@@ -54,17 +54,17 @@ export default function Results() {
   }, [location.search]);
 
   return (
-    <div>
+    <div className="flex flex-col gap-5 px-5 py-5">
       {searchType === "podcasts" &&
         (results as PodcastResults[]).map((podcast) => (
           <PodcastCard
-            key={podcast.podcast_id}
-            podcast_id={podcast.podcast_id}
+            key={podcast.podcastId}
+            podcastId={podcast.podcastId}
             name={podcast.name}
             description={podcast.description}
-            release_date={podcast.release_date}
-            genres={podcast.genres}
-            onClick={() => navigate(`/podcasts/${podcast.podcast_id}`)}
+            releaseDate={podcast.releaseDate}
+            genres={podcast.genres ?? ""}
+            onClick={() => navigate(`/podcasts/${podcast.podcastId}`)}
           />
         ))}
       {searchType === "users" &&

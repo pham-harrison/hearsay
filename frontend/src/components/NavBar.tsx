@@ -146,14 +146,20 @@ export default function NavBar() {
       </Button>
       <div className="flex justify-center items-center">
         <Select value={searchType} onValueChange={(value: SearchType) => setSearchType(value)}>
-          <SelectTrigger className="cursor-pointer">
+          <SelectTrigger className="cursor-pointer font-medium">
             <SelectValue placeholder={searchType} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem className="cursor-pointer" value="podcasts">
+            <SelectItem
+              className="cursor-pointer data-highlighted:bg-primary data-highlighted:text-primary-foreground"
+              value="podcasts"
+            >
               Podcasts
             </SelectItem>
-            <SelectItem className="cursor-pointer" value="users">
+            <SelectItem
+              className="cursor-pointer data-highlighted:bg-primary data-highlighted:text-primary-foreground"
+              value="users"
+            >
               Users
             </SelectItem>
           </SelectContent>
@@ -170,6 +176,8 @@ export default function NavBar() {
                   params.append(filter, value);
                 }
               });
+            } else if (searchType === "users") {
+              params.append("name", searchFilters.name);
             }
             navigate(`/results?${params.toString()}`);
           }}
@@ -182,19 +190,22 @@ export default function NavBar() {
               <DropdownMenuTrigger asChild>
                 <img
                   src={avatar}
-                  className="w-10 rounded-full cursor-pointer hover:scale-105 transition-all duration-200 flex-shrink-0"
+                  className="w-10 rounded-full cursor-pointer hover:scale-105 transition-all duration-200 shrink-0"
                 ></img>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="absolute transform -translate-x-25">
                 <DropdownMenuGroup>
                   <DropdownMenuItem
-                    className="cursor-pointer hover:bg-primary"
+                    className="cursor-pointer data-highlighted:bg-primary data-highlighted:text-primary-foreground"
                     onClick={() => navigate(`/users/${userID}`)}
                   >
                     <UserIcon></UserIcon>
                     <span className="text-popover-foreground">View Account</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer hover:bg-primary" onClick={() => onLogout()}>
+                  <DropdownMenuItem
+                    className="cursor-pointer data-highlighted:bg-primary data-highlighted:text-primary-foreground"
+                    onClick={() => onLogout()}
+                  >
                     <LogOutIcon></LogOutIcon>
                     <span className="text-popover-foreground">Sign out</span>
                   </DropdownMenuItem>
@@ -205,7 +216,7 @@ export default function NavBar() {
         ) : (
           <Dialog>
             <DialogTrigger asChild>
-              <Button className="cursor-pointer" variant="outline">
+              <Button className="cursor-pointer hover:bg-primary! hover:text-primary-foreground!" variant="outline">
                 Log in/Sign up
               </Button>
             </DialogTrigger>
