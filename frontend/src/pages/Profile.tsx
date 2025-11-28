@@ -304,6 +304,7 @@ export default function Profile() {
             const next = [...prev, friend];
             return next;
           });
+          setPendingList((prev) => prev.filter((fr) => fr.id !== friend.id));
         }
         // Accepting from requester's page
         else {
@@ -424,6 +425,18 @@ export default function Profile() {
         <Friends
           friends={friends}
           mode="list"
+          onFriendAccept={handleAcceptRequest}
+          onFriendReject={handleRejectRequest}
+          onFriendDelete={handleDeleteFriend}
+        />
+      </div>
+      <div>
+        Pending requests
+        <Friends
+          friends={pendingList}
+          mode="requests"
+          onFriendAccept={handleAcceptRequest}
+          onFriendReject={handleRejectRequest}
           onFriendDelete={handleDeleteFriend}
         />
       </div>

@@ -15,11 +15,18 @@ type Friend = {
 type FriendProps = {
   friends: Friend[];
   mode: "list" | "requests";
-  //onFriendAccept: (name: Friend) => void;
+  onFriendAccept: (userID: string, urlID: string, name: Friend) => void;
+  onFriendReject: (userID: string, urlID: string, name: Friend) => void;
   onFriendDelete: (name: Friend) => void;
 };
 
-export default function Friends({ friends, onFriendDelete }: FriendProps) {
+export default function Friends({
+  friends,
+  mode,
+  onFriendAccept,
+  onFriendReject,
+  onFriendDelete,
+}: FriendProps) {
   const { loggedIn, userID } = useContext(LoginContext);
   const navigate = useNavigate();
   const urlID = useParams().userID;
@@ -41,13 +48,42 @@ export default function Friends({ friends, onFriendDelete }: FriendProps) {
                 bio={user.bio}
                 onClick={() => navigate(`/users/${user.id}`)}
               />
-              {urlID === userID && (
+              {urlID === userID && mode === "list" && (
                 <button
                   className="bg-red-500 hover:bg-red-700 text-white py-0.5 px-1 rounded"
-                  onClick={() => onFriendDelete(user)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onFriendDelete(user);
+                  }}
                 >
                   Remove Friend
                 </button>
+              )}
+              {urlID === userID && mode === "requests" && (
+                <>
+                  <button
+                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-.5 px-1 rounded"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (urlID) {
+                        onFriendAccept(user.id, userID, user);
+                      }
+                    }}
+                  >
+                    Accept Request
+                  </button>
+                  <button
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-.5 px-1 rounded"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (urlID) {
+                        onFriendReject(user.id, userID, user);
+                      }
+                    }}
+                  >
+                    Reject Request
+                  </button>
+                </>
               )}
             </div>
           </>
