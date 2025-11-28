@@ -313,7 +313,7 @@ BEGIN
 END $$
 DELIMITER ;
 
-CALL get_user_friends_reviews(1);
+-- CALL get_user_friends_reviews(1);
 
 -- CALL get_user_friends_reviews(1);
 /*
@@ -594,7 +594,10 @@ BEGIN
         SET MESSAGE_TEXT = "Podcast not found";
     END IF;
     
-    SELECT name, description, release_date FROM podcast WHERE podcast_id = podcast_id_p;
+    SELECT name, description, release_date, GROUP_CONCAT(genre_name) FROM podcast 
+    JOIN genre_to_podcast ON podcast.podcast_id = genre_to_podcast.podcast_id
+    WHERE podcast.podcast_id = podcast_id_p
+    GROUP BY podcast.podcast_id;
 END $$
 DELIMITER ;
 
@@ -964,7 +967,7 @@ DELIMITER ;
 -- CALL create_user("testuser@email.com", "testUser", "root1234", "Test", "User");
 -- CALL send_friend_request(1, 52);
 -- CALL accept_friend_request(52, 1);
-CALL get_friends(1);
+-- CALL get_friends(1);
 -- CALL insert_podcast_review(52, 1, 3, NULL);
 -- CALL get_user_podcast_review(52, 1);
 -- SELECT * FROM user_to_user JOIN podcast_review ON id2 = user_id WHERE id1 = 1 AND podcast_id = 1;
