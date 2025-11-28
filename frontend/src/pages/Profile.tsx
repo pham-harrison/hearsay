@@ -143,6 +143,7 @@ export default function Profile() {
     return "none";
   }
 
+  // Create playlist
   async function handlePlaylistCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!playlistName) {
@@ -175,6 +176,7 @@ export default function Profile() {
     }
   }
 
+  // Delete playlist
   async function handlePlaylistDelete(playlist: string) {
     try {
       const response = await fetch(
