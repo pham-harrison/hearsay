@@ -129,7 +129,7 @@ export default function Profile() {
     getUserPendingRequests();
     getUserSentRequests();
     getUserPlaylists();
-  }, [urlID, loggedIn, userID, refreshtoken]);
+  }, [profile, urlID, loggedIn, userID, refreshtoken]);
 
   // Get relationship status
   function getRelationship(
@@ -374,16 +374,18 @@ export default function Profile() {
         <img src={avatar} className="w-48 h-48"></img>
         <h1>{profile.username}</h1>
         <p>{profile.bio}</p>
-        <button
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-.5 px-1 rounded"
-          onClick={
-            activeModal !== "update"
-              ? () => setActiveModal("update")
-              : () => setActiveModal(null)
-          }
-        >
-          Update bio
-        </button>
+        {userID === urlID && (
+          <button
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-.5 px-1 rounded"
+            onClick={
+              activeModal !== "update"
+                ? () => setActiveModal("update")
+                : () => setActiveModal(null)
+            }
+          >
+            Update bio
+          </button>
+        )}
       </div>
       <div>
         {relationship === "none" && loggedIn && (
