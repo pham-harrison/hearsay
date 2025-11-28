@@ -347,7 +347,10 @@ export default function Profile() {
         {relationship === "none" && loggedIn && (
           <button
             className="bg-green-500 hover:bg-green-700 text-white font-bold py-.5 px-1 rounded"
-            onClick={() => handleSendRequest(urlID)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSendRequest(urlID);
+            }}
           >
             Add Friend
           </button>
@@ -356,7 +359,8 @@ export default function Profile() {
           <>
             <button
               className="bg-green-500 hover:bg-green-700 text-white font-bold py-.5 px-1 rounded"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 if (urlID) {
                   handleAcceptRequest(urlID, userID);
                 }
@@ -366,7 +370,8 @@ export default function Profile() {
             </button>
             <button
               className="bg-red-500 hover:bg-red-700 text-white font-bold py-.5 px-1 rounded"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 if (urlID) {
                   handleRejectRequest(urlID, userID);
                 }
