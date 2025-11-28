@@ -42,6 +42,7 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("jwt");
     setLoggedIn(false);
     setUserID("");
+    window.location.reload();
   }
 
   return (
