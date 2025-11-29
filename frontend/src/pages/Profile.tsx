@@ -19,6 +19,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { UserRoundPlus } from "lucide-react";
 
 type DisplayType = "reviews" | "playlists";
 
@@ -395,7 +396,20 @@ export default function Profile() {
               src={minimalistAvatarM}
               className="w-24 h-24 m-4 rounded-full border-4 border-purple-500"
             ></img>
-            <CardTitle className="text-xl">{profile.username}</CardTitle>
+            <CardTitle className="text-xl mr-4">{profile.username}</CardTitle>
+            {relationship === "none" && loggedIn && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSendRequest(urlID);
+                }}
+              >
+                <UserRoundPlus />
+                <span className="sr-only">Update bio</span>
+              </Button>
+            )}
           </div>
           <div className="flex items-center justify-start">
             <CardDescription className="ml-4 mr-4">
@@ -414,17 +428,6 @@ export default function Profile() {
       </Card>
 
       <div>
-        {relationship === "none" && loggedIn && (
-          <button
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-.5 px-1 rounded"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleSendRequest(urlID);
-            }}
-          >
-            Add Friend
-          </button>
-        )}
         {relationship === "received" && (
           <>
             <button
