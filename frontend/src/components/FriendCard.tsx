@@ -23,12 +23,9 @@ type Friend = {
   bio: string;
 };
 
-type UserCardProps = {
+type FriendCardProps = {
   mode?: "list" | "requests";
-  id: string;
   username: string;
-  first_name: string;
-  last_name: string;
   bio: string;
   onClick: () => void;
   user: Friend;
@@ -37,19 +34,16 @@ type UserCardProps = {
   onFriendDelete: (name: Friend) => void;
 };
 
-export default function UserCard({
+export default function FriendCard({
   mode,
-  id,
   username,
-  first_name,
-  last_name,
   bio,
   onClick,
   user,
   onFriendAccept,
   onFriendReject,
   onFriendDelete,
-}: UserCardProps) {
+}: FriendCardProps) {
   const { userID } = useContext(LoginContext);
   const urlID = useParams().userID;
 

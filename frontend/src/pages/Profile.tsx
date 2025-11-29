@@ -488,7 +488,7 @@ export default function Profile() {
           Create
         </button>
       )}
-      {displayType === "reviews" && <Reviews />}
+      {/* {displayType === "reviews" && <Reviews />} */}
       {displayType === "playlists" && (
         <Playlists
           playlists={playlists}

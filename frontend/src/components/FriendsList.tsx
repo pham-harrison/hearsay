@@ -5,7 +5,7 @@ import { ItemGroup } from "@/components/ui/item";
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useContext } from "react";
 import { LoginContext } from "../contexts/LoginContext";
-import UserCard from "./UserCard";
+import FriendCard from "./FriendCard";
 
 type Friend = {
   id: string;
@@ -51,19 +51,16 @@ export default function FriendsList({
               return (
                 <>
                   <div key={user.id} className="flex items-center">
-                    <UserCard
+                    <FriendCard
                       key={user.id}
                       mode={mode}
-                      id={user.id}
                       username={user.username}
-                      first_name={user.first_name}
-                      last_name={user.last_name}
                       bio={user.bio}
+                      user={user}
                       onClick={() => navigate(`/users/${user.id}`)}
                       onFriendAccept={onFriendAccept}
                       onFriendReject={onFriendReject}
                       onFriendDelete={onFriendDelete}
-                      user={user}
                     />
                   </div>
                 </>
