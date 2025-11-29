@@ -16,10 +16,10 @@ import { useParams } from "react-router-dom";
 
 type Friend = {
   id: string;
-  date_added: string;
+  dateAdded: string;
   username: string;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   bio: string;
 };
 

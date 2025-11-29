@@ -14,17 +14,17 @@ type DisplayType = "reviews" | "playlists";
 type User = {
   id: string;
   username: string;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   bio: string;
 };
 
 type Friend = {
   id: string;
-  date_added: string;
+  dateAdded: string;
   username: string;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   bio: string;
 };
 
@@ -97,10 +97,10 @@ export default function Profile() {
       const data = await response.json();
       const mapped: Friend[] = data.map((row: any) => ({
         id: String(row.id),
-        date_added: row.date_added,
+        dateAdded: row.dateAdded,
         username: row.username,
-        first_name: row.first_name,
-        last_name: row.last_name,
+        firstName: row.firstName,
+        lastName: row.lastName,
         bio: row.bio,
       }));
       setFriends(mapped);
@@ -371,15 +371,6 @@ export default function Profile() {
 
   // Guard profile
   if (!profile) return null;
-
-  // test data
-  const fake: User = {
-    id: "1",
-    username: "fake-chan",
-    first_name: "Fake",
-    last_name: "Chan",
-    bio: "Hi I'm fake chan REEEEEEEEEEE",
-  };
 
   return (
     <>

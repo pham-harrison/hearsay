@@ -5,7 +5,7 @@ from pydantic import BaseModel, EmailStr
 from ..db import db_cursor
 from .auth import getCurrentUser
 from .playlists import router as playlist_router
-from ..utils.convertSnakeToCamel import convertListKeyToCamel
+from ..utils.convertSnakeToCamel import convertListKeyToCamel, convertDictKeyToCamel
 
 router = APIRouter(prefix="/users")
 router.include_router(playlist_router, prefix="/{user_id}/playlists")
@@ -41,7 +41,7 @@ async def getUser(user_id: int):
     try:
         with db_cursor() as cursor:
             cursor.callproc("get_user_by_id", (user_id,))
-            user_info = cursor.fetchone()
+            user_info = convertDictKeyToCamel(cursor.fetchone())
             return user_info
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
@@ -54,7 +54,7 @@ async def getUserByUsername(user_name: str):
     try:
         with db_cursor() as cursor:
             cursor.callproc("get_user_by_username", (user_name,))
-            user_info = cursor.fetchall()
+            user_info = convertListKeyToCamel(cursor.fetchall())
             return user_info
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
@@ -88,7 +88,7 @@ async def getUserFriends(user_id: int):
     try:
         with db_cursor() as cursor:
             cursor.callproc("get_friends", (user_id,))
-            user_friends = cursor.fetchall()
+            user_friends = convertListKeyToCamel(cursor.fetchall())
             return user_friends
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
@@ -100,7 +100,7 @@ async def getUserPending(user_id: int):
     try:
         with db_cursor() as cursor:
             cursor.callproc("get_pending_friend_requests", (user_id,))
-            user_pending = cursor.fetchall()
+            user_pending = convertListKeyToCamel(cursor.fetchall())
             return user_pending
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
@@ -112,7 +112,7 @@ async def getUserSent(user_id: int):
     try:
         with db_cursor() as cursor:
             cursor.callproc("get_sent_friend_requests", (user_id,))
-            user_sent = cursor.fetchall()
+            user_sent = convertListKeyToCamel(cursor.fetchall())
             return user_sent
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
