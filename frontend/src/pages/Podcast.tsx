@@ -6,9 +6,11 @@ import { Card, CardHeader, CardContent, CardFooter, CardTitle } from "@/componen
 import { Button } from "@/components/ui/button";
 import podcast from "../assets/minimalistMicrophone.jpg";
 import dateFormat from "@/utils/dateFormat";
-import { faStar } from "@fortawesome/free-solid-svg-icons";
+import { faStar, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Label } from "@radix-ui/react-label";
+import { Input } from "@/components/ui/input";
+import { Rating, RatingButton } from "@/components/ui/shadcn-io/rating";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +18,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 type ActiveModal = "createReview" | "updateReview" | "episode" | null;
 
@@ -161,10 +165,9 @@ export default function Podcast() {
   async function handleCreateReview(e: React.FormEvent) {
     e.preventDefault();
     if (!formReview.rating) {
-      alert("Every review needs a rating!");
+      toast.error("Every review needs a rating!");
       return;
     }
-
     try {
       const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/reviews/${userID}`, {
         method: "POST",
@@ -174,12 +177,13 @@ export default function Podcast() {
         },
         body: JSON.stringify({
           rating: formReview.rating,
-          comment: formReview.comment,
+          comment: formReview.comment ?? "",
         }),
       });
       const data = await response.json();
       if (!response.ok) {
         alert(data.detail);
+        console.log(data);
         return;
       }
       setActiveModal(null);
@@ -195,6 +199,7 @@ export default function Podcast() {
   }
 
   async function handleUpdateReview(e: React.FormEvent) {
+    console.log("test");
     e.preventDefault();
     if (!formReview.rating) {
       alert("Every review needs a rating!");
@@ -214,7 +219,7 @@ export default function Podcast() {
       });
       const data = await response.json();
       if (!response.ok) {
-        alert(data.detail);
+        toast.error(data.detail);
         return;
       }
       setActiveModal(null);
@@ -245,6 +250,7 @@ export default function Podcast() {
       setActiveModal(null);
       setUserReview(null);
       setFormReview({ rating: "", comment: "" });
+      fetchPodcastRatings();
     } catch (error) {
       console.log("Failed to delete the user's podcast review", error);
     }
@@ -292,45 +298,133 @@ export default function Podcast() {
           <CardTitle className="text-xl font-bold">Ratings</CardTitle>
           <Button>Review</Button>
         </div>
-        <CardContent className="flex flex-row flex-wrap justify-evenly gap-5">
-          <div className="shrink-0">
-            <Card className="p-3 w-40 h-36 items-center justify-center text-center bg-background hover:scale-98 duration-150">
-              <CardTitle className="font-medium">Average Rating</CardTitle>
-              <CardContent className="flex flex-row gap-1 justify-center items-center">
-                <p>{ratings.globalAvgRating}</p>
-                <FontAwesomeIcon icon={faStar}></FontAwesomeIcon>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="shrink-0">
-            <Card className="p-3 w-40 h-36 items-center justify-center text-center bg-background hover:scale-98 duration-150">
-              <CardTitle className="font-medium">Average Episode Rating</CardTitle>
-              <CardContent className="flex flex-row gap-1 justify-center items-center">
-                <p>{ratings.globalAvgRatingByEp}</p>
-                <FontAwesomeIcon icon={faStar}></FontAwesomeIcon>
-              </CardContent>
-            </Card>
-          </div>
-          <div>
-            <Card className="p-3 w-40 h-36 items-center justify-center text-center bg-background hover:scale-98 duration-150">
-              <CardTitle className="font-medium">What your friends think</CardTitle>
-              <CardContent className="flex flex-row gap-1 justify-center items-center">
-                <p>{ratings.friendsAvgRating}</p>
-                <FontAwesomeIcon icon={faStar}></FontAwesomeIcon>
-              </CardContent>
-            </Card>
-          </div>
-          <div>
-            <Card className="p-3 w-40 h-36 items-center justify-center text-center bg-background hover:scale-98 duration-150">
-              <CardTitle className="font-medium">How your friends rate each episode</CardTitle>
-              <CardContent className="flex flex-row gap-1 justify-center items-center">
-                <p>{ratings.friendsAvgRatingByEp}</p>
-                <FontAwesomeIcon icon={faStar}></FontAwesomeIcon>
-              </CardContent>
-            </Card>
-          </div>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-5">
+          <Card className="hover:scale-98 duration-300 hover:shadow-lg">
+            <CardContent className="flex flex-col items-center justify-center h-20 gap-3">
+              <p className="text-md font-medium text-center">Average Rating</p>
+              <div className="flex flex-row items-center gap-2">
+                <p className="text-3xl font-bold">{ratings.globalAvgRating}</p>
+                <FontAwesomeIcon icon={faStar} className="text-xl" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:scale-98 duration-300 hover:shadow-lg">
+            <CardContent className="flex flex-col items-center justify-center h-20 gap-3">
+              <p className="text-md font-medium text-center">Average Episode Rating</p>
+              <div className="flex flex-row items-center gap-2">
+                <p className="text-3xl font-bold">{ratings.globalAvgRatingByEp}</p>
+                <FontAwesomeIcon icon={faStar} className="text-xl" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:scale-98 duration-300 hover:shadow-lg">
+            <CardContent className="flex flex-col items-center justify-center h-20 gap-3">
+              <p className="text-md font-medium text-center">What Your Friends Think</p>
+              <div className="flex flex-row items-center gap-2">
+                {!loggedIn ? (
+                  <FontAwesomeIcon icon={faEyeSlash} className="text-xl" />
+                ) : (
+                  <div className="flex flex-row items-center gap-2">
+                    <p className="text-3xl font-bold">{ratings.friendsAvgRating}</p>
+                    <FontAwesomeIcon icon={faStar} className="text-xl" />
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:scale-98 duration-300 hover:shadow-lg">
+            <CardContent className="flex flex-col items-center justify-center h-20 gap-3">
+              <p className="text-md font-medium text-center">How Your Friends Rate Each Episode</p>
+              <div className="flex flex-row items-center gap-2">
+                {!loggedIn ? (
+                  <FontAwesomeIcon icon={faEyeSlash} className="text-xl" />
+                ) : (
+                  <div className="flex flex-row items-center gap-2">
+                    <p className="text-3xl font-bold">{ratings.friendsAvgRatingByEp}</p>
+                    <FontAwesomeIcon icon={faStar} className="text-xl" />
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </CardContent>
       </Card>
+
+      {loggedIn && userReview?.rating ? (
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>Update Review</Button>
+          </DialogTrigger>
+
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-xl">Update Review</DialogTitle>
+              <DialogDescription></DialogDescription>
+            </DialogHeader>
+            <form className="flex flex-col gap-5" onSubmit={(e) => handleUpdateReview(e)}>
+              <Label className="font-medium">Rating</Label>
+              <Rating
+                className="flex justify-center"
+                defaultValue={Number(userReview.rating)}
+                onValueChange={(value) => {
+                  setFormReview({ ...formReview, rating: value.toString() });
+                }}
+              >
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <RatingButton key={i} size={32} />
+                ))}
+              </Rating>
+              <Label className="font-medium">Comment</Label>
+              <Input
+                type="text"
+                value={formReview.comment}
+                onChange={(e) => setFormReview({ ...formReview, comment: e.target.value })}
+              ></Input>
+              <DialogClose asChild>
+                <Button type="submit">Update</Button>
+              </DialogClose>
+              <DialogClose asChild>
+                <Button type="button" onClick={handleDeleteReview}>
+                  Delete review
+                </Button>
+              </DialogClose>
+            </form>
+          </DialogContent>
+        </Dialog>
+      ) : (
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button disabled={!loggedIn}>Review</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-xl">Review</DialogTitle>
+              <DialogDescription></DialogDescription>
+            </DialogHeader>
+            <form className="flex flex-col gap-5" onSubmit={(e) => handleCreateReview(e)}>
+              <Label className="font-medium">Rating</Label>
+              <Rating
+                className="flex justify-center"
+                onValueChange={(value) => {
+                  setFormReview({ ...formReview, rating: value.toString() });
+                }}
+              >
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <RatingButton key={i} size={32} />
+                ))}
+              </Rating>
+              <Label className="font-medium">Comment</Label>
+              <Input type="text" onChange={(e) => setFormReview({ ...formReview, comment: e.target.value })} />
+              <DialogClose>
+                <Button type="submit">Submit</Button>
+              </DialogClose>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {loggedIn && userReview ? (
         <button onClick={() => setActiveModal("updateReview")}>Update review</button>

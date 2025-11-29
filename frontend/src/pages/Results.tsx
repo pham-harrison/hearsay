@@ -64,7 +64,9 @@ export default function Results() {
             description={podcast.description}
             releaseDate={podcast.releaseDate}
             genres={podcast.genres ?? ""}
-            onClick={() => navigate(`/podcasts/${podcast.podcastId}`)}
+            onClick={() => {
+              navigate(`/podcasts/${podcast.podcastId}`);
+            }}
           />
         ))}
       {searchType === "users" &&
