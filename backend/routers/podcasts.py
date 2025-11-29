@@ -117,7 +117,7 @@ async def getPodcast(podcast_id: int):
 
 
 # Get all derived podcast ratings
-@router.get("/{podcast_id}/ratings/")
+@router.get("/{podcast_id}/ratings")
 async def getPodcastGlobalRatings(podcast_id: int):
     try:
         with db_cursor() as cursor:
