@@ -107,7 +107,10 @@ async def getPodcast(podcast_id: int):
     try:
         with db_cursor() as cursor:
             cursor.callproc("get_podcast", (podcast_id,))
-            return convertDictKeyToCamel(cursor.fetchone())
+            result = cursor.fetchone()
+            if not result:
+                return HTTPException(status_code=404, detail="User review not found")
+            return convertDictKeyToCamel(result)
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
