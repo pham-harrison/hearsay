@@ -2,6 +2,8 @@ from fastapi import APIRouter, HTTPException, Depends
 from ..db import db_cursor
 from .auth import getCurrentUser
 from pydantic import BaseModel
+from ..utils.convertSnakeToCamel import convertListKeyToCamel, convertDictKeyToCamel
+
 import pymysql
 
 router = APIRouter()
@@ -77,7 +79,7 @@ async def createPlaylist(user_id: int, playlist_name: str):
     try:
         with db_cursor() as cursor:
             cursor.callproc("get_episodes_in_playlist", (user_id, playlist_name))
-            return cursor.fetchall()
+            return convertListKeyToCamel(cursor.fetchall())
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
