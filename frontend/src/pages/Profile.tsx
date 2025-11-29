@@ -5,6 +5,7 @@ import avatar from "../assets/avatar.png";
 import Friends from "./Friends";
 import Playlists from "./Playlists";
 import Reviews from "./Reviews";
+import UserBio from "@/components/UserBio";
 
 type DisplayType = "reviews" | "playlists";
 
@@ -32,7 +33,7 @@ type Playlist = {
 
 type Relationship = "friends" | "received" | "sent" | "none" | "self";
 
-type activeModal = "create" | "update" | null;
+type activeModal = "create" | null;
 
 const API_URL_BASE = import.meta.env.VITE_API_URL;
 
@@ -129,7 +130,7 @@ export default function Profile() {
     getUserPendingRequests();
     getUserSentRequests();
     getUserPlaylists();
-  }, [profile, urlID, loggedIn, userID, refreshtoken]);
+  }, [urlID, loggedIn, userID, refreshtoken]);
 
   // Get relationship status
   function getRelationship(
@@ -151,6 +152,7 @@ export default function Profile() {
   // Update bio
   async function handleUpdateBio(e: React.FormEvent) {
     e.preventDefault();
+    console.log("confirm clicked!");
     try {
       const response = await fetch(`${API_URL_BASE}/users/${userID}`, {
         method: "PUT",
@@ -375,16 +377,7 @@ export default function Profile() {
         <h1>{profile.username}</h1>
         <p>{profile.bio}</p>
         {userID === urlID && (
-          <button
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-.5 px-1 rounded"
-            onClick={
-              activeModal !== "update"
-                ? () => setActiveModal("update")
-                : () => setActiveModal(null)
-            }
-          >
-            Update bio
-          </button>
+          <UserBio bio={bio} onBioChange={setBio} onConfirm={handleUpdateBio} />
         )}
       </div>
       <div>
@@ -502,25 +495,6 @@ export default function Profile() {
               type="text"
               onChange={(e) => setPlaylistDesc(e.target.value)}
               placeholder="Description..."
-            ></input>
-            <button
-              type="submit"
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Confirm
-            </button>
-          </form>
-        </div>
-      )}
-      {activeModal === "update" && (
-        <div className="bg-purple-900 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <form className="flex flex-col" onSubmit={handleUpdateBio}>
-            <label>New bio: </label>
-            <input
-              type="text"
-              onChange={(e) => setBio(e.target.value)}
-              placeholder="Your bio..."
-              value={bio}
             ></input>
             <button
               type="submit"
