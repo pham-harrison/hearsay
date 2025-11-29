@@ -1,3 +1,4 @@
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +20,7 @@ type UserCardProps = {
   onClick: () => void;
 };
 
-export default function UserCard({
+export default function FriendsListTest({
   id,
   username,
   first_name,
@@ -28,7 +29,10 @@ export default function UserCard({
   onClick,
 }: UserCardProps) {
   return (
-    <div className="flex w-full max-w-lg flex-col gap-6 cursor-pointer">
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline">Open Dialog</Button>
+      </DialogTrigger>
       <Item variant="outline" onClick={onClick}>
         <ItemMedia>
           <Avatar className="size-10">
@@ -53,6 +57,6 @@ export default function UserCard({
           */}
         </ItemActions>
       </Item>
-    </div>
+    </Dialog>
   );
 }
