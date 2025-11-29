@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { LoginContext } from "../contexts/LoginContext";
 import SearchBar from "@/components/SearchBar";
-import { Card, CardHeader, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardDescription, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import podcast from "../assets/minimalistMicrophone.jpg";
 import dateFormat from "@/utils/dateFormat";
@@ -284,7 +284,10 @@ export default function Podcast() {
               <div className="flex flex-row gap-2">
                 {genreList &&
                   genreList.map((genre) => (
-                    <Button className="text-sm px-3 py-1 rounded-full bg-purple-300 text-purple-800 hover:bg-purple-300 hover:text-purple-800 hover:scale-98 duration-150">
+                    <Button
+                      key={genre}
+                      className="text-sm px-3 py-1 rounded-full bg-purple-300 text-purple-800 hover:bg-purple-300 hover:text-purple-800 hover:scale-98 duration-150"
+                    >
                       {genre}
                     </Button>
                   ))}
@@ -317,7 +320,9 @@ export default function Podcast() {
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle className="text-xl">Update Review</DialogTitle>
-                    <DialogDescription>written on {dateFormat(userReview.createdAt)}</DialogDescription>
+                    <DialogDescription>
+                      Your last review written on {dateFormat(userReview.createdAt)}
+                    </DialogDescription>
                   </DialogHeader>
                   <form className="flex flex-col gap-5" onSubmit={(e) => handleUpdateReview(e)}>
                     <Label className="font-medium">Rating</Label>
@@ -342,14 +347,16 @@ export default function Podcast() {
                       <DialogClose asChild>
                         <Button
                           type="button"
-                          className="cursor-pointer hover:scale-102 duration-175"
+                          className="cursor-pointer hover:scale-102 duration-150"
                           onClick={handleDeleteReview}
                         >
                           <FontAwesomeIcon icon={faTrash} />
                         </Button>
                       </DialogClose>
                       <DialogClose asChild>
-                        <Button type="submit">Update</Button>
+                        <Button className="cursor-pointer hover:scale-102 duration-150" type="submit">
+                          Update
+                        </Button>
                       </DialogClose>
                     </div>
                   </form>
@@ -367,7 +374,7 @@ export default function Podcast() {
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle className="text-xl">Review</DialogTitle>
-                    <DialogDescription></DialogDescription>
+                    <DialogDescription>What do you think of this podcast?</DialogDescription>
                   </DialogHeader>
                   <form className="flex flex-col gap-5" onSubmit={(e) => handleCreateReview(e)}>
                     <Label className="font-medium">Rating</Label>
@@ -387,7 +394,7 @@ export default function Podcast() {
                       onChange={(e) => setFormReview({ ...formReview, comment: e.target.value })}
                     />
                     <div className="flex justify-end">
-                      <Button type="submit" className="self-start">
+                      <Button type="submit" className="self-start cursor-pointer hover:scale-102 duration-150">
                         Submit
                       </Button>
                     </div>
@@ -457,10 +464,14 @@ export default function Podcast() {
         <CardTitle className="text-xl font-bold">Reviews From Your Friends</CardTitle>
         <CardContent>
           {friendReviews.length > 0 ? (
-            <Carousel>
-              <CarouselContent>
+            <Carousel
+              opts={{
+                loop: true,
+              }}
+            >
+              <CarouselContent className="ml-4">
                 {friendReviews.map((review, index) => (
-                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                  <CarouselItem key={index} className="pl-0 md:basis-1/2 lg:basis-1/3">
                     <PageReviewCard
                       id={review.id}
                       rating={review.rating}
@@ -473,45 +484,44 @@ export default function Podcast() {
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
+              <CarouselPrevious className="left-0" />
+              <CarouselNext className="right-0" />
             </Carousel>
           ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>No review</CardTitle>
-                <CardContent>No friends have reviewed this podcast yet</CardContent>
-              </CardHeader>
-            </Card>
+            <div className="flex justify-center items-center">
+              <Card className="w-100 text-center">
+                <CardHeader>
+                  <CardTitle>No reviews</CardTitle>
+                  <CardDescription>No friends have reviewed this podcast yet</CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
           )}
         </CardContent>
       </Card>
 
-      {/* {friendReviews.map((review) => (
-        <PageReviewCard
-          id={review.id}
-          rating={review.rating}
-          comment={review.comment}
-          createdAt={review.createdAt}
-          username={review.username}
-          firstName={review.firstName}
-          lastName={review.lastName}
-        />
-      ))} */}
+      {/* Search episodes */}
+      <Card className="flex flex-col items-center mt-5 rounded-sm">
+        <CardHeader>
+          <CardTitle className="text-nowrap -translate-x-1/2 text-3xl font-bold">Search Episodes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SearchBar
+            searchType="episodes"
+            onSearch={async (searchFilters) => {
+              const params = new URLSearchParams();
+              Object.entries(searchFilters).forEach(([filter, value]) => {
+                if (value) params.append(filter, value);
+              });
+              const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/episodes?${params.toString()}`);
+              const data = await response.json();
+              console.log(data);
+            }}
+            podcastID={podcastID}
+          ></SearchBar>
+        </CardContent>
+      </Card>
 
-      <SearchBar
-        searchType="episodes"
-        onSearch={async (searchFilters) => {
-          const params = new URLSearchParams();
-          Object.entries(searchFilters).forEach(([filter, value]) => {
-            if (value) params.append(filter, value);
-          });
-          const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/episodes?${params.toString()}`);
-          const data = await response.json();
-          console.log(data);
-        }}
-        podcastID={podcastID}
-      ></SearchBar>
       <div className="mb-1000"></div>
     </>
   );
