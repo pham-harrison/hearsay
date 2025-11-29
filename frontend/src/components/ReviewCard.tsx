@@ -52,7 +52,7 @@ export default function ReviewCard({ review }: ReviewCardProps) {
             <div className="flex gap-2">
               <Avatar className="w-9 h-9 cursor-pointer" onClick={() => navigate(`/users/${review.id}`)}>
                 <AvatarImage src={avatar} alt={review.username} />
-                <AvatarFallback>HP</AvatarFallback>
+                <AvatarFallback>{review.firstName[0] + review.lastName[0]}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col gap-1">
                 <CardTitle className="cursor-pointer hover:underline" onClick={() => navigate(`/users/${review.id}`)}>

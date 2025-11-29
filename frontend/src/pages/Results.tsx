@@ -69,7 +69,7 @@ export default function Results() {
             }}
           />
         ))}
-      {searchType === "users" &&
+      {/* {searchType === "users" &&
         (results as UserResults[]).map((user) => (
           <UserCard
             key={user.id}
@@ -80,7 +80,7 @@ export default function Results() {
             bio={user.bio}
             onClick={() => navigate(`/users/${user.id}`)}
           />
-        ))}
+        ))} */}
     </div>
   );
 }
