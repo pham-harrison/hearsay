@@ -1,7 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect, useContext } from "react";
 import { LoginContext } from "../contexts/LoginContext";
-import avatar from "../assets/avatar.png";
+import minimalistAvatarM from "../assets/minimalistAvatarM.jpg";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Friends from "./Friends";
 import Playlists from "./Playlists";
 import Reviews from "./Reviews";
@@ -373,7 +374,10 @@ export default function Profile() {
   return (
     <>
       <div>
-        <img src={avatar} className="w-48 h-48"></img>
+        <img
+          src={minimalistAvatarM}
+          className="w-48 h-48 rounded-full border-4 border-purple-500"
+        ></img>
         <h1>{profile.username}</h1>
         <p>{profile.bio}</p>
         {userID === urlID && (
