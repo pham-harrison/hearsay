@@ -94,8 +94,12 @@ Update user bio
 */
 DELIMITER $$
 DROP PROCEDURE IF EXISTS update_bio $$
-CREATE PROCEDURE update_bio(user_id_p INT, bio_p VARCHAR(255))
+CREATE PROCEDURE update_bio(user_id_p INT, bio_p TEXT)
 BEGIN
+	IF LENGTH(bio_p) > 255 THEN
+		SIGNAL SQLSTATE "45000"
+        SET MESSAGE_TEXT="Bio too long";
+	END IF;
 	IF NOT EXISTS (SELECT * FROM user WHERE id = user_id_p) THEN
 		SIGNAL SQLSTATE "45000"
         SET MESSAGE_TEXT="User not found";
@@ -109,7 +113,8 @@ DELIMITER ;
 -- CALL update_bio(51, "My name is Harrison");
 -- SELECT * FROM user WHERE id = 51;
 -- CALL update_bio(56, "My name is Harrison");
-
+-- CALL update_bio(51, "too long bio wahoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo");
+-- CALL update_bio(51, "hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello hello ");
 -- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /*
 USER-FRIEND PROCEDURES
