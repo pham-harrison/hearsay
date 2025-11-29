@@ -15,7 +15,7 @@ function App() {
     <BrowserRouter>
       <LoginProvider>
         <ScrollToTop />
-        <Toaster />
+        <Toaster position="top-center" />
         <NavBar />
         <Routes>
           <Route path="/" element={<Home />} />
