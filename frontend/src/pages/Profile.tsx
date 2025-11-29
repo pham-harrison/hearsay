@@ -9,6 +9,17 @@ import Reviews from "./Reviews";
 import UserBio from "@/components/UserBio";
 import FriendsList from "@/components/FriendsList";
 
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
 type DisplayType = "reviews" | "playlists";
 
 type User = {
@@ -374,17 +385,34 @@ export default function Profile() {
 
   return (
     <>
-      <div>
-        <img
-          src={minimalistAvatarM}
-          className="w-48 h-48 rounded-full border-4 border-purple-500"
-        ></img>
-        <h1>{profile.username}</h1>
-        <p>{profile.bio}</p>
-        {userID === urlID && (
-          <UserBio bio={bio} onBioChange={setBio} onConfirm={handleUpdateBio} />
-        )}
-      </div>
+      <Card className="w-full max-w-sm m-10">
+        <CardHeader>
+          <CardAction></CardAction>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-start">
+            <img
+              src={minimalistAvatarM}
+              className="w-24 h-24 m-4 rounded-full border-4 border-purple-500"
+            ></img>
+            <CardTitle className="text-xl">{profile.username}</CardTitle>
+          </div>
+          <div className="flex items-center justify-start">
+            <CardDescription className="ml-4 mr-4">
+              {profile.bio}
+            </CardDescription>
+            {userID === urlID && (
+              <UserBio
+                bio={bio}
+                onBioChange={setBio}
+                onConfirm={handleUpdateBio}
+              />
+            )}
+          </div>
+        </CardContent>
+        <CardFooter className="flex-col gap-2"></CardFooter>
+      </Card>
+
       <div>
         {relationship === "none" && loggedIn && (
           <button

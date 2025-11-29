@@ -17,8 +17,12 @@ type UserCardProps = {
 
 export default function UserCard({ username, bio, onClick }: UserCardProps) {
   return (
-    <div className="flex w-full max-w-lg flex-col gap-6 cursor-pointer">
-      <Item variant="outline" onClick={onClick}>
+    <div className="flex w-full mx-auto flex-col gap-6">
+      <Item
+        variant="outline"
+        className="cursor-pointer hover:bg-purple-900 transition-colors duration-400"
+        onClick={onClick}
+      >
         <ItemMedia>
           <Avatar className="size-10">
             <AvatarImage src={minimalistAvatarM} />
