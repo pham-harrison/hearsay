@@ -10,9 +10,9 @@ type Playlist = {
 };
 
 type Episode = {
-  podcast_id: string;
-  podcast_name: string;
-  episode_num: string;
+  podcastId: string;
+  podcastName: string;
+  episodeNum: string;
 };
 
 type PlaylistProps = {
@@ -26,16 +26,18 @@ export default function Playlists({
   playlists,
   onPlaylistDelete,
 }: PlaylistProps) {
+  // General
   const { loggedIn, userID, token } = useContext(LoginContext);
   const urlID = useParams().userID;
   const navigate = useNavigate();
+  const [refreshOnDelete, setRefreshOnDelete] = useState(0);
+  // Playlist states
   const [episodesByPlaylist, setEpisodesByPlaylist] = useState<
     Record<string, Episode[]>
   >({});
   const [expandedPlaylists, setExpandedPlaylists] = useState<Set<string>>(
     new Set()
   );
-  const [refreshOnDelete, setRefreshOnDelete] = useState(0);
 
   useEffect(() => {}, [urlID, loggedIn, userID, refreshOnDelete]);
 
@@ -129,21 +131,21 @@ export default function Playlists({
               {(episodes as Episode[]).map(
                 (episode) =>
                   isOpen(playlist.name) && (
-                    <ul key={episode.podcast_id + episode.episode_num}>
+                    <ul key={episode.podcastId + episode.episodeNum}>
                       <EpisodeCard
-                        podcast_id={episode.podcast_id}
-                        podcast_name={episode.podcast_name}
-                        episode_num={episode.episode_num}
+                        podcast_id={episode.podcastId}
+                        podcast_name={episode.podcastName}
+                        episode_num={episode.episodeNum}
                         onClick={() =>
                           navigate(
-                            `/podcasts/${episode.podcast_id}/episodes/${episode.episode_num}`
+                            `/podcasts/${episode.podcastId}/episodes/${episode.episodeNum}`
                           )
                         }
                         onDelete={() => {
                           handleEpisodeDelete(
                             playlist.name,
-                            episode.podcast_id,
-                            episode.episode_num
+                            episode.podcastId,
+                            episode.episodeNum
                           );
                         }}
                       />
