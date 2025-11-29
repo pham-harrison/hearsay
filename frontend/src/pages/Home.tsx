@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import ReviewCard from "@/components/ReviewCard";
-import FeedCard from "@/components/FeedCard";
 
 type FriendReview = {
   comment: string;
@@ -54,7 +53,7 @@ export default function Home() {
             // <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-5 justify-items-center">
             <div className="flex flex-row flex-wrap gap-5 justify-center">
               {feed.map((review: FriendReview, i) => (
-                <FeedCard
+                <ReviewCard
                   key={i}
                   review={{
                     id: review.id,
