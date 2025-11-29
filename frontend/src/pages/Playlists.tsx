@@ -49,6 +49,7 @@ export default function Playlists({
     const data = await response.json();
     setEpisodesByPlaylist((prev) => {
       const next = { ...prev, [playlist]: data };
+      console.log(next);
       return next;
     });
   }
@@ -133,9 +134,9 @@ export default function Playlists({
                   isOpen(playlist.name) && (
                     <ul key={episode.podcastId + episode.episodeNum}>
                       <EpisodeCard
-                        podcast_id={episode.podcastId}
-                        podcast_name={episode.podcastName}
-                        episode_num={episode.episodeNum}
+                        podcastId={episode.podcastId}
+                        podcastName={episode.podcastName}
+                        episodeNum={episode.episodeNum}
                         onClick={() =>
                           navigate(
                             `/podcasts/${episode.podcastId}/episodes/${episode.episodeNum}`
