@@ -25,6 +25,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import confetti from "canvas-confetti";
 import PageReviewCard from "@/components/PageReviewCard";
+import Autoplay from "embla-carousel-autoplay";
 
 type PodcastInfo = {
   name: string;
@@ -468,10 +469,16 @@ export default function Podcast() {
               opts={{
                 loop: true,
               }}
+              plugins={[
+                Autoplay({
+                  delay: 2000,
+                  stopOnMouseEnter: true,
+                }),
+              ]}
             >
-              <CarouselContent className="ml-4">
+              <CarouselContent className="-ml-4 my-3 xl:-ml-31">
                 {friendReviews.map((review, index) => (
-                  <CarouselItem key={index} className="pl-0 md:basis-1/2 lg:basis-1/3">
+                  <CarouselItem key={index} className="xl:pl-35 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
                     <PageReviewCard
                       id={review.id}
                       rating={review.rating}
@@ -484,8 +491,8 @@ export default function Podcast() {
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious className="left-0" />
-              <CarouselNext className="right-0" />
+              <CarouselPrevious className="left-0 hover:bg-primary! hover:text-white! cursor-pointer" />
+              <CarouselNext className="right-0 hover:bg-primary! hover:text-white! cursor-pointer" />
             </Carousel>
           ) : (
             <div className="flex justify-center items-center">
