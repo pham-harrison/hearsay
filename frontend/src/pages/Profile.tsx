@@ -1,11 +1,11 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useContext } from "react";
 import { LoginContext } from "../contexts/LoginContext";
 import minimalistAvatarM from "../assets/minimalistAvatarM.jpg";
 import * as React from "react";
 
 import Playlists from "./Playlists";
-import Reviews from "./Reviews";
+import ReviewCard from "@/components/ReviewCard";
 import UserBio from "@/components/UserBio";
 import FriendsList from "@/components/FriendsList";
 
@@ -36,6 +36,24 @@ type Friend = {
   bio: string;
 };
 
+type PodcastReview = {
+  id: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  podcastId: string;
+  podcastName: string;
+  rating: string;
+  comment: string;
+  createdAt: string;
+  onClick: () => void;
+};
+
+type EpisodeReview = PodcastReview & {
+  episodeNum: string;
+  episodeName: string;
+};
+
 type Playlist = {
   name: string;
   description: string;
@@ -52,9 +70,13 @@ export default function Profile() {
   const urlID = useParams().userID;
   const { loggedIn, userID, token } = useContext(LoginContext);
   const [refreshtoken, setRefreshToken] = useState<number>(0);
+  const navigate = useNavigate();
   // User states
   const [profile, setProfile] = useState<User | null>(null);
   const [bio, setBio] = useState<string>("");
+  // Review states
+  const [podcastReviews, setPodcastReviews] = useState<PodcastReview[]>([]);
+  const [episodeReviews, setEpisodeReviews] = useState<EpisodeReview[]>([]);
   // Playlist states
   const [activeModal, setActiveModal] = useState<activeModal>(null);
   const [playlistName, setPlaylistName] = useState<string>("");
@@ -87,6 +109,21 @@ export default function Profile() {
       );
       const profileData: User = await u_response.json();
       setProfile(profileData);
+    }
+    // Review data
+    async function getUserPodcastReviews() {
+      const response: Response = await fetch(
+        `${API_URL_BASE}/users/${urlID}/reviews/podcasts`
+      );
+      const data = await response.json();
+      setPodcastReviews(data);
+    }
+    async function getUserEpisodeReviews() {
+      const response: Response = await fetch(
+        `${API_URL_BASE}/users/${urlID}/reviews/episodes`
+      );
+      const data = await response.json();
+      setEpisodeReviews(data);
     }
     // Playlist data
     async function getUserPlaylists() {
@@ -138,6 +175,8 @@ export default function Profile() {
     getUserFriends();
     getUserPendingRequests();
     getUserSentRequests();
+    getUserPodcastReviews();
+    getUserEpisodeReviews();
     getUserPlaylists();
   }, [urlID, loggedIn, userID, refreshtoken]);
 
@@ -489,13 +528,61 @@ export default function Profile() {
           </Card>
 
           <div className="bg-card rounded-lg">
-            <Tabs defaultValue="reviews" className="w-max-full p-2">
+            <Tabs defaultValue="podcastReviews" className="w-max-full p-2">
               <TabsList>
-                <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                <TabsTrigger value="podcastReviews">
+                  Podcast Reviews
+                </TabsTrigger>
+                <TabsTrigger value="episodeReviews">
+                  Episode Reviews
+                </TabsTrigger>
                 <TabsTrigger value="playlists">Playlists</TabsTrigger>
               </TabsList>
-              <TabsContent value="reviews">
-                <Reviews />
+              <TabsContent value="podcastReviews">
+                <div className="flex flex-col justify-center gap-10 w-max-full">
+                  {(podcastReviews as PodcastReview[]).map((review, i) => (
+                    <ReviewCard
+                      key={i}
+                      review={{
+                        id: review.id,
+                        type: "podcast",
+                        username: review.username,
+                        firstName: review.firstName,
+                        lastName: review.lastName,
+                        podcastId: review.podcastId,
+                        podcastName: review.podcastName,
+                        rating: review.rating,
+                        comment: review.comment,
+                        createdAt: review.createdAt,
+                        onClick: () => navigate(`/users/${review.id}`),
+                      }}
+                    />
+                  ))}
+                </div>
+              </TabsContent>
+              <TabsContent value="episodeReviews">
+                <div className="flex flex-col justify-center gap-10">
+                  {(episodeReviews as EpisodeReview[]).map((review, i) => (
+                    <ReviewCard
+                      key={i}
+                      review={{
+                        type: "episode",
+                        id: review.id,
+                        firstName: review.firstName,
+                        lastName: review.lastName,
+                        username: review.username,
+                        podcastId: review.podcastId,
+                        podcastName: review.podcastName,
+                        episodeName: review.episodeName,
+                        episodeNum: review.episodeNum,
+                        rating: review.rating,
+                        comment: review.comment,
+                        createdAt: review.createdAt,
+                        onClick: () => {},
+                      }}
+                    />
+                  ))}
+                </div>
               </TabsContent>
               <TabsContent value="playlists">
                 {loggedIn && userID === urlID && (
