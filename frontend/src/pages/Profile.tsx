@@ -306,6 +306,7 @@ export default function Profile() {
         console.error("Response from delete playlist not ok");
       } else {
         setPlaylists((prev) => prev.filter((pl) => pl.name !== playlist));
+        toast.success("Playlist deleted");
       }
     } catch (error) {
       console.error("Failed to delete playlist", error);
@@ -329,6 +330,7 @@ export default function Profile() {
         console.error("Response from delete friend not ok");
       } else {
         setFriends((prev) => prev.filter((fr) => fr.id !== friend.id));
+        toast.success("Removed user from friends list");
       }
     } catch (error) {
       console.error("Failed to delete friend for user", error);
@@ -352,6 +354,7 @@ export default function Profile() {
       if (!response.ok) {
         console.error("Response from send friend request not ok");
       } else {
+        toast.success("Friend request sent!");
         const profileIdNum = Number(urlID);
         setSentRequests((prev) => {
           const next = new Set(prev);
@@ -360,6 +363,7 @@ export default function Profile() {
         });
       }
     } catch (error) {
+      toast.error("Failed to send friend request for user");
       console.error("Failed to send friend request for user", error);
     }
   }
@@ -384,6 +388,7 @@ export default function Profile() {
       if (!response.ok) {
         console.error("Response from accept friend request not ok");
       } else {
+        toast.success("Friend request accepted!");
         setSentRequests((prev) => {
           const next = new Set(prev);
           next.delete(Number(responder));
@@ -396,10 +401,6 @@ export default function Profile() {
             return next;
           });
           setPendingList((prev) => prev.filter((fr) => fr.id !== friend.id));
-        }
-        // Accepting from requester's page
-        else {
-          setRefreshToken(refreshtoken + 1);
         }
       }
     } catch (error) {
@@ -429,6 +430,7 @@ export default function Profile() {
         console.error("Response from reject friend request not ok");
       } else {
         // Rejecting on requester's user page
+        toast.success("Friend request rejected :(");
         if (!friend) {
           setPendingRequests((prev) => {
             const next = new Set(prev);
@@ -493,6 +495,7 @@ export default function Profile() {
         setRefreshOnDelete(() => {
           return refreshOnDelete + 1;
         });
+        toast.success("Episode removed from playlist");
       }
     } catch (error) {
       console.error("Failed to delete episode from playlist", error);
