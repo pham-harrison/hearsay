@@ -17,10 +17,10 @@ type UserCardProps = {
 
 export default function UserCard({ username, bio, onClick }: UserCardProps) {
   return (
-    <div className="flex w-full mx-auto flex-col gap-6">
+    <div className="flex ml-30 mr-30 flex-col gap-6">
       <Item
         variant="outline"
-        className="cursor-pointer hover:bg-purple-900 transition-colors duration-400"
+        className="w-full cursor-pointer hover:scale-102 duration-150 active:scale-98"
         onClick={onClick}
       >
         <ItemMedia>

@@ -17,7 +17,7 @@ const UserBio = ({ bio, onBioChange, onConfirm }: BioProps) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="icon">
+        <Button className="w-12" variant="outline" size="icon">
           <ClipboardPenIcon />
           <span className="sr-only">Update bio</span>
         </Button>

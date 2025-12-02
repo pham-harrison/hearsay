@@ -18,6 +18,7 @@ type PodcastReview = {
 
 type EpisodeReview = PodcastReview & {
   episodeNum: string;
+  episodeName: string;
 };
 
 const API_URL_BASE = import.meta.env.VITE_API_URL;
@@ -49,45 +50,50 @@ export default function Reviews() {
   }, [urlID, userID]);
   return (
     <>
-      <div>
-        Podcast Reviews:
-        {(podcastReviews as PodcastReview[]).map((review, i) => (
-          <ReviewCard
-            key={i}
-            review={{
-              id: review.id,
-              type: "podcast",
-              username: review.username,
-              firstName: review.firstName,
-              lastName: review.lastName,
-              podcastId: review.podcastId,
-              podcastName: review.podcastName,
-              rating: review.rating,
-              comment: review.comment,
-              createdAt: review.createdAt,
-              onClick: () => navigate(`/users/${review.id}`),
-            }}
-          />
-        ))}
+      <div className="flex justify-center gap-20 mt-4 ">
+        <div className="flex flex-col justify-center gap-10 w-max-full">
+          {(podcastReviews as PodcastReview[]).map((review, i) => (
+            <ReviewCard
+              key={i}
+              review={{
+                id: review.id,
+                type: "podcast",
+                username: review.username,
+                firstName: review.firstName,
+                lastName: review.lastName,
+                podcastId: review.podcastId,
+                podcastName: review.podcastName,
+                rating: review.rating,
+                comment: review.comment,
+                createdAt: review.createdAt,
+                onClick: () => navigate(`/users/${review.id}`),
+              }}
+            />
+          ))}
+        </div>
+        <div className="flex flex-col justify-center gap-10">
+          {(episodeReviews as EpisodeReview[]).map((review, i) => (
+            <ReviewCard
+              key={i}
+              review={{
+                type: "episode",
+                id: review.id,
+                firstName: review.firstName,
+                lastName: review.lastName,
+                username: review.username,
+                podcastId: review.podcastId,
+                podcastName: review.podcastName,
+                episodeName: review.episodeName,
+                episodeNum: review.episodeNum,
+                rating: review.rating,
+                comment: review.comment,
+                createdAt: review.createdAt,
+                onClick: () => {},
+              }}
+            />
+          ))}
+        </div>
       </div>
-      {/* <div>
-        Episode Reviews:
-        {(episodeReviews as EpisodeReview[]).map((review, i) => (
-          <ReviewCard
-            key={i}
-            review={{
-              type: "episode",
-              username: review.username,
-              podcastName: review.podcastName,
-              episodeNum: review.episodeNum,
-              rating: review.rating,
-              comment: review.comment,
-              createdAt: review.createdAt,
-              onClick: () => {},
-            }}
-          />
-        ))}
-      </div> */}
     </>
   );
 }
