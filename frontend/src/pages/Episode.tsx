@@ -1,9 +1,43 @@
 import { useContext, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { LoginContext } from "../contexts/LoginContext";
-import ReviewCard from "../components/ReviewCard";
 import PlaylistCard from "../components/PlaylistCard";
+import { Card, CardHeader, CardDescription, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import podcast from "../assets/minimalistMicrophone.jpg";
+import dateFormat from "@/utils/dateFormat";
+import { faStar, faEyeSlash, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Label } from "@radix-ui/react-label";
+import { Rating, RatingButton } from "@/components/ui/shadcn-io/rating";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { RainbowButton } from "@/components/ui/rainbow-button";
+import confetti from "canvas-confetti";
+import PageReviewCard from "@/components/PageReviewCard";
+import Autoplay from "embla-carousel-autoplay";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemFooter,
+  ItemHeader,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
+import { Input } from "@/components/ui/input";
 
 type ActiveModal = "createReview" | "updateReview" | "playlists" | null;
 
@@ -69,6 +103,8 @@ export default function Episode() {
     rating: "",
     comment: "",
   });
+  const [newPlaylistName, setnewPlaylistName] = useState<string>("");
+  const [createPlaylistPopUp, setCreatePlaylistPopUp] = useState<boolean>(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -265,15 +301,46 @@ export default function Episode() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          podcast_id: podcastID,
-          episode_num: episodeNum,
+          podcastId: podcastID,
+          episodeNum: episodeNum,
         }),
       });
       const data = await response.json();
       if (!response.ok) {
-        alert(data.detail);
+        toast.error(data.detail);
         return;
       }
+      toast.success("Episode added to playlist!");
+    } catch (error) {
+      console.error("Failed to add episode to playlist", error);
+    }
+  }
+
+  async function handleCreatePlaylist(e: React.FormEvent) {
+    e.preventDefault();
+    if (newPlaylistName === "") {
+      toast.error("Enter a name for your new playlist!");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL_BASE}/users/${userID}/playlists/${newPlaylistName}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ description: "" }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.detail);
+        return;
+      }
+      toast.success("Playlist created!");
+      setnewPlaylistName("");
+      setCreatePlaylistPopUp(false);
+      handlePlaylistSearch();
     } catch (error) {
       console.error("Failed to add episode to playlist", error);
     }
@@ -281,6 +348,74 @@ export default function Episode() {
 
   return (
     <>
+      {/* Hero */}
+      <Card className="flex flex-col md:flex-row items-center md:items-start bg-linear-to-tr from-white to-purple-500 py-10 px-6 mt-5">
+        <CardContent>
+          <img src={podcast} className="h-50 w-50 md:h-65 md:w-65 object-cover rounded-sm shadow-lg" />
+        </CardContent>
+        <div className="flex flex-col justify-between gap-4">
+          <CardTitle className="text-2xl text-purple-800">Episode {episodeInfo.episodeNum}</CardTitle>
+          <CardTitle className="font-bold text-4xl md:text-5xl text-gray-900 tracking-tight">
+            {episodeInfo.name}
+          </CardTitle>
+          <CardDescription className="text-lg text-gray-700">{episodeInfo.description}</CardDescription>
+          <CardDescription className="text-sm text-gray-500">
+            Released: {dateFormat(episodeInfo.releaseDate)} &nbsp; &#8226; &nbsp; Duration: {episodeInfo.duration} mins
+          </CardDescription>
+          <div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  className="mt-7 text-md hover:scale-102 duration-150 cursor-pointer"
+                  disabled={!loggedIn}
+                  onClick={handlePlaylistSearch}
+                >
+                  + Add to Playlist
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle className="mb-4">Select a Playlist</DialogTitle>
+                  <DialogDescription></DialogDescription>
+                  <div className="max-h-[50vh] overflow-scroll">
+                    {playlists.map((playlist) => (
+                      <Item key={playlist.name} className="flex justify-between" variant="outline">
+                        <ItemTitle className="text-md">{playlist.name}</ItemTitle>
+                        <ItemActions>
+                          <Button
+                            className="text-xl w-8 h-8 bg-transparent border rounded-full"
+                            onClick={() => handleAddToPlaylist(playlist.name)}
+                          >
+                            +
+                          </Button>
+                        </ItemActions>
+                      </Item>
+                    ))}
+                  </div>
+                </DialogHeader>
+                <DialogFooter>
+                  <div className="flex justify-end">
+                    <Button onClick={() => setCreatePlaylistPopUp(true)}>Create New Playlist</Button>
+                  </div>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={createPlaylistPopUp} onOpenChange={setCreatePlaylistPopUp}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Playlist Name</DialogTitle>
+                  <DialogDescription>Enter the name of your new playlist</DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleCreatePlaylist}>
+                  <Input type="text" maxLength={20} onChange={(e) => setnewPlaylistName(e.target.value)}></Input>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      </Card>
+
       <div>global review: {ratings.globalAvgRating}</div>
       {loggedIn && <div>friends review: {ratings.friendsAvgRating}</div>}
       {loggedIn && userReview ? (
