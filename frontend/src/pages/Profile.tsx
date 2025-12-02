@@ -11,19 +11,13 @@ import FriendsList from "@/components/FriendsList";
 
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
-  CardFooter,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UserRoundPlus } from "lucide-react";
-import { DropDownTest } from "@/components/DropDownTest";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-type DisplayType = "reviews" | "playlists";
 
 type User = {
   id: string;
@@ -390,8 +384,8 @@ export default function Profile() {
       <div className="flex flex-col justify-center ml-30 mr-30">
         {/* bg-linear-to-br from-fuchsia-300 to-purple-800 
         bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400*/}
-        <div className="p-2 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400">
-          <Card className="">
+        <div className="p-2 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 rounded-lg">
+          <Card className="mb-2.5">
             <CardContent className="flex flex-col justify-center">
               <div className="flex flex-row items-end">
                 <img
@@ -493,10 +487,9 @@ export default function Profile() {
               </div>
             </div>
           </Card>
-        </div>
-        <div className="pr-2 pl-2 pb-2 pt-0.5 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400">
+
           <div className="bg-card rounded-lg">
-            <Tabs defaultValue="reviews" className="w-max-full">
+            <Tabs defaultValue="reviews" className="w-max-full p-2">
               <TabsList>
                 <TabsTrigger value="reviews">Reviews</TabsTrigger>
                 <TabsTrigger value="playlists">Playlists</TabsTrigger>
@@ -506,6 +499,7 @@ export default function Profile() {
               </TabsContent>
               <TabsContent value="playlists">
                 {loggedIn && userID === urlID && (
+                  // Accordion test
                   <button
                     className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
                     onClick={
