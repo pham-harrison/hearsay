@@ -51,7 +51,7 @@ export default function Reviews() {
   return (
     <>
       <div className="flex justify-center gap-20 mt-4 ">
-        <div className="flex flex-col justify-center gap-10">
+        <div className="flex flex-col justify-center gap-10 w-max-full">
           {(podcastReviews as PodcastReview[]).map((review, i) => (
             <ReviewCard
               key={i}

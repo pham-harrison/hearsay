@@ -387,10 +387,10 @@ export default function Profile() {
 
   return (
     <>
-      <div className="flex flex-col justify-center ml-30 mr-30 mt-5">
+      <div className="flex flex-col justify-center ml-30 mr-30">
         {/* bg-linear-to-br from-fuchsia-300 to-purple-800 
         bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400*/}
-        <div className="pr-2 pl-2 pb-2 pt-2 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 rounded-lg">
+        <div className="p-2 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400">
           <Card className="">
             <CardContent className="flex flex-col justify-center">
               <div className="flex flex-row items-end">
@@ -481,7 +481,7 @@ export default function Profile() {
                       onFriendDelete={handleDeleteFriend}
                     />
                   )}
-                  {pendingList.length !== 0 && (
+                  {pendingList.length !== 0 && userID === urlID && (
                     <div className="absolute top-0 right-0">
                       <span className="relative flex size-3">
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-yellow-500 opacity-75"></span>
@@ -494,56 +494,63 @@ export default function Profile() {
             </div>
           </Card>
         </div>
-        <Tabs defaultValue="reviews" className="w-[400px]">
-          <TabsList>
-            <TabsTrigger value="reviews">Reviews</TabsTrigger>
-            <TabsTrigger value="playlists">Playlists</TabsTrigger>
-          </TabsList>
-          <TabsContent value="reviews">
-            <Reviews />
-          </TabsContent>
-          <TabsContent value="playlists">
-            {loggedIn && userID === urlID && (
-              <button
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                onClick={
-                  activeModal !== "create"
-                    ? () => setActiveModal("create")
-                    : () => setActiveModal(null)
-                }
-              >
-                Create
-              </button>
-            )}
-            <Playlists
-              playlists={playlists}
-              onPlaylistDelete={handlePlaylistDelete}
-            />
-            {activeModal === "create" && (
-              <div className="bg-purple-900 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <form className="flex flex-col" onSubmit={handlePlaylistCreate}>
-                  <label>Name of new playlist</label>
-                  <input
-                    type="text"
-                    onChange={(e) => setPlaylistName(e.target.value)}
-                    placeholder="Title..."
-                  ></input>
-                  <input
-                    type="text"
-                    onChange={(e) => setPlaylistDesc(e.target.value)}
-                    placeholder="Description..."
-                  ></input>
+        <div className="pr-2 pl-2 pb-2 pt-0.5 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400">
+          <div className="bg-card rounded-lg">
+            <Tabs defaultValue="reviews" className="w-max-full">
+              <TabsList>
+                <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                <TabsTrigger value="playlists">Playlists</TabsTrigger>
+              </TabsList>
+              <TabsContent value="reviews">
+                <Reviews />
+              </TabsContent>
+              <TabsContent value="playlists">
+                {loggedIn && userID === urlID && (
                   <button
-                    type="submit"
                     className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                    onClick={
+                      activeModal !== "create"
+                        ? () => setActiveModal("create")
+                        : () => setActiveModal(null)
+                    }
                   >
-                    Confirm
+                    Create
                   </button>
-                </form>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+                )}
+                <Playlists
+                  playlists={playlists}
+                  onPlaylistDelete={handlePlaylistDelete}
+                />
+                {activeModal === "create" && (
+                  <div className="bg-purple-900 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <form
+                      className="flex flex-col"
+                      onSubmit={handlePlaylistCreate}
+                    >
+                      <label>Name of new playlist</label>
+                      <input
+                        type="text"
+                        onChange={(e) => setPlaylistName(e.target.value)}
+                        placeholder="Title..."
+                      ></input>
+                      <input
+                        type="text"
+                        onChange={(e) => setPlaylistDesc(e.target.value)}
+                        placeholder="Description..."
+                      ></input>
+                      <button
+                        type="submit"
+                        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                      >
+                        Confirm
+                      </button>
+                    </form>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
       </div>
     </>
   );
