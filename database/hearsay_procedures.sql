@@ -1205,5 +1205,6 @@ DELIMITER ;
 -- CALL send_friend_request(51, 57);
 -- CALL accept_friend_request(57, 51);
 
-CALL insert_episode_review(51, 1, 1169, 5, "testing adding review");
-CALL get_episode_review(51, 1, 1169);
+-- CALL insert_episode_review(51, 1, 1169, 5, "testing adding review");
+-- CALL get_episode_review(51, 1, 1169);
+-- CALL insert_episode_review(53, 1, 1169, 5, "friend review");
