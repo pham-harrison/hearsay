@@ -228,7 +228,7 @@ export default function Podcast() {
         },
         body: JSON.stringify({
           rating: formReview.rating,
-          comment: formReview.comment,
+          comment: formReview.comment ?? "",
         }),
       });
       const data = await response.json();
@@ -487,6 +487,7 @@ export default function Podcast() {
                       username={review.username}
                       firstName={review.firstName}
                       lastName={review.lastName}
+                      width="w-85"
                     />
                   </CarouselItem>
                 ))}
@@ -496,7 +497,7 @@ export default function Podcast() {
             </Carousel>
           ) : (
             <div className="flex justify-center items-center">
-              <Card className="w-100 text-center">
+              <Card className="w-100 text-center h-35 justify-center">
                 <CardHeader>
                   <CardTitle>No reviews</CardTitle>
                   <CardDescription>No friends have reviewed this podcast yet</CardDescription>
@@ -508,7 +509,7 @@ export default function Podcast() {
       </Card>
 
       {/* Search episodes */}
-      <Card className="flex flex-col items-center mt-5 rounded-sm">
+      <Card className="flex flex-col items-center mt-5 rounded-sm h-screen">
         <CardHeader>
           <CardTitle className="text-nowrap -translate-x-1/2 text-3xl font-bold">Search Episodes</CardTitle>
         </CardHeader>
@@ -528,8 +529,6 @@ export default function Podcast() {
           ></SearchBar>
         </CardContent>
       </Card>
-
-      <div className="mb-1000"></div>
     </>
   );
 }
