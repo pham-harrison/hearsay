@@ -38,6 +38,8 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarImage, AvatarFallback } from "../components/ui/avatar";
+import avatar from "../assets/minimalistAvatarF.jpg";
 
 type ActiveModal = "createReview" | "updateReview" | "playlists" | null;
 
@@ -359,7 +361,10 @@ export default function Episode() {
       {/* Hero */}
       <Card className="flex flex-col md:flex-row items-center md:items-start bg-linear-to-tr from-white to-purple-500 py-10 px-6 mt-5">
         <CardContent>
-          <img src={podcast} className="h-50 w-50 md:h-65 md:w-65 object-cover rounded-sm shadow-lg" />
+          <img
+            src={podcast}
+            className="h-50 w-50 md:h-65 md:w-65 object-cover rounded-sm shadow-lg hover:scale-98 duration-225"
+          />
         </CardContent>
         <div className="flex flex-col justify-between gap-4">
           <CardTitle className="text-2xl text-purple-800">Episode {episodeInfo.episodeNum}</CardTitle>
@@ -562,99 +567,49 @@ export default function Episode() {
         </CardContent>
       </Card>
 
-      <div>global review: {ratings.globalAvgRating}</div>
-      {loggedIn && <div>friends review: {ratings.friendsAvgRating}</div>}
-      {loggedIn && userReview ? (
-        <button onClick={() => setActiveModal("updateReview")}>Update review</button>
-      ) : (
-        <button disabled={!loggedIn} onClick={() => setActiveModal("createReview")}>
-          Review
-        </button>
-      )}
-      <button
-        className="cursor-pointer"
-        disabled={!loggedIn}
-        onClick={() => {
-          handlePlaylistSearch();
-          setActiveModal(activeModal !== "playlists" ? "playlists" : null);
-        }}
-      >
-        Add to playlist
-      </button>
-      {loggedIn && friendReviews.length > 0 ? (
-        friendReviews.map((review) => (
-          // <ReviewCard
-          //   review={{
-          //     type: "podcast",
-          //     username: review.username,
-          //     podcastName: "",
-          //     rating: review.rating,
-          //     comment: review.comment,
-          //     createdAt: review.createdAt,
-          //     onClick: () => navigate(`/users/${review.id}`),
-          //   }}
-          // ></ReviewCard>
-          <div></div>
-        ))
-      ) : (
-        <h1>Create an account to see friend reviews</h1>
-      )}
+      <Card className="flex flex-col bg-background border-none shadow-none px-5">
+        <CardTitle className="text-xl font-bold">Reviews From Your Friends</CardTitle>
+        <CardContent>
+          {!loggedIn && (
+            <div className="flex justify-center items-center">
+              <Card className="w-100 text-center justify-center h-35">
+                <CardHeader>
+                  <CardTitle>No reviews</CardTitle>
+                  <CardDescription>Create an account or log in to see what your friends think</CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
+          )}
 
-      {activeModal === "createReview" && (
-        <div className="fixed bg-purple-300 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <form className="flex flex-col" onSubmit={(e) => handleCreateReview(e)}>
-            <label>Rating</label>
-            <input type="number" onChange={(e) => setFormReview({ ...formReview, rating: e.target.value })}></input>
-            <label>Comment</label>
-            <input type="text" onChange={(e) => setFormReview({ ...formReview, comment: e.target.value })}></input>
-            <button type="submit">Submit</button>
-          </form>
-        </div>
-      )}
+          {loggedIn && friendReviews.length < 1 && (
+            <div className="flex justify-center items-center">
+              <Card className="w-100 text-center justify-center h-35">
+                <CardHeader>
+                  <CardTitle>No reviews</CardTitle>
+                  <CardDescription>No friends have rated this episode yet</CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
+          )}
 
-      {activeModal === "updateReview" && (
-        <div className="fixed bg-purple-300 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <div>Written on {userReview?.createdAt}</div>
-          <form className="flex flex-col" onSubmit={(e) => handleUpdateReview(e)}>
-            <label>Rating</label>
-            <input
-              type="number"
-              value={formReview.rating}
-              onChange={(e) => setFormReview({ ...formReview, rating: e.target.value })}
-            ></input>
-            <label>Comment</label>
-            <input
-              type="text"
-              value={formReview.comment}
-              onChange={(e) => setFormReview({ ...formReview, comment: e.target.value })}
-            ></input>
-            <button type="submit">Update</button>
-            <button type="button" onClick={handleDeleteReview}>
-              Delete review
-            </button>
-          </form>
-        </div>
-      )}
-
-      {activeModal === "playlists" && (
-        <div className="fixed bg-purple-300 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <div className="flex justify-center">Your playlists</div>
-          {playlists.length > 0 &&
-            playlists.map((playlist) => (
-              <div className="flex bg-blue-200">
-                <PlaylistCard
-                  name={playlist.name}
-                  description={playlist.description ? playlist.description : "No description provided"}
-                  onClick={() => {}}
-                  onDelete={() => {}}
-                ></PlaylistCard>
-                <button className="cursor-pointer" onClick={() => handleAddToPlaylist(playlist.name)}>
-                  Add
-                </button>
-              </div>
-            ))}
-        </div>
-      )}
+          {loggedIn && friendReviews.length > 0 && (
+            <div className="flex flex-col gap-4">
+              {friendReviews.map((review) => (
+                <PageReviewCard
+                  id={review.id}
+                  rating={review.rating}
+                  comment={review.comment}
+                  createdAt={review.createdAt}
+                  username={review.username}
+                  firstName={review.firstName}
+                  lastName={review.lastName}
+                  width="w-full"
+                />
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </>
   );
 }
