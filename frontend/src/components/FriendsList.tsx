@@ -47,25 +47,32 @@ export default function FriendsList({
       <DialogContent className="max-h-[80vh] overflow-y-auto">
         <ItemGroup className="gap-3">
           <>
-            {(friends as Friend[]).map((user) => {
-              return (
-                <>
-                  <div key={user.id} className="flex items-center">
-                    <FriendCard
-                      key={user.id}
-                      mode={mode}
-                      username={user.username}
-                      bio={user.bio}
-                      user={user}
-                      onClick={() => navigate(`/users/${user.id}`)}
-                      onFriendAccept={onFriendAccept}
-                      onFriendReject={onFriendReject}
-                      onFriendDelete={onFriendDelete}
-                    />
-                  </div>
-                </>
-              );
-            })}
+            {friends.length !== 0 &&
+              (friends as Friend[]).map((user) => {
+                return (
+                  <>
+                    <div key={user.id} className="flex items-center">
+                      <FriendCard
+                        key={user.id}
+                        mode={mode}
+                        username={user.username}
+                        bio={user.bio}
+                        user={user}
+                        onClick={() => navigate(`/users/${user.id}`)}
+                        onFriendAccept={onFriendAccept}
+                        onFriendReject={onFriendReject}
+                        onFriendDelete={onFriendDelete}
+                      />
+                    </div>
+                  </>
+                );
+              })}
+            {friends.length === 0 && mode === "list" && (
+              <span>Friend's list is empty</span>
+            )}
+            {friends.length === 0 && mode === "requests" && (
+              <span>No pending requests</span>
+            )}
           </>
         </ItemGroup>
       </DialogContent>
