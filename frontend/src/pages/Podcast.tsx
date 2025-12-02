@@ -101,7 +101,7 @@ export default function Podcast() {
   useEffect(() => {
     if (!loggedIn) return;
 
-    async function getUserPodcastReview() {
+    async function fetchUserReview() {
       if (!loggedIn) return;
       try {
         const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/reviews/${userID}`);
@@ -130,7 +130,7 @@ export default function Podcast() {
     fetchPodcastInfo();
     fetchPodcastRatings();
     fetchFriendReviews();
-    getUserPodcastReview();
+    fetchUserReview();
   }, [loggedIn]);
 
   useEffect(() => {
@@ -216,7 +216,7 @@ export default function Podcast() {
   async function handleUpdateReview(e: React.FormEvent) {
     e.preventDefault();
     if (!formReview.rating) {
-      alert("Every review needs a rating!");
+      toast.error("Every review needs a rating!");
       return;
     }
     try {
@@ -259,7 +259,7 @@ export default function Podcast() {
       });
       const data = await response.json();
       if (!response.ok) {
-        console.log(data.detail);
+        toast.error(data.detail);
       }
       setUserReview(null);
       setFormReview({ rating: "", comment: "" });
