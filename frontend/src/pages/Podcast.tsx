@@ -101,7 +101,7 @@ export default function Podcast() {
   useEffect(() => {
     if (!loggedIn) return;
 
-    async function getUserPodcastReview() {
+    async function fetchUserReview() {
       if (!loggedIn) return;
       try {
         const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/reviews/${userID}`);
@@ -130,7 +130,7 @@ export default function Podcast() {
     fetchPodcastInfo();
     fetchPodcastRatings();
     fetchFriendReviews();
-    getUserPodcastReview();
+    fetchUserReview();
   }, [loggedIn]);
 
   useEffect(() => {
@@ -216,7 +216,7 @@ export default function Podcast() {
   async function handleUpdateReview(e: React.FormEvent) {
     e.preventDefault();
     if (!formReview.rating) {
-      alert("Every review needs a rating!");
+      toast.error("Every review needs a rating!");
       return;
     }
     try {
@@ -228,7 +228,7 @@ export default function Podcast() {
         },
         body: JSON.stringify({
           rating: formReview.rating,
-          comment: formReview.comment,
+          comment: formReview.comment ?? "",
         }),
       });
       const data = await response.json();
@@ -259,7 +259,7 @@ export default function Podcast() {
       });
       const data = await response.json();
       if (!response.ok) {
-        console.log(data.detail);
+        toast.error(data.detail);
       }
       setUserReview(null);
       setFormReview({ rating: "", comment: "" });
@@ -487,6 +487,7 @@ export default function Podcast() {
                       username={review.username}
                       firstName={review.firstName}
                       lastName={review.lastName}
+                      width="w-85"
                     />
                   </CarouselItem>
                 ))}
@@ -496,7 +497,7 @@ export default function Podcast() {
             </Carousel>
           ) : (
             <div className="flex justify-center items-center">
-              <Card className="w-100 text-center">
+              <Card className="w-100 text-center h-35 justify-center">
                 <CardHeader>
                   <CardTitle>No reviews</CardTitle>
                   <CardDescription>No friends have reviewed this podcast yet</CardDescription>
@@ -508,7 +509,7 @@ export default function Podcast() {
       </Card>
 
       {/* Search episodes */}
-      <Card className="flex flex-col items-center mt-5 rounded-sm">
+      <Card className="flex flex-col items-center mt-5 rounded-sm h-screen">
         <CardHeader>
           <CardTitle className="text-nowrap -translate-x-1/2 text-3xl font-bold">Search Episodes</CardTitle>
         </CardHeader>
@@ -528,8 +529,6 @@ export default function Podcast() {
           ></SearchBar>
         </CardContent>
       </Card>
-
-      <div className="mb-1000"></div>
     </>
   );
 }

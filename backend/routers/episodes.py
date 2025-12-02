@@ -4,6 +4,7 @@ from .auth import getCurrentUser
 from ..db import db_cursor
 from pydantic import BaseModel
 import pymysql
+from ..utils.convertSnakeToCamel import convertListKeyToCamel, convertDictKeyToCamel
 
 
 class Review(BaseModel):
@@ -84,16 +85,23 @@ async def getPodcast(podcast_id: int, episode_num: int):
     try:
         with db_cursor() as cursor:
             cursor.callproc("get_episode", (podcast_id, episode_num))
-            return cursor.fetchone()
+            result = cursor.fetchone()
+            if not result:
+                return HTTPException(status_code=404, detail="Episode not found")
+            return convertDictKeyToCamel(result)
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
 
 # Create an episode review
-@router.post("/{episode_num}/reviews/{user_id}")
+@router.post("/{episode_num}/reviews/{user_id}", status_code=201)
 async def addReviewEpisode(
-    user_id: int, podcast_id: int, episode_num: int, review: Review, status_code=201, current_user: int = Depends(getCurrentUser)
+    user_id: int,
+    podcast_id: int,
+    episode_num: int,
+    review: Review,
+    current_user: int = Depends(getCurrentUser),
 ):
     if current_user != user_id:
         raise HTTPException(
@@ -118,12 +126,16 @@ async def addReviewEpisode(
 
 # Get an episode review
 @router.get("/{episode_num}/reviews/{user_id}")
-async def getReviewPodcast(podcast_id: int, episode_num: int, user_id: int):
+async def getReviewEpisode(podcast_id: int, episode_num: int, user_id: int):
     try:
         with db_cursor() as cursor:
             cursor.callproc("get_episode_review", (user_id, podcast_id, episode_num))
-            episode_review = cursor.fetchone()
-            return episode_review
+            result = cursor.fetchone()
+            if not result:
+                return HTTPException(
+                    status_code=404, detail="User episode review not found"
+                )
+            return convertDictKeyToCamel(result)
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
@@ -132,7 +144,11 @@ async def getReviewPodcast(podcast_id: int, episode_num: int, user_id: int):
 # Update an episode review
 @router.put("/{episode_num}/reviews/{user_id}")
 async def updateReviewEpisode(
-    user_id: int, podcast_id: int, episode_num: int, review: Review, current_user: int = Depends(getCurrentUser)
+    user_id: int,
+    podcast_id: int,
+    episode_num: int,
+    review: Review,
+    current_user: int = Depends(getCurrentUser),
 ):
     if current_user != user_id:
         raise HTTPException(
@@ -157,7 +173,12 @@ async def updateReviewEpisode(
 
 # Delete an episode review
 @router.delete("/{episode_num}/reviews/{user_id}")
-async def deleteUserEpisodeReview(podcast_id: int, episode_num: int, user_id: int, current_user: int = Depends(getCurrentUser)):
+async def deleteUserEpisodeReview(
+    podcast_id: int,
+    episode_num: int,
+    user_id: int,
+    current_user: int = Depends(getCurrentUser),
+):
     if current_user != user_id:
         raise HTTPException(
             status_code=400, detail="Unauthorized to make changes to user"
@@ -186,14 +207,14 @@ async def getAllFriendsReviewsEpisode(podcast_id: int, episode_num: int, user_id
             cursor.callproc(
                 "get_user_friends_episode_review", (user_id, podcast_id, episode_num)
             )
-            return cursor.fetchall()
+            return convertListKeyToCamel(cursor.fetchall())
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
 
 # Get all derived episode ratings for a user
-@router.get("/{episode_num}/ratings/")
+@router.get("/{episode_num}/ratings")
 async def getEpisodeGlobalRatings(podcast_id: int, episode_num: int):
     try:
         with db_cursor() as cursor:
@@ -205,9 +226,13 @@ async def getEpisodeGlobalRatings(podcast_id: int, episode_num: int):
                     episode_num,
                 ),
             )
-            global_avg_rating = cursor.fetchone()
+            result = cursor.fetchone()
+            if not result:
+                return HTTPException(
+                    status_code=404, detail="Failed to get episode ratings"
+                )
             return {
-                "global_episode_avg_rating": list(global_avg_rating.values())[0],
+                "globalEpisodeAvgRating": list(result.values())[0],
             }
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
@@ -227,9 +252,14 @@ async def getEpisodeDerivedRatings(podcast_id: int, episode_num: int, user_id: i
                     episode_num,
                 ),
             )
-            friends_avg_rating = cursor.fetchone()
+            result = cursor.fetchone()
+            if not result:
+                return HTTPException(
+                    status_code=404,
+                    detail="Failed to get episode ratings from a user's friends",
+                )
             return {
-                "friends_episode_avg_rating": list(friends_avg_rating.values())[0],
+                "friendsEpisodeAvgRating": list(result.values())[0],
             }
     except pymysql.err.OperationalError as e:
         error_code, message = e.args

@@ -22,6 +22,7 @@ type PageReviewCardProps = {
   username: string;
   firstName: string;
   lastName: string;
+  width: string;
 };
 
 export default function PageReviewCard({
@@ -32,10 +33,11 @@ export default function PageReviewCard({
   username,
   firstName,
   lastName,
+  width,
 }: PageReviewCardProps) {
   const navigate = useNavigate();
   return (
-    <Card className="w-85 h-40 shrink-0 cursor-pointer hover:scale-102 duration-150">
+    <Card className={`${width} h-40 shrink-0 cursor-pointer hover:scale-102 duration-150`}>
       <CardHeader>
         <div className="flex justify-between">
           <div className="flex gap-2">

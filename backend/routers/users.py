@@ -35,6 +35,7 @@ async def getAllUsers():
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
+
 # Get all user details by ID
 @router.get("/{user_id}")
 async def getUser(user_id: int):
@@ -82,6 +83,7 @@ async def updateBio(
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
+
 # Get all friends for a user
 @router.get("/{user_id}/friends")
 async def getUserFriends(user_id: int):
@@ -94,6 +96,7 @@ async def getUserFriends(user_id: int):
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
 
+
 # Get pending friend requests for a user
 @router.get("/{user_id}/pending")
 async def getUserPending(user_id: int):
@@ -105,6 +108,7 @@ async def getUserPending(user_id: int):
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
+
 
 # Get sent friend requests for a user
 @router.get("/{user_id}/sent")
@@ -121,7 +125,9 @@ async def getUserSent(user_id: int):
 
 # Send a friend request for a user
 @router.post("/{requester_id}/request/{user_id}")
-async def sendFriendRequest(user_id: int, requester_id: int, current_user: int = Depends(getCurrentUser)):
+async def sendFriendRequest(
+    user_id: int, requester_id: int, current_user: int = Depends(getCurrentUser)
+):
     if current_user != requester_id:
         raise HTTPException(
             status_code=400, detail="Unauthorized to make changes to user"
@@ -134,12 +140,14 @@ async def sendFriendRequest(user_id: int, requester_id: int, current_user: int =
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
     except pymysql.err.IntegrityError as e:
-        raise HTTPException(status_code=400, detail="Request already sent. "+ message)
+        raise HTTPException(status_code=400, detail="Request already sent. " + message)
 
 
 # Accept a friend request for a user
 @router.put("/{user_id}/request/{requester_id}")
-async def acceptFriendRequest(user_id: int, requester_id: int, current_user: int = Depends(getCurrentUser)):
+async def acceptFriendRequest(
+    user_id: int, requester_id: int, current_user: int = Depends(getCurrentUser)
+):
     if current_user != user_id:
         raise HTTPException(
             status_code=400, detail="Unauthorized to make changes to user"
@@ -152,11 +160,16 @@ async def acceptFriendRequest(user_id: int, requester_id: int, current_user: int
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
     except pymysql.err.IntegrityError as e:
-        raise HTTPException(status_code=400, detail="Request already accepted. "+ message)
-    
+        raise HTTPException(
+            status_code=400, detail="Request already accepted. " + message
+        )
+
+
 # Reject a friend request for a user
 @router.delete("/{user_id}/request/{requester_id}")
-async def acceptFriendRequest(user_id: int, requester_id: int, current_user: int = Depends(getCurrentUser)):
+async def acceptFriendRequest(
+    user_id: int, requester_id: int, current_user: int = Depends(getCurrentUser)
+):
     if current_user != user_id:
         raise HTTPException(
             status_code=400, detail="Unauthorized to make changes to user"
@@ -168,6 +181,7 @@ async def acceptFriendRequest(user_id: int, requester_id: int, current_user: int
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
+
 
 # Delete a user's friend
 @router.delete("/{user_id}/friends/{user_to_delete_id}")
@@ -192,7 +206,7 @@ async def deleteFriend(
 async def getUserFeed(user_id: int):
     try:
         with db_cursor() as cursor:
-            cursor.callproc("get_user_friends_reviews", (user_id,))
+            cursor.callproc("get_user_feed", (user_id,))
             return convertListKeyToCamel(cursor.fetchall())
     except pymysql.err.OperationalError as e:
         error_code, message = e.args

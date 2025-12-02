@@ -1,14 +1,51 @@
 import { useContext, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { LoginContext } from "../contexts/LoginContext";
-import ReviewCard from "../components/ReviewCard";
 import PlaylistCard from "../components/PlaylistCard";
+import { Card, CardHeader, CardDescription, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import podcast from "../assets/minimalistMicrophone.jpg";
+import dateFormat from "@/utils/dateFormat";
+import { faStar, faEyeSlash, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Label } from "@radix-ui/react-label";
+import { Rating, RatingButton } from "@/components/ui/shadcn-io/rating";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { RainbowButton } from "@/components/ui/rainbow-button";
+import confetti from "canvas-confetti";
+import PageReviewCard from "@/components/PageReviewCard";
+import Autoplay from "embla-carousel-autoplay";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemFooter,
+  ItemHeader,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarImage, AvatarFallback } from "../components/ui/avatar";
+import avatar from "../assets/minimalistAvatarF.jpg";
 
 type ActiveModal = "createReview" | "updateReview" | "playlists" | null;
 
 type EpisodeRating = {
-  globalEpisodeAvgRating: string;
-  friendsEpisodeAvgRating: string;
+  globalAvgRating: string;
+  friendsAvgRating: string;
 };
 
 type FriendReview = {
@@ -22,13 +59,16 @@ type FriendReview = {
 };
 
 type EpisodeInfo = {
+  episodeNum: string;
+  name: string;
   description: string;
   duration: string;
-  name: string;
   releaseDate: string;
+  podcastId: string;
 };
 
 type Playlist = {
+  userId: string;
   name: string;
   description: string;
 };
@@ -41,33 +81,21 @@ type UserReview = {
 
 const API_URL_BASE = import.meta.env.VITE_API_URL;
 
-function convertToCamelCase(data: Record<string, string>[]): FriendReview[] {
-  return data.map((review) => {
-    return {
-      id: review.id,
-      rating: review.rating,
-      comment: review.comment,
-      createdAt: review.created_at,
-      username: review.username,
-      firstName: review.first_name,
-      lastName: review.last_name,
-    };
-  });
-}
-
 export default function Episode() {
   const podcastID = useParams().podcastID;
   const episodeNum = useParams().episodeNum;
   const { loggedIn, userID, token } = useContext(LoginContext);
   const [episodeInfo, setEpisodeInfo] = useState<EpisodeInfo>({
+    episodeNum: "",
     description: "",
     duration: "",
     name: "",
     releaseDate: "",
+    podcastId: "",
   });
   const [ratings, setRatings] = useState<EpisodeRating>({
-    globalEpisodeAvgRating: "",
-    friendsEpisodeAvgRating: "",
+    globalAvgRating: "",
+    friendsAvgRating: "",
   });
   const [friendReviews, setFriendReviews] = useState<FriendReview[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
@@ -77,22 +105,29 @@ export default function Episode() {
     rating: "",
     comment: "",
   });
+  const [playlistForm, setPlaylistForm] = useState<Playlist>({
+    userId: "",
+    name: "",
+    description: "",
+  });
+  const [createPlaylistPopUp, setCreatePlaylistPopUp] = useState<boolean>(false);
+  const [reviewPopUp, setReviewPopUp] = useState<boolean>(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!userID) return;
+    if (loggedIn) return;
+    fetchEpisodeInfo();
+    fetchEpisodeRatings();
+    setRatings((prevRatings) => ({
+      ...prevRatings,
+      friendsAvgRating: "",
+    }));
+    setUserReview(null);
+    setFriendReviews([]);
+  }, []);
 
-    async function fetchEpisodeInfo() {
-      try {
-        const response = await fetch(
-          `${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}`
-        );
-        const data = await response.json();
-        setEpisodeInfo(data);
-      } catch (error) {
-        console.error("Failed to fetch episode info", error);
-      }
-    }
+  useEffect(() => {
+    if (!loggedIn) return;
 
     async function fetchFriendReviews() {
       if (!loggedIn) return;
@@ -101,7 +136,7 @@ export default function Episode() {
           `${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/reviews/${userID}/friends`
         );
         const data = await response.json();
-        setFriendReviews(convertToCamelCase(data));
+        setFriendReviews(data);
       } catch (error) {
         console.error("Failed to fetch user's friends episode review", error);
       }
@@ -110,9 +145,7 @@ export default function Episode() {
     async function fetchUserReview() {
       if (!loggedIn) return;
       try {
-        const response = await fetch(
-          `${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/reviews/${userID}`
-        );
+        const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/reviews/${userID}`);
         const data: UserReview = await response.json();
         if (data) {
           setFormReview({ rating: data.rating, comment: data.comment });
@@ -127,26 +160,32 @@ export default function Episode() {
     fetchEpisodeRatings();
     fetchFriendReviews();
     fetchUserReview();
-  }, [userID]);
+  }, [loggedIn]);
+
+  async function fetchEpisodeInfo() {
+    try {
+      const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}`);
+      const data = await response.json();
+      setEpisodeInfo(data);
+    } catch (error) {
+      console.error("Failed to fetch episode info", error);
+    }
+  }
 
   async function fetchEpisodeRatings() {
     try {
-      let response = await fetch(
-        `${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/ratings`
-      );
+      let response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/ratings`);
       let data = await response.json();
       setRatings((prevRatings) => ({
         ...prevRatings,
-        globalEpisodeAvgRating: data.global_episode_avg_rating,
+        globalAvgRating: data.globalEpisodeAvgRating,
       }));
       if (loggedIn) {
-        response = await fetch(
-          `${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/ratings/${userID}`
-        );
+        response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/ratings/${userID}`);
         data = await response.json();
         setRatings((prevRatings) => ({
           ...prevRatings,
-          friendsEpisodeAvgRating: data.friends_episode_avg_rating,
+          friendsAvgRating: data.friendsEpisodeAvgRating,
         }));
       }
     } catch (error) {
@@ -154,42 +193,41 @@ export default function Episode() {
     }
   }
 
-  // useEffect(() => {
-  //   console.log(friendReviews);
-  // }, [ratings, friendReviews]);
-
   async function handleCreateReview(e: React.FormEvent) {
     e.preventDefault();
     if (!formReview.rating) {
-      alert("Every review needs a rating!");
+      toast.error("Every review needs a rating!");
       return;
     }
 
     try {
-      const response = await fetch(
-        `${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/reviews/${userID}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            rating: formReview.rating,
-            comment: formReview.comment,
-          }),
-        }
-      );
+      const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/reviews/${userID}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          rating: formReview.rating,
+          comment: formReview.comment ?? "",
+        }),
+      });
       const data = await response.json();
       if (!response.ok) {
-        alert(data.detail);
+        toast.error(data.detail);
         return;
       }
-      setActiveModal(null);
       setUserReview({
         rating: formReview.rating,
         comment: formReview.comment,
-        createdAt: Date.now().toString(),
+        createdAt: new Date().toISOString().split("T")[0],
+      });
+      setReviewPopUp(false);
+      toast.success("Review Submitted!");
+      confetti({
+        particleCount: 125,
+        spread: 180,
+        startVelocity: 40,
       });
       fetchEpisodeRatings();
     } catch (error) {
@@ -200,88 +238,57 @@ export default function Episode() {
   async function handleUpdateReview(e: React.FormEvent) {
     e.preventDefault();
     if (!formReview.rating) {
-      alert("Every review needs a rating!");
+      toast.error("Every review needs a rating!");
       return;
     }
     try {
-      const response = await fetch(
-        `${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/reviews/${userID}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            rating: formReview.rating,
-            comment: formReview.comment,
-          }),
-        }
-      );
+      const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/reviews/${userID}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          rating: formReview.rating,
+          comment: formReview.comment ?? "",
+        }),
+      });
       const data = await response.json();
       if (!response.ok) {
-        alert(data.detail);
+        toast.error(data.detail);
         return;
       }
-      setActiveModal(null);
       setUserReview({
         rating: formReview.rating,
         comment: formReview.comment,
-        createdAt: Date.now().toString(),
+        createdAt: new Date().toISOString().split("T")[0],
       });
+      toast.success("Review Updated!");
       fetchEpisodeRatings();
     } catch (error) {
-      console.log("Failed to update user's podcast review", error);
+      console.log("Failed to update user's episode review", error);
     }
   }
 
   async function handleDeleteReview() {
     try {
-      const response = await fetch(
-        `${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/reviews/${userID}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/reviews/${userID}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const data = await response.json();
       if (!response.ok) {
-        console.log(data.detail);
+        toast.error(data.detail);
       }
-      setActiveModal(null);
       setUserReview(null);
       setFormReview({ rating: "", comment: "" });
+      toast.success("Review Deleted!");
+      fetchEpisodeRatings();
     } catch (error) {
-      console.log("Failed to delete the user's podcast review", error);
-    }
-  }
-
-  async function handleAddToPlaylist(playlistName: string) {
-    try {
-      const response = await fetch(
-        `${API_URL_BASE}/users/${userID}/playlists/${playlistName}/episodes`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            podcast_id: podcastID,
-            episode_num: episodeNum,
-          }),
-        }
-      );
-      const data = await response.json();
-      if (!response.ok) {
-        alert(data.detail);
-        return;
-      }
-    } catch (error) {
-      console.error("Failed to add episode to playlist", error);
+      console.log("Failed to delete the user's episode review", error);
     }
   }
 
@@ -295,132 +302,314 @@ export default function Episode() {
     }
   }
 
+  async function handleAddToPlaylist(playlistName: string) {
+    try {
+      const response = await fetch(`${API_URL_BASE}/users/${userID}/playlists/${playlistName}/episodes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          podcastId: podcastID,
+          episodeNum: episodeNum,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.detail);
+        return;
+      }
+      toast.success("Episode added to playlist!");
+    } catch (error) {
+      console.error("Failed to add episode to playlist", error);
+    }
+  }
+
+  async function handleCreatePlaylist(e: React.FormEvent) {
+    e.preventDefault();
+    if (playlistForm.name === "") {
+      toast.error("Enter a name for your new playlist!");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL_BASE}/users/${userID}/playlists/${playlistForm.name}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ description: playlistForm.description }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.detail);
+        return;
+      }
+      toast.success("Playlist created!");
+      setPlaylistForm({ userId: "", name: "", description: "" });
+      setCreatePlaylistPopUp(false);
+      handlePlaylistSearch();
+    } catch (error) {
+      console.error("Failed to add episode to playlist", error);
+    }
+  }
+
   return (
     <>
-      <div>global review: {ratings.globalEpisodeAvgRating}</div>
-      {loggedIn && <div>friends review: {ratings.friendsEpisodeAvgRating}</div>}
-      {loggedIn && userReview ? (
-        <button onClick={() => setActiveModal("updateReview")}>
-          Update review
-        </button>
-      ) : (
-        <button
-          disabled={!loggedIn}
-          onClick={() => setActiveModal("createReview")}
-        >
-          Review
-        </button>
-      )}
-      <button
-        className="cursor-pointer"
-        disabled={!loggedIn}
-        onClick={() => {
-          handlePlaylistSearch();
-          setActiveModal(activeModal !== "playlists" ? "playlists" : null);
-        }}
-      >
-        Add to playlist
-      </button>
-      {loggedIn && friendReviews.length > 0 ? (
-        friendReviews.map((review) => (
-          <ReviewCard
-            review={{
-              type: "podcast",
-              username: review.username,
-              podcastName: "",
-              rating: review.rating,
-              comment: review.comment,
-              createdAt: review.createdAt,
-              onClick: () => navigate(`/users/${review.id}`),
-            }}
-          ></ReviewCard>
-        ))
-      ) : (
-        <h1>Create an account to see friend reviews</h1>
-      )}
-
-      {activeModal === "createReview" && (
-        <div className="fixed bg-purple-300 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <form
-            className="flex flex-col"
-            onSubmit={(e) => handleCreateReview(e)}
-          >
-            <label>Rating</label>
-            <input
-              type="number"
-              onChange={(e) =>
-                setFormReview({ ...formReview, rating: e.target.value })
-              }
-            ></input>
-            <label>Comment</label>
-            <input
-              type="text"
-              onChange={(e) =>
-                setFormReview({ ...formReview, comment: e.target.value })
-              }
-            ></input>
-            <button type="submit">Submit</button>
-          </form>
-        </div>
-      )}
-
-      {activeModal === "updateReview" && (
-        <div className="fixed bg-purple-300 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <div>Written on {userReview?.createdAt}</div>
-          <form
-            className="flex flex-col"
-            onSubmit={(e) => handleUpdateReview(e)}
-          >
-            <label>Rating</label>
-            <input
-              type="number"
-              value={formReview.rating}
-              onChange={(e) =>
-                setFormReview({ ...formReview, rating: e.target.value })
-              }
-            ></input>
-            <label>Comment</label>
-            <input
-              type="text"
-              value={formReview.comment}
-              onChange={(e) =>
-                setFormReview({ ...formReview, comment: e.target.value })
-              }
-            ></input>
-            <button type="submit">Update</button>
-            <button type="button" onClick={handleDeleteReview}>
-              Delete review
-            </button>
-          </form>
-        </div>
-      )}
-
-      {activeModal === "playlists" && (
-        <div className="fixed bg-purple-300 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <div className="flex justify-center">Your playlists</div>
-          {playlists.length > 0 &&
-            playlists.map((playlist) => (
-              <div className="flex bg-blue-200">
-                <PlaylistCard
-                  name={playlist.name}
-                  description={
-                    playlist.description
-                      ? playlist.description
-                      : "No description provided"
-                  }
-                  onClick={() => {}}
-                  onDelete={() => {}}
-                ></PlaylistCard>
-                <button
-                  className="cursor-pointer"
-                  onClick={() => handleAddToPlaylist(playlist.name)}
+      {/* Hero */}
+      <Card className="flex flex-col md:flex-row items-center md:items-start bg-linear-to-tr from-white to-purple-500 py-10 px-6 mt-5">
+        <CardContent>
+          <img
+            src={podcast}
+            className="h-50 w-50 md:h-65 md:w-65 object-cover rounded-sm shadow-lg hover:scale-98 duration-225"
+          />
+        </CardContent>
+        <div className="flex flex-col justify-between gap-4">
+          <CardTitle className="text-2xl text-purple-800">Episode {episodeInfo.episodeNum}</CardTitle>
+          <CardTitle className="font-bold text-4xl md:text-5xl text-gray-900 tracking-tight">
+            {episodeInfo.name}
+          </CardTitle>
+          <CardDescription className="text-lg text-gray-700">{episodeInfo.description}</CardDescription>
+          <CardDescription className="text-sm text-gray-500">
+            Released: {dateFormat(episodeInfo.releaseDate)} &nbsp; &#8226; &nbsp; Duration: {episodeInfo.duration} mins
+          </CardDescription>
+          <div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  className="mt-7 text-md hover:scale-102 duration-150 cursor-pointer"
+                  disabled={!loggedIn}
+                  onClick={handlePlaylistSearch}
                 >
-                  Add
-                </button>
-              </div>
-            ))}
+                  + Add to Playlist
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle className="mb-4">Select a Playlist</DialogTitle>
+                  <DialogDescription></DialogDescription>
+                  <div className="max-h-[50vh] overflow-scroll flex flex-col gap-3">
+                    {playlists.map((playlist) => (
+                      <Item key={playlist.name} className="flex justify-between" variant="outline">
+                        <ItemTitle className="text-md">{playlist.name}</ItemTitle>
+                        <ItemActions>
+                          <Button
+                            className="text-xl w-8 h-8 bg-transparent border rounded-full cursor-pointer"
+                            onClick={() => handleAddToPlaylist(playlist.name)}
+                          >
+                            +
+                          </Button>
+                        </ItemActions>
+                      </Item>
+                    ))}
+                  </div>
+                </DialogHeader>
+                <DialogFooter>
+                  <div className="flex justify-end">
+                    <Button onClick={() => setCreatePlaylistPopUp(true)}>Create New Playlist</Button>
+                  </div>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={createPlaylistPopUp} onOpenChange={setCreatePlaylistPopUp}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>New Playlist</DialogTitle>
+                  <DialogDescription>Create your new playlist</DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleCreatePlaylist}>
+                  <DialogDescription className="font-medium mb-3">Playlist Name</DialogDescription>
+                  <Input
+                    type="text"
+                    maxLength={20}
+                    onChange={(e) => setPlaylistForm({ ...playlistForm, name: e.target.value })}
+                  ></Input>
+                  <DialogDescription className="font-medium my-3">Add an optional description</DialogDescription>
+                  <Input
+                    type="text"
+                    maxLength={50}
+                    onChange={(e) => setPlaylistForm({ ...playlistForm, description: e.target.value })}
+                  ></Input>
+                  <div className="flex justify-end mt-3">
+                    <Button type="submit">Create Playlist</Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
-      )}
+      </Card>
+
+      {/* Ratings */}
+      <Card className="flex flex-col bg-background border-none shadow-none px-5">
+        <div className="flex flex-row justify-between">
+          <CardTitle className="text-xl font-bold">Ratings</CardTitle>
+          {loggedIn && userReview?.rating ? (
+            <div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <RainbowButton className="hover:scale-102 duration-175" disabled={!loggedIn}>
+                    Update Review
+                  </RainbowButton>
+                </DialogTrigger>
+
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="text-xl">Update Review</DialogTitle>
+                    <DialogDescription>
+                      Your last review written on {dateFormat(userReview.createdAt)}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form className="flex flex-col gap-5" onSubmit={(e) => handleUpdateReview(e)}>
+                    <Label className="font-medium">Rating</Label>
+                    <Rating
+                      className="flex justify-center"
+                      defaultValue={Number(userReview.rating)}
+                      onValueChange={(value) => {
+                        setFormReview({ ...formReview, rating: value.toString() });
+                      }}
+                    >
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <RatingButton key={i} size={32} />
+                      ))}
+                    </Rating>
+                    <Label className="font-medium">Comment</Label>
+                    <Textarea
+                      value={formReview.comment}
+                      placeholder="Add an optional comment"
+                      onChange={(e) => setFormReview({ ...formReview, comment: e.target.value })}
+                    ></Textarea>
+                    <div className="flex flex-row items-center justify-between">
+                      <DialogClose asChild>
+                        <Button
+                          type="button"
+                          className="cursor-pointer hover:scale-102 duration-150"
+                          onClick={handleDeleteReview}
+                        >
+                          <FontAwesomeIcon icon={faTrash} />
+                        </Button>
+                      </DialogClose>
+                      <DialogClose asChild>
+                        <Button className="cursor-pointer hover:scale-102 duration-150" type="submit">
+                          Update
+                        </Button>
+                      </DialogClose>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+          ) : (
+            <div className="flex justify-end">
+              <Dialog open={reviewPopUp} onOpenChange={setReviewPopUp}>
+                <DialogTrigger asChild>
+                  <RainbowButton className="hover:scale-102 duration-175" disabled={!loggedIn}>
+                    Review
+                  </RainbowButton>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="text-xl">Review</DialogTitle>
+                    <DialogDescription>What do you think of this podcast?</DialogDescription>
+                  </DialogHeader>
+                  <form className="flex flex-col gap-5" onSubmit={(e) => handleCreateReview(e)}>
+                    <Label className="font-medium">Rating</Label>
+                    <Rating
+                      className="flex justify-center"
+                      onValueChange={(value) => {
+                        setFormReview({ ...formReview, rating: value.toString() });
+                      }}
+                    >
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <RatingButton key={i} size={32} />
+                      ))}
+                    </Rating>
+                    <Label className="font-medium">Comment</Label>
+                    <Textarea
+                      placeholder="Add an optional comment"
+                      onChange={(e) => setFormReview({ ...formReview, comment: e.target.value })}
+                    />
+                    <div className="flex justify-end">
+                      <Button type="submit" className="self-start cursor-pointer hover:scale-102 duration-150">
+                        Submit
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+          )}
+        </div>
+
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 px-5">
+          <Card className="hover:scale-98 duration-300 hover:shadow-lg">
+            <CardContent className="flex flex-col items-center justify-center h-20 gap-3">
+              <p className="text-md font-medium text-center">Average Rating</p>
+              <div className="flex flex-row items-center gap-2">
+                <p className="text-3xl font-bold">{ratings.globalAvgRating}</p>
+                <FontAwesomeIcon icon={faStar} className="text-xl" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:scale-98 duration-300 hover:shadow-lg">
+            <CardContent className="flex flex-col items-center justify-center h-20 gap-3">
+              <p className="text-md font-medium text-center">What your friends think</p>
+              <div className="flex flex-row items-center gap-2">
+                <p className="text-3xl font-bold">{ratings.friendsAvgRating}</p>
+                <FontAwesomeIcon icon={faStar} className="text-xl" />
+              </div>
+            </CardContent>
+          </Card>
+        </CardContent>
+      </Card>
+
+      <Card className="flex flex-col bg-background border-none shadow-none px-5">
+        <CardTitle className="text-xl font-bold">Reviews From Your Friends</CardTitle>
+        <CardContent>
+          {!loggedIn && (
+            <div className="flex justify-center items-center">
+              <Card className="w-100 text-center justify-center h-35">
+                <CardHeader>
+                  <CardTitle>No reviews</CardTitle>
+                  <CardDescription>Create an account or log in to see what your friends think</CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
+          )}
+
+          {loggedIn && friendReviews.length < 1 && (
+            <div className="flex justify-center items-center">
+              <Card className="w-100 text-center justify-center h-35">
+                <CardHeader>
+                  <CardTitle>No reviews</CardTitle>
+                  <CardDescription>No friends have rated this episode yet</CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
+          )}
+
+          {loggedIn && friendReviews.length > 0 && (
+            <div className="flex flex-col gap-4">
+              {friendReviews.map((review) => (
+                <PageReviewCard
+                  id={review.id}
+                  rating={review.rating}
+                  comment={review.comment}
+                  createdAt={review.createdAt}
+                  username={review.username}
+                  firstName={review.firstName}
+                  lastName={review.lastName}
+                  width="w-full"
+                />
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </>
   );
 }

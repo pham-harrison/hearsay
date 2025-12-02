@@ -139,6 +139,9 @@ def decode_access_token(token: str) -> dict:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         return payload
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=400, detail="Token expired")
+        raise HTTPException(
+            status_code=400,
+            detail="Your session has expired. Sign in to your account again.",
+        )
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=400, detail="Invalid token")

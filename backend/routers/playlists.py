@@ -8,12 +8,14 @@ import pymysql
 
 router = APIRouter()
 
+
 class PlaylistCreate(BaseModel):
     description: str
 
-class PlaylistEp(BaseModel):
-    podcast_id: int
-    episode_num: int
+
+class EpisodeInfo(BaseModel):
+    podcastId: int
+    episodeNum: int
 
 
 # Get all playlists for a user
@@ -22,7 +24,7 @@ async def getPlaylist(user_id: int):
     try:
         with db_cursor() as cursor:
             cursor.callproc("get_playlists", (user_id,))
-            return cursor.fetchall()
+            return convertListKeyToCamel(cursor.fetchall())
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
         raise HTTPException(status_code=400, detail=message)
@@ -30,15 +32,26 @@ async def getPlaylist(user_id: int):
 
 # Create a playlist for a user
 @router.post("/{playlist_name}", status_code=201)
-async def createPlaylist(user_id: int, playlist_name: str, body : PlaylistCreate, current_user: int = Depends(getCurrentUser)):
-    if (user_id != current_user) :
+async def createPlaylist(
+    user_id: int,
+    playlist_name: str,
+    body: PlaylistCreate,
+    current_user: int = Depends(getCurrentUser),
+):
+    if user_id != current_user:
         raise HTTPException(
             status_code=400, detail="Unauthorized to make changes to user"
         )
     try:
         with db_cursor() as cursor:
-            cursor.callproc("create_playlist", (user_id, playlist_name, body.description))
-            return {"playlistCreated": True, "message": "New playlist created successfully", "playlist_name": playlist_name}
+            cursor.callproc(
+                "create_playlist", (user_id, playlist_name, body.description)
+            )
+            return {
+                "playlistCreated": True,
+                "message": "New playlist created successfully",
+                "playlist_name": playlist_name,
+            }
 
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
@@ -49,8 +62,10 @@ async def createPlaylist(user_id: int, playlist_name: str, body : PlaylistCreate
 
 # Delete a playlist for a user
 @router.delete("/{playlist_name}")
-async def deletePlaylist(user_id: int, playlist_name: str, current_user: int = Depends(getCurrentUser)):
-    if (user_id != current_user) :
+async def deletePlaylist(
+    user_id: int, playlist_name: str, current_user: int = Depends(getCurrentUser)
+):
+    if user_id != current_user:
         raise HTTPException(
             status_code=400, detail="Unauthorized to make changes to user"
         )
@@ -87,8 +102,13 @@ async def createPlaylist(user_id: int, playlist_name: str):
 
 # Add an episode to a playlist
 @router.post("/{playlist_name}/episodes", status_code=201)
-async def addToPlaylist(user_id: int, playlist_name: str, playlist_ep: PlaylistEp, current_user: int = Depends(getCurrentUser)):
-    if (user_id != current_user) :
+async def addToPlaylist(
+    user_id: int,
+    playlist_name: str,
+    episode_info: EpisodeInfo,
+    current_user: int = Depends(getCurrentUser),
+):
+    if user_id != current_user:
         raise HTTPException(
             status_code=400, detail="Unauthorized to make changes to user"
         )
@@ -98,8 +118,8 @@ async def addToPlaylist(user_id: int, playlist_name: str, playlist_ep: PlaylistE
                 "add_episode_to_playlist",
                 (
                     user_id,
-                    playlist_ep.podcast_id,
-                    playlist_ep.episode_num,
+                    episode_info.podcastId,
+                    episode_info.episodeNum,
                     playlist_name,
                 ),
             )
@@ -117,8 +137,13 @@ async def addToPlaylist(user_id: int, playlist_name: str, playlist_ep: PlaylistE
 
 # Remove an episode from a playlist
 @router.delete("/{playlist_name}/episodes")
-async def removeFromPlaylist(user_id: int, playlist_name: str, playlist_ep: PlaylistEp, current_user: int = Depends(getCurrentUser)):
-    if (user_id != current_user) :
+async def removeFromPlaylist(
+    user_id: int,
+    playlist_name: str,
+    episode_info: EpisodeInfo,
+    current_user: int = Depends(getCurrentUser),
+):
+    if user_id != current_user:
         raise HTTPException(
             status_code=400, detail="Unauthorized to make changes to user"
         )
@@ -128,8 +153,8 @@ async def removeFromPlaylist(user_id: int, playlist_name: str, playlist_ep: Play
                 "remove_episode_from_playlist",
                 (
                     user_id,
-                    playlist_ep.podcast_id,
-                    playlist_ep.episode_num,
+                    episode_info.podcastId,
+                    episode_info.episodeNum,
                     playlist_name,
                 ),
             )
