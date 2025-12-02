@@ -1,8 +1,14 @@
 import { useContext, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { LoginContext } from "../contexts/LoginContext";
-import PlaylistCard from "../components/PlaylistCard";
-import { Card, CardHeader, CardDescription, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardDescription,
+  CardContent,
+  CardFooter,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import podcast from "../assets/minimalistMicrophone.jpg";
 import dateFormat from "@/utils/dateFormat";
@@ -22,7 +28,13 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import confetti from "canvas-confetti";
 import PageReviewCard from "@/components/PageReviewCard";
@@ -110,7 +122,8 @@ export default function Episode() {
     name: "",
     description: "",
   });
-  const [createPlaylistPopUp, setCreatePlaylistPopUp] = useState<boolean>(false);
+  const [createPlaylistPopUp, setCreatePlaylistPopUp] =
+    useState<boolean>(false);
   const [reviewPopUp, setReviewPopUp] = useState<boolean>(false);
   const navigate = useNavigate();
 
@@ -145,7 +158,9 @@ export default function Episode() {
     async function fetchUserReview() {
       if (!loggedIn) return;
       try {
-        const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/reviews/${userID}`);
+        const response = await fetch(
+          `${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/reviews/${userID}`
+        );
         const data: UserReview = await response.json();
         if (data) {
           setFormReview({ rating: data.rating, comment: data.comment });
@@ -164,7 +179,9 @@ export default function Episode() {
 
   async function fetchEpisodeInfo() {
     try {
-      const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}`);
+      const response = await fetch(
+        `${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}`
+      );
       const data = await response.json();
       setEpisodeInfo(data);
     } catch (error) {
@@ -174,14 +191,18 @@ export default function Episode() {
 
   async function fetchEpisodeRatings() {
     try {
-      let response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/ratings`);
+      let response = await fetch(
+        `${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/ratings`
+      );
       let data = await response.json();
       setRatings((prevRatings) => ({
         ...prevRatings,
         globalAvgRating: data.globalEpisodeAvgRating,
       }));
       if (loggedIn) {
-        response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/ratings/${userID}`);
+        response = await fetch(
+          `${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/ratings/${userID}`
+        );
         data = await response.json();
         setRatings((prevRatings) => ({
           ...prevRatings,
@@ -201,17 +222,20 @@ export default function Episode() {
     }
 
     try {
-      const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/reviews/${userID}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          rating: formReview.rating,
-          comment: formReview.comment ?? "",
-        }),
-      });
+      const response = await fetch(
+        `${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/reviews/${userID}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            rating: formReview.rating,
+            comment: formReview.comment ?? "",
+          }),
+        }
+      );
       const data = await response.json();
       if (!response.ok) {
         toast.error(data.detail);
@@ -242,17 +266,20 @@ export default function Episode() {
       return;
     }
     try {
-      const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/reviews/${userID}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          rating: formReview.rating,
-          comment: formReview.comment ?? "",
-        }),
-      });
+      const response = await fetch(
+        `${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/reviews/${userID}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            rating: formReview.rating,
+            comment: formReview.comment ?? "",
+          }),
+        }
+      );
       const data = await response.json();
       if (!response.ok) {
         toast.error(data.detail);
@@ -272,13 +299,16 @@ export default function Episode() {
 
   async function handleDeleteReview() {
     try {
-      const response = await fetch(`${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/reviews/${userID}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_URL_BASE}/podcasts/${podcastID}/episodes/${episodeNum}/reviews/${userID}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const data = await response.json();
       if (!response.ok) {
         toast.error(data.detail);
@@ -304,17 +334,20 @@ export default function Episode() {
 
   async function handleAddToPlaylist(playlistName: string) {
     try {
-      const response = await fetch(`${API_URL_BASE}/users/${userID}/playlists/${playlistName}/episodes`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          podcastId: podcastID,
-          episodeNum: episodeNum,
-        }),
-      });
+      const response = await fetch(
+        `${API_URL_BASE}/users/${userID}/playlists/${playlistName}/episodes`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            podcastId: podcastID,
+            episodeNum: episodeNum,
+          }),
+        }
+      );
       const data = await response.json();
       if (!response.ok) {
         toast.error(data.detail);
@@ -334,14 +367,17 @@ export default function Episode() {
     }
 
     try {
-      const response = await fetch(`${API_URL_BASE}/users/${userID}/playlists/${playlistForm.name}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ description: playlistForm.description }),
-      });
+      const response = await fetch(
+        `${API_URL_BASE}/users/${userID}/playlists/${playlistForm.name}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ description: playlistForm.description }),
+        }
+      );
       const data = await response.json();
       if (!response.ok) {
         toast.error(data.detail);
@@ -367,13 +403,18 @@ export default function Episode() {
           />
         </CardContent>
         <div className="flex flex-col justify-between gap-4">
-          <CardTitle className="text-2xl text-purple-800">Episode {episodeInfo.episodeNum}</CardTitle>
+          <CardTitle className="text-2xl text-purple-800">
+            Episode {episodeInfo.episodeNum}
+          </CardTitle>
           <CardTitle className="font-bold text-4xl md:text-5xl text-gray-900 tracking-tight">
             {episodeInfo.name}
           </CardTitle>
-          <CardDescription className="text-lg text-gray-700">{episodeInfo.description}</CardDescription>
+          <CardDescription className="text-lg text-gray-700">
+            {episodeInfo.description}
+          </CardDescription>
           <CardDescription className="text-sm text-gray-500">
-            Released: {dateFormat(episodeInfo.releaseDate)} &nbsp; &#8226; &nbsp; Duration: {episodeInfo.duration} mins
+            Released: {dateFormat(episodeInfo.releaseDate)} &nbsp; &#8226;
+            &nbsp; Duration: {episodeInfo.duration} mins
           </CardDescription>
           <div>
             <Dialog>
@@ -392,8 +433,14 @@ export default function Episode() {
                   <DialogDescription></DialogDescription>
                   <div className="max-h-[50vh] overflow-scroll flex flex-col gap-3">
                     {playlists.map((playlist) => (
-                      <Item key={playlist.name} className="flex justify-between" variant="outline">
-                        <ItemTitle className="text-md">{playlist.name}</ItemTitle>
+                      <Item
+                        key={playlist.name}
+                        className="flex justify-between"
+                        variant="outline"
+                      >
+                        <ItemTitle className="text-md">
+                          {playlist.name}
+                        </ItemTitle>
                         <ItemActions>
                           <Button
                             className="text-xl w-8 h-8 bg-transparent border rounded-full cursor-pointer"
@@ -408,30 +455,48 @@ export default function Episode() {
                 </DialogHeader>
                 <DialogFooter>
                   <div className="flex justify-end">
-                    <Button onClick={() => setCreatePlaylistPopUp(true)}>Create New Playlist</Button>
+                    <Button onClick={() => setCreatePlaylistPopUp(true)}>
+                      Create New Playlist
+                    </Button>
                   </div>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
 
-            <Dialog open={createPlaylistPopUp} onOpenChange={setCreatePlaylistPopUp}>
+            <Dialog
+              open={createPlaylistPopUp}
+              onOpenChange={setCreatePlaylistPopUp}
+            >
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>New Playlist</DialogTitle>
-                  <DialogDescription>Create your new playlist</DialogDescription>
+                  <DialogDescription>
+                    Create your new playlist
+                  </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleCreatePlaylist}>
-                  <DialogDescription className="font-medium mb-3">Playlist Name</DialogDescription>
+                  <DialogDescription className="font-medium mb-3">
+                    Playlist Name
+                  </DialogDescription>
                   <Input
                     type="text"
                     maxLength={20}
-                    onChange={(e) => setPlaylistForm({ ...playlistForm, name: e.target.value })}
+                    onChange={(e) =>
+                      setPlaylistForm({ ...playlistForm, name: e.target.value })
+                    }
                   ></Input>
-                  <DialogDescription className="font-medium my-3">Add an optional description</DialogDescription>
+                  <DialogDescription className="font-medium my-3">
+                    Add an optional description
+                  </DialogDescription>
                   <Input
                     type="text"
                     maxLength={50}
-                    onChange={(e) => setPlaylistForm({ ...playlistForm, description: e.target.value })}
+                    onChange={(e) =>
+                      setPlaylistForm({
+                        ...playlistForm,
+                        description: e.target.value,
+                      })
+                    }
                   ></Input>
                   <div className="flex justify-end mt-3">
                     <Button type="submit">Create Playlist</Button>
@@ -451,7 +516,10 @@ export default function Episode() {
             <div>
               <Dialog>
                 <DialogTrigger asChild>
-                  <RainbowButton className="hover:scale-102 duration-175" disabled={!loggedIn}>
+                  <RainbowButton
+                    className="hover:scale-102 duration-175"
+                    disabled={!loggedIn}
+                  >
                     Update Review
                   </RainbowButton>
                 </DialogTrigger>
@@ -460,16 +528,23 @@ export default function Episode() {
                   <DialogHeader>
                     <DialogTitle className="text-xl">Update Review</DialogTitle>
                     <DialogDescription>
-                      Your last review written on {dateFormat(userReview.createdAt)}
+                      Your last review written on{" "}
+                      {dateFormat(userReview.createdAt)}
                     </DialogDescription>
                   </DialogHeader>
-                  <form className="flex flex-col gap-5" onSubmit={(e) => handleUpdateReview(e)}>
+                  <form
+                    className="flex flex-col gap-5"
+                    onSubmit={(e) => handleUpdateReview(e)}
+                  >
                     <Label className="font-medium">Rating</Label>
                     <Rating
                       className="flex justify-center"
                       defaultValue={Number(userReview.rating)}
                       onValueChange={(value) => {
-                        setFormReview({ ...formReview, rating: value.toString() });
+                        setFormReview({
+                          ...formReview,
+                          rating: value.toString(),
+                        });
                       }}
                     >
                       {Array.from({ length: 5 }).map((_, i) => (
@@ -480,7 +555,12 @@ export default function Episode() {
                     <Textarea
                       value={formReview.comment}
                       placeholder="Add an optional comment"
-                      onChange={(e) => setFormReview({ ...formReview, comment: e.target.value })}
+                      onChange={(e) =>
+                        setFormReview({
+                          ...formReview,
+                          comment: e.target.value,
+                        })
+                      }
                     ></Textarea>
                     <div className="flex flex-row items-center justify-between">
                       <DialogClose asChild>
@@ -493,7 +573,10 @@ export default function Episode() {
                         </Button>
                       </DialogClose>
                       <DialogClose asChild>
-                        <Button className="cursor-pointer hover:scale-102 duration-150" type="submit">
+                        <Button
+                          className="cursor-pointer hover:scale-102 duration-150"
+                          type="submit"
+                        >
                           Update
                         </Button>
                       </DialogClose>
@@ -506,21 +589,32 @@ export default function Episode() {
             <div className="flex justify-end">
               <Dialog open={reviewPopUp} onOpenChange={setReviewPopUp}>
                 <DialogTrigger asChild>
-                  <RainbowButton className="hover:scale-102 duration-175" disabled={!loggedIn}>
+                  <RainbowButton
+                    className="hover:scale-102 duration-175"
+                    disabled={!loggedIn}
+                  >
                     Review
                   </RainbowButton>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle className="text-xl">Review</DialogTitle>
-                    <DialogDescription>What do you think of this podcast?</DialogDescription>
+                    <DialogDescription>
+                      What do you think of this podcast?
+                    </DialogDescription>
                   </DialogHeader>
-                  <form className="flex flex-col gap-5" onSubmit={(e) => handleCreateReview(e)}>
+                  <form
+                    className="flex flex-col gap-5"
+                    onSubmit={(e) => handleCreateReview(e)}
+                  >
                     <Label className="font-medium">Rating</Label>
                     <Rating
                       className="flex justify-center"
                       onValueChange={(value) => {
-                        setFormReview({ ...formReview, rating: value.toString() });
+                        setFormReview({
+                          ...formReview,
+                          rating: value.toString(),
+                        });
                       }}
                     >
                       {Array.from({ length: 5 }).map((_, i) => (
@@ -530,10 +624,18 @@ export default function Episode() {
                     <Label className="font-medium">Comment</Label>
                     <Textarea
                       placeholder="Add an optional comment"
-                      onChange={(e) => setFormReview({ ...formReview, comment: e.target.value })}
+                      onChange={(e) =>
+                        setFormReview({
+                          ...formReview,
+                          comment: e.target.value,
+                        })
+                      }
                     />
                     <div className="flex justify-end">
-                      <Button type="submit" className="self-start cursor-pointer hover:scale-102 duration-150">
+                      <Button
+                        type="submit"
+                        className="self-start cursor-pointer hover:scale-102 duration-150"
+                      >
                         Submit
                       </Button>
                     </div>
@@ -557,7 +659,9 @@ export default function Episode() {
 
           <Card className="hover:scale-98 duration-300 hover:shadow-lg">
             <CardContent className="flex flex-col items-center justify-center h-20 gap-3">
-              <p className="text-md font-medium text-center">What your friends think</p>
+              <p className="text-md font-medium text-center">
+                What your friends think
+              </p>
               <div className="flex flex-row items-center gap-2">
                 <p className="text-3xl font-bold">{ratings.friendsAvgRating}</p>
                 <FontAwesomeIcon icon={faStar} className="text-xl" />
@@ -568,14 +672,18 @@ export default function Episode() {
       </Card>
 
       <Card className="flex flex-col bg-background border-none shadow-none px-5">
-        <CardTitle className="text-xl font-bold">Reviews From Your Friends</CardTitle>
+        <CardTitle className="text-xl font-bold">
+          Reviews From Your Friends
+        </CardTitle>
         <CardContent>
           {!loggedIn && (
             <div className="flex justify-center items-center">
               <Card className="w-100 text-center justify-center h-35">
                 <CardHeader>
                   <CardTitle>No reviews</CardTitle>
-                  <CardDescription>Create an account or log in to see what your friends think</CardDescription>
+                  <CardDescription>
+                    Create an account or log in to see what your friends think
+                  </CardDescription>
                 </CardHeader>
               </Card>
             </div>
@@ -586,7 +694,9 @@ export default function Episode() {
               <Card className="w-100 text-center justify-center h-35">
                 <CardHeader>
                   <CardTitle>No reviews</CardTitle>
-                  <CardDescription>No friends have rated this episode yet</CardDescription>
+                  <CardDescription>
+                    No friends have rated this episode yet
+                  </CardDescription>
                 </CardHeader>
               </Card>
             </div>
