@@ -4,8 +4,6 @@ import { LoginContext } from "../contexts/LoginContext";
 import minimalistAvatarM from "../assets/minimalistAvatarM.jpg";
 import * as React from "react";
 
-import PlaylistCard from "@/components/PlaylistCard";
-import EpisodeCard from "@/components/EpisodeCard";
 import ReviewCard from "@/components/ReviewCard";
 import UserBio from "@/components/UserBio";
 import FriendsList from "@/components/FriendsList";
@@ -16,8 +14,14 @@ import {
   CardDescription,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { UserRoundPlus } from "lucide-react";
+import { Trash2, UserRoundPlus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type User = {
@@ -115,11 +119,9 @@ export default function Profile() {
   useEffect(() => {
     async function getUserInfo() {
       // Profile data
-      const u_response: Response = await fetch(
-        `${API_URL_BASE}/users/${urlID}`
-      );
-      const profileData: User = await u_response.json();
-      setProfile(profileData);
+      const response: Response = await fetch(`${API_URL_BASE}/users/${urlID}`);
+      const data: User = await response.json();
+      setProfile(data);
     }
     // Review data
     async function getUserPodcastReviews() {
@@ -662,6 +664,70 @@ export default function Profile() {
                     Create
                   </button>
                 )}
+                <Accordion type="single" collapsible>
+                  {playlists.map((playlist) => {
+                    const episodes = episodesByPlaylist[playlist.name] ?? [];
+                    return (
+                      <AccordionItem
+                        value={playlist.name}
+                        onClick={() => {
+                          handlePlaylistClick(playlist.name);
+                        }}
+                      >
+                        <AccordionTrigger>
+                          <div>
+                            <div>{playlist.name}</div>
+                            <div>{playlist.description}</div>
+                            <Button
+                              className="w-12"
+                              variant="outline"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handlePlaylistDelete(playlist.name);
+                              }}
+                            >
+                              <Trash2 />
+                            </Button>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div>
+                            {(episodes as Episode[]).map((episode) => (
+                              <div
+                                key={episode.podcastId + episode.episodeNum}
+                                onClick={() =>
+                                  navigate(
+                                    `/podcasts/${episode.podcastId}/episodes/${episode.episodeNum}`
+                                  )
+                                }
+                              >
+                                <div>{episode.podcastName}</div>
+                                <div>{episode.episodeNum}</div>
+                                <Button
+                                  className="w-6"
+                                  variant="outline"
+                                  size="icon"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEpisodeDelete(
+                                      playlist.name,
+                                      episode.podcastId,
+                                      episode.episodeNum
+                                    );
+                                  }}
+                                >
+                                  <Trash2 />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    );
+                  })}
+                </Accordion>
+
                 {activeModal === "create" && (
                   <div className="bg-purple-900 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                     <form
@@ -688,57 +754,6 @@ export default function Profile() {
                     </form>
                   </div>
                 )}
-                <div>
-                  {playlists.map((playlist) => {
-                    const episodes = episodesByPlaylist[playlist.name] ?? [];
-                    return (
-                      <div key={playlist.name}>
-                        <PlaylistCard
-                          name={playlist.name}
-                          description={playlist.description}
-                          onClick={() => {
-                            handlePlaylistClick(playlist.name);
-                          }}
-                          onDelete={() => {
-                            handlePlaylistDelete(playlist.name);
-                          }}
-                        />
-                        {loggedIn && userID === urlID && (
-                          <button
-                            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handlePlaylistDelete(playlist.name);
-                            }}
-                          >
-                            Delete Playlist
-                          </button>
-                        )}
-                        {(episodes as Episode[]).map((episode) => (
-                          <ul key={episode.podcastId + episode.episodeNum}>
-                            <EpisodeCard
-                              podcastId={episode.podcastId}
-                              podcastName={episode.podcastName}
-                              episodeNum={episode.episodeNum}
-                              onClick={() =>
-                                navigate(
-                                  `/podcasts/${episode.podcastId}/episodes/${episode.episodeNum}`
-                                )
-                              }
-                              onDelete={() => {
-                                handleEpisodeDelete(
-                                  playlist.name,
-                                  episode.podcastId,
-                                  episode.episodeNum
-                                );
-                              }}
-                            />
-                          </ul>
-                        ))}
-                      </div>
-                    );
-                  })}
-                </div>
               </TabsContent>
             </Tabs>
           </div>
