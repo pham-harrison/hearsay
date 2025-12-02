@@ -290,8 +290,8 @@ DELIMITER ;
 Get user friends' reviews
 */
 DELIMITER $$
-DROP PROCEDURE IF EXISTS get_user_friends_reviews $$
-CREATE PROCEDURE get_user_friends_reviews(IN user_id_p INT)
+DROP PROCEDURE IF EXISTS get_user_feed $$
+CREATE PROCEDURE get_user_feed(IN user_id_p INT)
 BEGIN
     IF NOT EXISTS (SELECT * FROM user WHERE id = user_id_p) THEN
         SIGNAL SQLSTATE "45000"
@@ -314,13 +314,13 @@ BEGIN
     JOIN user ON id2 = id
     JOIN episode ON episode_review.podcast_id = episode.podcast_id AND episode_review.episode_num = episode.episode_num
     JOIN podcast ON episode_review.podcast_id = podcast.podcast_id
-    WHERE id1 = user_id_p AND status = "accepted";
+    WHERE id1 = user_id_p AND status = "accepted"
+    ORDER BY created_at DESC;
 END $$
 DELIMITER ;
 
--- CALL get_user_friends_reviews(1);
+-- CALL get_user_feed(51);
 
--- CALL get_user_friends_reviews(1);
 /*
 Get a users podcast reviews
 */
@@ -384,11 +384,12 @@ BEGIN
     SELECT id2 AS id, rating, comment, created_at, username, first_name, last_name FROM user_to_user
     JOIN podcast_review ON id2 = podcast_review.user_id
     JOIN user ON id = id2
-    WHERE id1 = user_id_p AND podcast_id = podcast_id_p;
+    WHERE id1 = user_id_p AND podcast_id = podcast_id_p
+    ORDER BY created_at DESC;
 END $$
 DELIMITER ;
 
--- CALL get_user_friends_podcast_reviews(1, 2);
+-- CALL get_user_friends_podcast_reviews(51, 1);
 
 
 /*
@@ -416,7 +417,8 @@ BEGIN
     SELECT id, rating, comment, created_at, username, first_name, last_name FROM user_to_user
     JOIN episode_review ON id2 = user_id
     JOIN user ON id = id2
-    WHERE id1 = user_id_p AND podcast_id = podcast_id_p AND episode_num = episode_num_p;
+    WHERE id1 = user_id_p AND podcast_id = podcast_id_p AND episode_num = episode_num_p
+    ORDER BY created_at DESC;
 END $$
 DELIMITER ;
 
@@ -1202,3 +1204,6 @@ DELIMITER ;
 
 -- CALL send_friend_request(51, 57);
 -- CALL accept_friend_request(57, 51);
+
+CALL insert_episode_review(51, 1, 1169, 5, "testing adding review");
+CALL get_episode_review(51, 1, 1169);
