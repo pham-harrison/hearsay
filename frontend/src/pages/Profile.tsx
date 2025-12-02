@@ -68,30 +68,44 @@ export default function Profile() {
   // Friends states
   const [friends, setFriends] = useState<Friend[]>([]);
   const [pendingList, setPendingList] = useState<Friend[]>([]);
-  const [pendingRequests, setPendingRequests] = useState<Set<number>>(new Set());
+  const [pendingRequests, setPendingRequests] = useState<Set<number>>(
+    new Set()
+  );
   const [sentRequests, setSentRequests] = useState<Set<number>>(new Set());
   // Relationship
   let relationship: Relationship = "none";
   if (userID && urlID) {
-    relationship = getRelationship(userID, urlID, sentRequests, pendingRequests, friends);
+    relationship = getRelationship(
+      userID,
+      urlID,
+      sentRequests,
+      pendingRequests,
+      friends
+    );
   }
 
   useEffect(() => {
     async function getUserInfo() {
       // Profile data
-      const u_response: Response = await fetch(`${API_URL_BASE}/users/${urlID}`);
+      const u_response: Response = await fetch(
+        `${API_URL_BASE}/users/${urlID}`
+      );
       const profileData: User = await u_response.json();
       setProfile(profileData);
     }
     // Playlist data
     async function getUserPlaylists() {
-      const response: Response = await fetch(`${API_URL_BASE}/users/${urlID}/playlists`);
+      const response: Response = await fetch(
+        `${API_URL_BASE}/users/${urlID}/playlists`
+      );
       const data = await response.json();
       setPlaylists(data);
     }
     // Friends data
     async function getUserFriends() {
-      const response: Response = await fetch(`${API_URL_BASE}/users/${urlID}/friends`);
+      const response: Response = await fetch(
+        `${API_URL_BASE}/users/${urlID}/friends`
+      );
       const data = await response.json();
       const mapped: Friend[] = data.map((row: any) => ({
         id: String(row.id),
@@ -106,7 +120,9 @@ export default function Profile() {
     // Pending friends data
     async function getUserPendingRequests() {
       if (!userID) return;
-      const response: Response = await fetch(`${API_URL_BASE}/users/${userID}/pending`);
+      const response: Response = await fetch(
+        `${API_URL_BASE}/users/${userID}/pending`
+      );
       const data = await response.json();
       const ids = new Set<number>(data.map((row: any) => Number(row.id)));
       setPendingList(data);
@@ -115,7 +131,9 @@ export default function Profile() {
     // Sent friend requests data
     async function getUserSentRequests() {
       if (!userID) return;
-      const response: Response = await fetch(`${API_URL_BASE}/users/${userID}/sent`);
+      const response: Response = await fetch(
+        `${API_URL_BASE}/users/${userID}/sent`
+      );
       const data = await response.json();
       const ids = new Set<number>(data.map((row: any) => Number(row.id)));
       setSentRequests(ids);
@@ -181,14 +199,17 @@ export default function Profile() {
       return;
     }
     try {
-      const response = await fetch(`${API_URL_BASE}/users/${userID}/playlists/${playlistName}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ description: playlistDesc }),
-      });
+      const response = await fetch(
+        `${API_URL_BASE}/users/${userID}/playlists/${playlistName}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ description: playlistDesc }),
+        }
+      );
       if (!response.ok) {
         console.error("Response not ok from create playlist");
       } else {
@@ -206,13 +227,16 @@ export default function Profile() {
   // Delete playlist
   async function handlePlaylistDelete(playlist: string) {
     try {
-      const response = await fetch(`${API_URL_BASE}/users/${urlID}/playlists/${playlist}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_URL_BASE}/users/${urlID}/playlists/${playlist}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (!response.ok) {
         console.error("Response from delete playlist not ok");
       } else {
@@ -226,13 +250,16 @@ export default function Profile() {
   // Delete friend from friends list
   async function handleDeleteFriend(friend: Friend) {
     try {
-      const response = await fetch(`${API_URL_BASE}/users/${userID}/friends/${friend.id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_URL_BASE}/users/${userID}/friends/${friend.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (!response.ok) {
         console.error("Response from delete friend not ok");
       } else {
@@ -247,13 +274,16 @@ export default function Profile() {
   async function handleSendRequest(urlID: string | undefined) {
     if (!urlID) return;
     try {
-      const response = await fetch(`${API_URL_BASE}/users/${userID}/request/${urlID}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_URL_BASE}/users/${userID}/request/${urlID}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (!response.ok) {
         console.error("Response from send friend request not ok");
       } else {
@@ -270,15 +300,22 @@ export default function Profile() {
   }
 
   // Accept friend request
-  async function handleAcceptRequest(requester: string, responder: string, friend: Friend | null) {
+  async function handleAcceptRequest(
+    requester: string,
+    responder: string,
+    friend: Friend | null
+  ) {
     try {
-      const response = await fetch(`${API_URL_BASE}/users/${responder}/request/${requester}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_URL_BASE}/users/${responder}/request/${requester}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (!response.ok) {
         console.error("Response from accept friend request not ok");
       } else {
@@ -306,16 +343,23 @@ export default function Profile() {
   }
 
   // Reject friend request
-  async function handleRejectRequest(requester: string | null, responder: string, friend: Friend | null) {
+  async function handleRejectRequest(
+    requester: string | null,
+    responder: string,
+    friend: Friend | null
+  ) {
     if (!requester) return;
     try {
-      const response = await fetch(`${API_URL_BASE}/users/${responder}/request/${requester}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "applications/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_URL_BASE}/users/${responder}/request/${requester}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "applications/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (!response.ok) {
         console.error("Response from reject friend request not ok");
       } else {
@@ -342,120 +386,174 @@ export default function Profile() {
 
   return (
     <>
-      <Card className="w-full max-w-sm m-10">
-        <CardHeader>
-          <CardAction></CardAction>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-start">
-            <img src={minimalistAvatarM} className="w-24 h-24 m-4 rounded-full border-4 border-purple-500"></img>
-            <CardTitle className="text-xl mr-4">{profile.username}</CardTitle>
-            {relationship === "none" && loggedIn && (
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleSendRequest(urlID);
-                }}
-              >
-                <UserRoundPlus />
-                <span className="sr-only">Update bio</span>
-              </Button>
-            )}
+      <div className="flex flex-col justify-center ml-30 mr-30 mt-5">
+        <Card>
+          <CardHeader>
+            <CardAction></CardAction>
+          </CardHeader>
+          <CardContent className="flex flex-col justify-center ">
+            <div className="flex flex-row items-end">
+              <img
+                src={minimalistAvatarM}
+                className="w-48 h-48 rounded-full border-4 border-purple-500 mr-4"
+              ></img>
+              <CardTitle className="text-8xl font-bold">
+                {profile.username}
+              </CardTitle>
+            </div>
+          </CardContent>
+          <div className="flex flex-row justify-start gap-4">
+            {/* Bio and buttons cont */}
+            <CardDescription className="ml-8 min-w-46 max-w-52 min-h-20 max-h-20 overflow-auto">
+              {profile.bio.length !== 0 ? (
+                profile.bio
+              ) : (
+                <span>No bio . . .</span>
+              )}
+            </CardDescription>
+            <div className="flex flex-row items-center gap-4">
+              {/* User buttons and lists */}
+              {relationship === "none" && loggedIn && (
+                <Button
+                  className="w-12 h-12"
+                  variant="outline"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSendRequest(urlID);
+                  }}
+                >
+                  <UserRoundPlus />
+                  <span className="sr-only">Update bio</span>
+                </Button>
+              )}
+              {userID === urlID && (
+                <UserBio
+                  bio={bio}
+                  onBioChange={setBio}
+                  onConfirm={handleUpdateBio}
+                />
+              )}
+              {/* Friends list */}
+              <FriendsList
+                title="Friends list"
+                friends={friends}
+                mode="list"
+                onFriendAccept={handleAcceptRequest}
+                onFriendReject={handleRejectRequest}
+                onFriendDelete={handleDeleteFriend}
+              />
+              {/* Pending requests */}
+              {userID === urlID && (
+                <FriendsList
+                  title="Pending requests"
+                  friends={pendingList}
+                  mode="requests"
+                  onFriendAccept={handleAcceptRequest}
+                  onFriendReject={handleRejectRequest}
+                  onFriendDelete={handleDeleteFriend}
+                />
+              )}
+            </div>
           </div>
-          <div className="flex items-center justify-start">
-            <CardDescription className="ml-4 mr-4">{profile.bio}</CardDescription>
-            {userID === urlID && <UserBio bio={bio} onBioChange={setBio} onConfirm={handleUpdateBio} />}
-          </div>
-        </CardContent>
-        <CardFooter className="flex-col gap-2"></CardFooter>
-      </Card>
+          <CardFooter className="flex-row gap-2">
+            <div>
+              {relationship === "received" && (
+                <>
+                  <button
+                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-.5 px-1 rounded"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (urlID) {
+                        handleAcceptRequest(urlID, userID, null);
+                      }
+                    }}
+                  >
+                    Accept Request
+                  </button>
+                  <button
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-.5 px-1 rounded"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (urlID) {
+                        handleRejectRequest(urlID, userID, null);
+                      }
+                    }}
+                  >
+                    Reject Request
+                  </button>
+                </>
+              )}
+              {relationship === "friends" && (
+                <button
+                  disabled
+                  className="bg-blue-900 text-white font-bold py-.5 px-1 rounded"
+                >
+                  Friends
+                </button>
+              )}
+              {relationship === "sent" && (
+                <button
+                  disabled
+                  className="bg-blue-900 text-white font-bold py-.5 px-1 rounded"
+                >
+                  Request Sent
+                </button>
+              )}
+            </div>
+            <select
+              value={displayType}
+              onChange={(e) => setDisplayType(e.target.value as DisplayType)}
+            >
+              <option value={"reviews"}>Reviews</option>
+              <option value={"playlists"}>Playlists</option>
+            </select>
+          </CardFooter>
+        </Card>
 
-      <div>
-        {relationship === "received" && (
-          <>
-            <button
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-.5 px-1 rounded"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (urlID) {
-                  handleAcceptRequest(urlID, userID, null);
-                }
-              }}
-            >
-              Accept Request
-            </button>
-            <button
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-.5 px-1 rounded"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (urlID) {
-                  handleRejectRequest(urlID, userID, null);
-                }
-              }}
-            >
-              Reject Request
-            </button>
-          </>
-        )}
-        {relationship === "friends" && (
-          <button disabled className="bg-blue-900 text-white font-bold py-.5 px-1 rounded">
-            Friends
+        {loggedIn && userID === urlID && displayType === "playlists" && (
+          <button
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+            onClick={
+              activeModal !== "create"
+                ? () => setActiveModal("create")
+                : () => setActiveModal(null)
+            }
+          >
+            Create
           </button>
         )}
-        {relationship === "sent" && (
-          <button disabled className="bg-blue-900 text-white font-bold py-.5 px-1 rounded">
-            Request Sent
-          </button>
+        {displayType === "reviews" && <Reviews />}
+        {displayType === "playlists" && (
+          <Playlists
+            playlists={playlists}
+            onPlaylistDelete={handlePlaylistDelete}
+          />
+        )}
+        {activeModal === "create" && (
+          <div className="bg-purple-900 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <form className="flex flex-col" onSubmit={handlePlaylistCreate}>
+              <label>Name of new playlist</label>
+              <input
+                type="text"
+                onChange={(e) => setPlaylistName(e.target.value)}
+                placeholder="Title..."
+              ></input>
+              <input
+                type="text"
+                onChange={(e) => setPlaylistDesc(e.target.value)}
+                placeholder="Description..."
+              ></input>
+              <button
+                type="submit"
+                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Confirm
+              </button>
+            </form>
+          </div>
         )}
       </div>
-      {/* Friends list */}
-      <FriendsList
-        title="Friends list"
-        friends={friends}
-        mode="list"
-        onFriendAccept={handleAcceptRequest}
-        onFriendReject={handleRejectRequest}
-        onFriendDelete={handleDeleteFriend}
-      />
-      {/* Pending requests */}
-      {userID === urlID && (
-        <FriendsList
-          title="Pending requests"
-          friends={pendingList}
-          mode="requests"
-          onFriendAccept={handleAcceptRequest}
-          onFriendReject={handleRejectRequest}
-          onFriendDelete={handleDeleteFriend}
-        />
-      )}
-      <select value={displayType} onChange={(e) => setDisplayType(e.target.value as DisplayType)}>
-        <option value={"reviews"}>Reviews</option>
-        <option value={"playlists"}>Playlists</option>
-      </select>
-      {loggedIn && userID === urlID && displayType === "playlists" && (
-        <button
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-          onClick={activeModal !== "create" ? () => setActiveModal("create") : () => setActiveModal(null)}
-        >
-          Create
-        </button>
-      )}
-      {displayType === "reviews" && <Reviews />}
-      {displayType === "playlists" && <Playlists playlists={playlists} onPlaylistDelete={handlePlaylistDelete} />}
-      {activeModal === "create" && (
-        <div className="bg-purple-900 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <form className="flex flex-col" onSubmit={handlePlaylistCreate}>
-            <label>Name of new playlist</label>
-            <input type="text" onChange={(e) => setPlaylistName(e.target.value)} placeholder="Title..."></input>
-            <input type="text" onChange={(e) => setPlaylistDesc(e.target.value)} placeholder="Description..."></input>
-            <button type="submit" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-              Confirm
-            </button>
-          </form>
-        </div>
-      )}
     </>
   );
 }
