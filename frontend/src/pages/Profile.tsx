@@ -387,128 +387,139 @@ export default function Profile() {
   return (
     <>
       <div className="flex flex-col justify-center ml-30 mr-30 mt-5">
-        <Card>
-          <CardHeader>
-            <CardAction></CardAction>
-          </CardHeader>
-          <CardContent className="flex flex-col justify-center ">
-            <div className="flex flex-row items-end">
-              <img
-                src={minimalistAvatarM}
-                className="w-48 h-48 rounded-full border-4 border-purple-500 mr-4"
-              ></img>
-              <CardTitle className="text-8xl font-bold">
-                {profile.username}
-              </CardTitle>
-            </div>
-          </CardContent>
-          <div className="flex flex-row justify-start gap-4">
-            {/* Bio and buttons cont */}
-            <CardDescription className="ml-8 min-w-46 max-w-52 min-h-20 max-h-20 overflow-auto">
-              {profile.bio.length !== 0 ? (
-                profile.bio
-              ) : (
-                <span>No bio . . .</span>
-              )}
-            </CardDescription>
-            <div className="flex flex-row items-center gap-4">
-              {/* User buttons and lists */}
-              {relationship === "none" && loggedIn && (
-                <Button
-                  className="w-12 h-12"
-                  variant="outline"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSendRequest(urlID);
-                  }}
-                >
-                  <UserRoundPlus />
-                  <span className="sr-only">Update bio</span>
-                </Button>
-              )}
-              {userID === urlID && (
-                <UserBio
-                  bio={bio}
-                  onBioChange={setBio}
-                  onConfirm={handleUpdateBio}
-                />
-              )}
-              {/* Friends list */}
-              <FriendsList
-                title="Friends list"
-                friends={friends}
-                mode="list"
-                onFriendAccept={handleAcceptRequest}
-                onFriendReject={handleRejectRequest}
-                onFriendDelete={handleDeleteFriend}
-              />
-              {/* Pending requests */}
-              {userID === urlID && (
+        <Card className="bg-linear-to-br from-fuchsia-300 to-purple-800 pb-0">
+          <Card className="p-0">
+            <CardHeader>
+              <CardAction></CardAction>
+            </CardHeader>
+            <CardContent className="flex flex-col justify-center ">
+              <div className="flex flex-row items-end">
+                <img
+                  src={minimalistAvatarM}
+                  className="w-48 h-48 rounded-full border-4 border-purple-500 mr-4"
+                ></img>
+                <CardTitle className="text-8xl font-bold">
+                  {profile.username}
+                </CardTitle>
+              </div>
+            </CardContent>
+            <div className="flex flex-row justify-start gap-4">
+              {/* Bio and buttons cont */}
+              <CardDescription className="ml-8 min-w-46 max-w-52 min-h-20 max-h-20 overflow-auto">
+                {profile.bio !== null ? profile.bio : <span>No bio . . .</span>}
+              </CardDescription>
+              <div className="flex flex-row items-center gap-4">
+                {/* User buttons and lists */}
+                {relationship === "none" && loggedIn && (
+                  <Button
+                    className="w-12 h-12"
+                    variant="outline"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSendRequest(urlID);
+                    }}
+                  >
+                    <UserRoundPlus />
+                    <span className="sr-only">Update bio</span>
+                  </Button>
+                )}
+                {relationship === "sent" && (
+                  <Button
+                    className="w-12 h-12"
+                    variant="outline"
+                    size="icon"
+                    disabled
+                  >
+                    <UserRoundPlus />
+                    <span className="sr-only">Update bio</span>
+                  </Button>
+                )}
+                {relationship === "friends" && (
+                  <button
+                    disabled
+                    className="bg-blue-900 text-white font-bold py-.5 px-1 rounded"
+                  >
+                    Friends
+                  </button>
+                )}
+                {userID === urlID && (
+                  <UserBio
+                    bio={bio}
+                    onBioChange={setBio}
+                    onConfirm={handleUpdateBio}
+                  />
+                )}
+                {/* Friends list */}
                 <FriendsList
-                  title="Pending requests"
-                  friends={pendingList}
-                  mode="requests"
+                  title="Friends list"
+                  friends={friends}
+                  mode="list"
                   onFriendAccept={handleAcceptRequest}
                   onFriendReject={handleRejectRequest}
                   onFriendDelete={handleDeleteFriend}
                 />
-              )}
+                {/* Pending requests */}
+                <div className="relative">
+                  {userID === urlID && (
+                    <FriendsList
+                      title="Pending requests"
+                      friends={pendingList}
+                      mode="requests"
+                      onFriendAccept={handleAcceptRequest}
+                      onFriendReject={handleRejectRequest}
+                      onFriendDelete={handleDeleteFriend}
+                    />
+                  )}
+                  {pendingList.length !== 0 && (
+                    <div className="absolute top-0 right-0">
+                      <span className="relative flex size-3">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-yellow-500 opacity-75"></span>
+                        <span className="relative inline-flex size-3 rounded-full bg-yellow-500"></span>
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-          <CardFooter className="flex-row gap-2">
-            <div>
-              {relationship === "received" && (
-                <>
-                  <button
-                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-.5 px-1 rounded"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (urlID) {
-                        handleAcceptRequest(urlID, userID, null);
-                      }
-                    }}
-                  >
-                    Accept Request
-                  </button>
-                  <button
-                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-.5 px-1 rounded"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (urlID) {
-                        handleRejectRequest(urlID, userID, null);
-                      }
-                    }}
-                  >
-                    Reject Request
-                  </button>
-                </>
-              )}
-              {relationship === "friends" && (
-                <button
-                  disabled
-                  className="bg-blue-900 text-white font-bold py-.5 px-1 rounded"
-                >
-                  Friends
-                </button>
-              )}
-              {relationship === "sent" && (
-                <button
-                  disabled
-                  className="bg-blue-900 text-white font-bold py-.5 px-1 rounded"
-                >
-                  Request Sent
-                </button>
-              )}
-            </div>
-            <select
-              value={displayType}
-              onChange={(e) => setDisplayType(e.target.value as DisplayType)}
-            >
-              <option value={"reviews"}>Reviews</option>
-              <option value={"playlists"}>Playlists</option>
-            </select>
-          </CardFooter>
+            <CardFooter className="flex-row gap-2">
+              <div>
+                {relationship === "received" && (
+                  <>
+                    <button
+                      className="bg-green-500 hover:bg-green-700 text-white font-bold py-.5 px-1 rounded"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (urlID) {
+                          handleAcceptRequest(urlID, userID, null);
+                        }
+                      }}
+                    >
+                      Accept Request
+                    </button>
+                    <button
+                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-.5 px-1 rounded"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (urlID) {
+                          handleRejectRequest(urlID, userID, null);
+                        }
+                      }}
+                    >
+                      Reject Request
+                    </button>
+                  </>
+                )}
+              </div>
+              <select
+                value={displayType}
+                onChange={(e) => setDisplayType(e.target.value as DisplayType)}
+              >
+                <option value={"reviews"}>Reviews</option>
+                <option value={"playlists"}>Playlists</option>
+              </select>
+            </CardFooter>
+          </Card>
         </Card>
 
         {loggedIn && userID === urlID && displayType === "playlists" && (
