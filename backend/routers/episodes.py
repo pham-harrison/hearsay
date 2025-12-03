@@ -50,7 +50,7 @@ async def searchPodcastEpisodes(
                     year,
                 ),
             )
-            filtered_episodes = cursor.fetchall()
+            filtered_episodes = convertListKeyToCamel(cursor.fetchall())
             return filtered_episodes
     except pymysql.err.OperationalError as e:
         error_code, message = e.args
