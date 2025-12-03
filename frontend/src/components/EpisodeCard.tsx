@@ -1,13 +1,5 @@
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Item,
-  ItemActions,
   ItemContent,
   ItemDescription,
   ItemMedia,
@@ -21,6 +13,7 @@ type EpisodeCardProps = {
   podcastName: string;
   episodeNum: string;
   episodeName: string | null;
+  description: string;
 };
 
 export default function EpisodeCard({
@@ -38,7 +31,7 @@ export default function EpisodeCard({
         hover:scale-104
         activ:scale-98
         hover:bg-gradient-to-r
-        hover:from-purple-600 hover:via-pink-600 hover:to-orange-500 rounded-lg
+        hover:from-fuchsia-300 hover:to-purple-800 rounded-lg
       "
     >
       <Item

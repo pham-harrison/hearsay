@@ -509,7 +509,7 @@ export default function Profile() {
   return (
     <>
       <div className="flex flex-col justify-center ml-30 mr-30">
-        <div className="p-2 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 rounded-lg">
+        <div className="p-2 bg-gradient-to-r from-purple-800 to-fuchsia-300 rounded-lg">
           <Card className="mb-2.5">
             <CardContent className="flex flex-col justify-center">
               <div className="flex flex-row items-end">
@@ -565,7 +565,6 @@ export default function Profile() {
                     disabled
                   >
                     <UserRoundPlus />
-                    <span className="sr-only">Update bio</span>
                   </Button>
                 )}
                 {relationship === "friends" && (
@@ -576,7 +575,6 @@ export default function Profile() {
                     disabled
                   >
                     <UserCheck />
-                    <span className="sr-only">Update bio</span>
                   </Button>
                 )}
                 {userID === urlID && (
@@ -734,9 +732,9 @@ export default function Profile() {
                             {episodes.length !== 0 &&
                               (episodes as Episode[]).map((episode) => (
                                 <div
-                                  className="flex flex-row mt-2 mb-2 p-2 items-center bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 
-                                   text-white transition-all duration-300 ease-in-out 
-                                   hover:from-purple-500 hover:via-pink-500 hover:to-orange-400 rounded-sm"
+                                  className="flex flex-row mt-2 mb-2 p-2 items-center bg-gradient-to-r from-purple-800 to-fuchsia-300 
+                                   transition-all duration-300 ease-in-out 
+                                   hover:from-purple-900 hover:to-fuchsia-400 rounded-sm"
                                   key={episode.podcastId + episode.episodeNum}
                                   onClick={() =>
                                     navigate(
