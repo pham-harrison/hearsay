@@ -1,38 +1,74 @@
-import { useContext } from "react";
-import { useParams } from "react-router-dom";
-import { LoginContext } from "../contexts/LoginContext";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
+import episode from "../assets/episode_image.png";
+import { useNavigate } from "react-router-dom";
 
 type EpisodeCardProps = {
   podcastId: string;
   podcastName: string;
   episodeNum: string;
-  onClick: () => void;
-  onDelete: () => void;
+  episodeName: string | null;
 };
 
 export default function EpisodeCard({
+  podcastId,
   podcastName,
   episodeNum,
-  onClick,
-  onDelete,
+  episodeName,
 }: EpisodeCardProps) {
-  const { loggedIn, userID } = useContext(LoginContext);
-  const urlID = useParams().userID;
-
+  const navigate = useNavigate();
   return (
-    <li className="bg-grey-300 cursor-pointer" onClick={onClick}>
-      - {podcastName} : Episode {episodeNum}{" "}
-      {loggedIn && userID === urlID && (
-        <button
-          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-        >
-          Delete Episode
-        </button>
-      )}
-    </li>
+    <div
+      className="
+        w-fit shrink-0 cursor-pointer
+        transition-all duration-150
+        hover:scale-104
+        activ:scale-98
+        hover:bg-gradient-to-r
+        hover:from-purple-600 hover:via-pink-600 hover:to-orange-500 rounded-lg
+      "
+    >
+      <Item
+        className="
+        w-fit shrink-0 cursor-pointer
+        transition-all duration-150
+        hover:scale-98
+        activ:scale-98
+        bg-card border border-2 border-bg-primary
+      "
+        onClick={() =>
+          navigate(`/podcasts/${podcastId}/episodes/${episodeNum}`)
+        }
+      >
+        <ItemMedia>
+          <img
+            className="rounded-sm"
+            src={episode}
+            alt={podcastName + " " + episodeNum}
+          />{" "}
+        </ItemMedia>
+        <ItemContent>
+          <ItemTitle className="hover:underline">
+            {episodeName ? episodeName : "Untitled"}
+          </ItemTitle>
+          <ItemDescription>
+            {podcastName + " · Episode: " + episodeNum}
+          </ItemDescription>
+        </ItemContent>
+      </Item>
+    </div>
   );
 }
