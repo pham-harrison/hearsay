@@ -24,7 +24,11 @@ export default function UserBio({ bio, onBioChange, onConfirm }: BioProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild onClick={() => setOpen(true)}>
-        <Button className="w-10 rounded-full" variant="outline" size="icon">
+        <Button
+          className="w-10 rounded-full hover:bg-primary! hover:text-primary-foreground!"
+          variant="outline"
+          size="icon"
+        >
           <ClipboardPenIcon />
           <span className="sr-only">Update bio</span>
         </Button>
