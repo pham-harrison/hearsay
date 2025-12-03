@@ -1,7 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Item,
-  ItemActions,
   ItemContent,
   ItemDescription,
   ItemMedia,
@@ -20,21 +19,27 @@ export default function UserCard({ username, bio, onClick }: UserCardProps) {
     <div className="">
       <Item
         variant="outline"
-        className="w-50 h-65 flex items-center cursor-pointer transition-transform hover:scale-102 active:scale-98 duration-150"
+        className="w-50 h-70 flex items-center cursor-pointer transition-transform hover:scale-102 active:scale-98 duration-150"
         onClick={onClick}
       >
-        <div className="">
-          <ItemMedia className="mb-2">
-            <Avatar className="size-42">
+        <div>
+          <ItemMedia className="">
+            <Avatar className="size-42 shrink-0 mb-2">
               <AvatarImage src={minimalistAvatarM} />
               <AvatarFallback>{username}</AvatarFallback>
             </Avatar>
           </ItemMedia>
-          <ItemContent>
-            <ItemTitle className="font-bold text-xl">{username}</ItemTitle>
-            <ItemDescription className="break-all">{}</ItemDescription>
-          </ItemContent>
+          <ItemTitle className="font-bold text-xl shrink-0">
+            {username}
+          </ItemTitle>
         </div>
+        <ItemContent>
+          <div className="flex flex-col overflow-hidden">
+            <ItemDescription className="truncate break-words overflow-hidden">
+              {bio ? bio : <span className="italic">No bio . . .</span>}
+            </ItemDescription>
+          </div>
+        </ItemContent>
       </Item>
     </div>
   );
