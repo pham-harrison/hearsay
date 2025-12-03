@@ -17,23 +17,24 @@ type UserCardProps = {
 
 export default function UserCard({ username, bio, onClick }: UserCardProps) {
   return (
-    <div className="flex ml-30 mr-30 flex-col gap-6">
+    <div className="">
       <Item
         variant="outline"
-        className="w-full cursor-pointer transition-transform hover:scale-102 active:scale-98 duration-150"
+        className="w-50 h-65 flex items-center cursor-pointer transition-transform hover:scale-102 active:scale-98 duration-150"
         onClick={onClick}
       >
-        <ItemMedia>
-          <Avatar className="size-10">
-            <AvatarImage src={minimalistAvatarM} />
-            <AvatarFallback>ER</AvatarFallback>
-          </Avatar>
-        </ItemMedia>
-        <ItemContent>
-          <ItemTitle>{username}</ItemTitle>
-          <ItemDescription className="break-all">{bio}</ItemDescription>
-        </ItemContent>
-        <ItemActions></ItemActions>
+        <div className="">
+          <ItemMedia className="mb-2">
+            <Avatar className="size-42">
+              <AvatarImage src={minimalistAvatarM} />
+              <AvatarFallback>{username}</AvatarFallback>
+            </Avatar>
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle className="font-bold text-xl">{username}</ItemTitle>
+            <ItemDescription className="break-all">{}</ItemDescription>
+          </ItemContent>
+        </div>
       </Item>
     </div>
   );

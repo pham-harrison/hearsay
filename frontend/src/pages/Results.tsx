@@ -54,30 +54,34 @@ export default function Results() {
   }, [location.search]);
 
   return (
-    <div className="flex flex-col gap-5 px-5 py-5">
-      {searchType === "podcasts" &&
-        (results as PodcastResults[]).map((podcast) => (
-          <PodcastCard
-            key={podcast.podcastId}
-            podcastId={podcast.podcastId}
-            name={podcast.name}
-            description={podcast.description}
-            releaseDate={podcast.releaseDate}
-            genres={podcast.genres ?? ""}
-            onClick={() => {
-              navigate(`/podcasts/${podcast.podcastId}`);
-            }}
-          />
-        ))}
-      {searchType === "users" &&
-        (results as UserResults[]).map((user) => (
-          <UserCard
-            key={user.id}
-            username={user.username}
-            bio={user.bio}
-            onClick={() => navigate(`/users/${user.id}`)}
-          />
-        ))}
-    </div>
+    <>
+      <div className="flex flex-col gap-5 px-5 py-5">
+        {searchType === "podcasts" &&
+          (results as PodcastResults[]).map((podcast) => (
+            <PodcastCard
+              key={podcast.podcastId}
+              podcastId={podcast.podcastId}
+              name={podcast.name}
+              description={podcast.description}
+              releaseDate={podcast.releaseDate}
+              genres={podcast.genres ?? ""}
+              onClick={() => {
+                navigate(`/podcasts/${podcast.podcastId}`);
+              }}
+            />
+          ))}
+      </div>
+      <div className="grid md:grid-cols-5 ml-30 mr-30 gap-6">
+        {searchType === "users" &&
+          (results as UserResults[]).map((user) => (
+            <UserCard
+              key={user.id}
+              username={user.username}
+              bio={user.bio}
+              onClick={() => navigate(`/users/${user.id}`)}
+            />
+          ))}
+      </div>
+    </>
   );
 }
