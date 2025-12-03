@@ -545,7 +545,7 @@ export default function Profile() {
                 {relationship === "none" && loggedIn && (
                   <div>
                     <RainbowButton
-                      className="w-10 rounded-full"
+                      className="w-10 rounded-full transition-all hover:scale-105 active:scale-95 duration-150"
                       disabled={!loggedIn}
                       size="icon"
                       onClick={(e) => {

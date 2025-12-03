@@ -643,6 +643,8 @@ export default function Podcast() {
                   episodeName={episode.name}
                   episodeNum={episode.episodeNum}
                   description={episode.description}
+                  duration={episode.duration}
+                  releaseDate={episode.releaseDate}
                 ></EpisodeCard>
               );
             })}

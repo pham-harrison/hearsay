@@ -48,10 +48,15 @@ export default function FriendsList({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild onClick={() => setOpen(true)}>
-        <Button variant="outline">{title}</Button>
+        <Button
+          variant="outline"
+          className="hover:bg-primary! hover:text-primary-foreground!"
+        >
+          {title}
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[80vh] overflow-y-auto">
-        <ItemGroup className="gap-3">
+        <ItemGroup className="gap-3 mt-4">
           <>
             {friends.length !== 0 &&
               (friends as Friend[]).map((user) => {

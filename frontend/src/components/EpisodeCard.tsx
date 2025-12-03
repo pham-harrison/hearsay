@@ -13,6 +13,8 @@ type EpisodeCardProps = {
   episodeNum: string;
   episodeName: string | null;
   description: string;
+  duration: number;
+  releaseDate: string;
 };
 
 export default function EpisodeCard({
@@ -25,21 +27,17 @@ export default function EpisodeCard({
   return (
     <div
       className="
-        shrink-0 cursor-pointer
-        transition-all duration-150
-        hover:scale-104
-        activ:scale-98
-        hover:bg-gradient-to-r
-        hover:from-fuchsia-300 hover:to-purple-800 rounded-lg
+        
       "
     >
       <Item
         className="
          shrink-0 cursor-pointer
         transition-all duration-150
-        hover:scale-98
-        activ:scale-98
-        bg-card border border-2 border-bg-primary
+        hover:scale-102
+        active:scale-98
+        bg-gradient-to-br from-fuchsia-300 to-purple-800
+        hover:bg-linear-to-br hover:from-fuchsia-400 hover:to-purple-800
       "
         onClick={() =>
           navigate(`/podcasts/${podcastId}/episodes/${episodeNum}`)
@@ -53,13 +51,15 @@ export default function EpisodeCard({
           />{" "}
         </ItemMedia>
         <ItemContent>
-          <ItemTitle className="hover:underline">
+          <ItemTitle className="hover:underline text-3xl text-gray-900 tracking-tight font-bold">
             {episodeName ? episodeName : "Untitled"}
           </ItemTitle>
           <ItemDescription>
             <div className="flex flex-col">
-              <h1>{"Episode: " + episodeNum}</h1>
-              <div>{description}</div>
+              <h1 className="text-gray-900 text-lg font-bold">
+                {"Episode: " + episodeNum}
+              </h1>
+              <div className="text-md text-gray-900">{description}</div>
             </div>
           </ItemDescription>
         </ItemContent>
