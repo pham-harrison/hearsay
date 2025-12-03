@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ClipboardPenIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -6,6 +7,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import type React from "react";
 
 type BioProps = {
   bio: string;
@@ -13,10 +15,15 @@ type BioProps = {
   onConfirm: (e: React.FormEvent) => void;
 };
 
-const UserBio = ({ bio, onBioChange, onConfirm }: BioProps) => {
+export default function UserBio({ bio, onBioChange, onConfirm }: BioProps) {
+  const [open, setOpen] = useState(false);
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   return (
-    <Popover>
-      <PopoverTrigger asChild>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild onClick={() => setOpen(true)}>
         <Button className="w-10 rounded-full" variant="outline" size="icon">
           <ClipboardPenIcon />
           <span className="sr-only">Update bio</span>
@@ -32,10 +39,16 @@ const UserBio = ({ bio, onBioChange, onConfirm }: BioProps) => {
             className="max-h-56"
           />
           <div className="grid w-full grid-cols-2 gap-2">
-            <Button size="sm" onClick={onConfirm}>
+            <Button
+              size="sm"
+              onClick={(e) => {
+                onConfirm(e);
+                handleClose();
+              }}
+            >
               Confirm
             </Button>
-            <Button variant="secondary" size="sm">
+            <Button variant="secondary" size="sm" onClick={handleClose}>
               Cancel
             </Button>
           </div>
@@ -43,6 +56,4 @@ const UserBio = ({ bio, onBioChange, onConfirm }: BioProps) => {
       </PopoverContent>
     </Popover>
   );
-};
-
-export default UserBio;
+}
