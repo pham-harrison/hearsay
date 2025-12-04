@@ -116,7 +116,7 @@ export default function Results() {
       )}
 
       {searchType === "users" && results.length > 0 && (
-        <div className="grid md:grid-cols-5 ml-30 mr-30 gap-5">
+        <div className="grid md:grid-cols-5 ml-30 mr-30 gap-5 my-5">
           {(results as UserResults[]).map((user) => (
             <UserCard
               key={user.id}
