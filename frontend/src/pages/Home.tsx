@@ -43,15 +43,14 @@ export default function Home() {
   }, [loggedIn]);
 
   return (
-    <div className="bg-background">
+    <div className="bg-background flex flex-1 items-center justify-center">
       {loggedIn ? (
         <div className="flex flex-col px-15 gap-5">
           <CardHeader>
             <CardTitle className="text-xl font-bold mt-5">Your feed</CardTitle>
           </CardHeader>
           {feed.length > 0 ? (
-            // <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-5 justify-items-center">
-            <div className="flex flex-row flex-wrap gap-5 justify-center xl:justify-start">
+            <div className="flex flex-row flex-wrap gap-5 justify-center xl:justify-start mb-5">
               {feed.map((review: FriendReview, i) => (
                 <ReviewCard
                   key={i}
@@ -87,7 +86,7 @@ export default function Home() {
           )}
         </div>
       ) : (
-        <div className="flex justify-center items-center min-h-screen">
+        <div className="flex justify-center items-center">
           <Card className="w-100 text-center">
             <CardHeader>
               <CardTitle className="text-lg">No feed yet</CardTitle>

@@ -16,14 +16,16 @@ function App() {
       <LoginProvider>
         <ScrollToTop />
         <Toaster position="top-center" />
-        <NavBar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/results" element={<Results />} />
-          <Route path="/podcasts/:podcastID" element={<Podcast />} />
-          <Route path="/users/:userID" element={<Profile />} />
-          <Route path="/podcasts/:podcastID/episodes/:episodeNum" element={<Episode />} />
-        </Routes>
+        <div className="flex flex-col min-h-screen">
+          <NavBar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/results" element={<Results />} />
+            <Route path="/podcasts/:podcastID" element={<Podcast />} />
+            <Route path="/users/:userID" element={<Profile />} />
+            <Route path="/podcasts/:podcastID/episodes/:episodeNum" element={<Episode />} />
+          </Routes>
+        </div>
       </LoginProvider>
     </BrowserRouter>
   );
