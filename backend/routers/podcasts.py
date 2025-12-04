@@ -34,15 +34,16 @@ async def searchPodcasts(
             host_first_name, host_last_name = None, None
             if host:
                 host_name_parts = host.split()
-                host_first_name, host_last_name = host_name_parts[0], host_name_parts[1]
+                if len(host_name_parts) > 1:
+                    host_last_name = host_name_parts[1]
+                host_first_name = host_name_parts[0]
 
             guest_first_name, guest_last_name = None, None
             if guest:
                 guest_name_parts = guest.split()
-                guest_first_name, guest_last_name = (
-                    guest_name_parts[0],
-                    guest_name_parts[1],
-                )
+                if len(guest_name_parts) > 1:
+                    guest_last_name = guest_name_parts[1]
+                guest_first_name = guest_name_parts[0]
 
             cursor.callproc(
                 "search_podcasts",
