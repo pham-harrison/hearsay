@@ -79,10 +79,6 @@ DELIMITER $$
 DROP PROCEDURE IF EXISTS get_user_by_username $$
 CREATE PROCEDURE get_user_by_username(IN username_p VARCHAR(32))
 BEGIN
-    IF NOT EXISTS (SELECT * FROM user WHERE username LIKE CONCAT("%", username_p, "%")) THEN
-		SIGNAL SQLSTATE "45000"
-        SET MESSAGE_TEXT="No users found";
-	END IF; 
 	SELECT id, username, email, first_name, last_name, bio FROM user WHERE username LIKE CONCAT("%", username_p, "%");
 END $$
 DELIMITER ;
