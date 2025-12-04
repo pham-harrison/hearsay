@@ -311,8 +311,8 @@ export default function SearchBar({ searchType, onSearch, podcastID }: SearchBar
                 />
                 {filteredGuests.length > 0 && (
                   <div className="absolute">
-                    <Command className="rounded-sm border p-1">
-                      <CommandList className="no-scrollbar w-34">
+                    <Command className="rounded-sm w-34 border p-1">
+                      <CommandList className="no-scrollbar">
                         {filteredGuests.map((guest) => (
                           <CommandItem
                             className="data-[selected=true]:bg-primary data-[selected=true]:text-white"
@@ -357,10 +357,11 @@ export default function SearchBar({ searchType, onSearch, podcastID }: SearchBar
                 <Input type="search" value={searchFilters.host} onChange={handleHostSearch} placeholder="Any" />
                 {filteredHosts.length > 0 && (
                   <div className="absolute">
-                    <Command>
-                      <CommandList>
+                    <Command className="rounded-sm w-34 border p-1">
+                      <CommandList className="no-scrollbar">
                         {filteredHosts.map((host) => (
                           <CommandItem
+                            className="data-[selected=true]:bg-primary data-[selected=true]:text-white"
                             key={host}
                             onSelect={() => {
                               setSearchFilters({ ...searchFilters, host: host });
@@ -380,10 +381,11 @@ export default function SearchBar({ searchType, onSearch, podcastID }: SearchBar
                 <Input type="search" value={searchFilters.guest} onChange={handleGuestSearch} placeholder="Any" />
                 {filteredGuests.length > 0 && (
                   <div className="absolute">
-                    <Command>
-                      <CommandList>
+                    <Command className="rounded-sm w-34 border p-1">
+                      <CommandList className="no-scrollbar">
                         {filteredGuests.map((guest) => (
                           <CommandItem
+                            className="data-[selected=true]:bg-primary data-[selected=true]:text-white"
                             key={guest}
                             onSelect={() => {
                               setSearchFilters({ ...searchFilters, guest: guest });
