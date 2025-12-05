@@ -546,7 +546,7 @@ export default function Podcast() {
       </Card>
 
       {/* Search episodes */}
-      <Card className="flex flex-col items-center mt-5 rounded-sm h-screen">
+      <Card className="flex flex-col items-center mt-5 rounded-sm min-h-screen">
         <CardHeader>
           <CardTitle className="text-nowrap -translate-x-1/2 text-3xl font-bold">Search Episodes</CardTitle>
         </CardHeader>
@@ -566,7 +566,7 @@ export default function Podcast() {
             podcastID={podcastID}
           ></SearchBar>
         </CardContent>
-        <div className="grid grid-cols-3 gap-4 mr-3 ml-3">
+        <div className="grid xl:grid-cols-2 gap-4 mr-3 ml-3">
           {searchedEpisodes !== null &&
             (searchedEpisodes as Episode[]).map((episode) => {
               return (

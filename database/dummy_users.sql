@@ -389,3 +389,69 @@ INSERT INTO episode_to_playlist (user_id, podcast_id, episode_num, playlist_name
 -- User 27 playlists
 (27, 6, 4, 'Deep Thoughts'),
 (27, 7, 3, 'Deep Thoughts');
+
+-- Add Eric Brewer and Ada Lovelace as users
+INSERT INTO user (email, username, password_hash, first_name, last_name, bio) VALUES
+('eric.brewer@email.com', 'ericbrewer', 'hashed_password_eric', 'Eric', 'Brewer', 'Computer scientist and podcast lover'),
+('ada.lovelace@example.com', 'adalovelace', 'hashed_password_ada', 'Ada', 'Lovelace', 'Born too early for podcasts :(');
+
+-- Assuming Eric Brewer gets id 32 and Ada Lovelace gets id 33
+-- Add bidirectional friendships between you (id 31) and both users
+INSERT INTO user_to_user (id1, id2, date_added, status) VALUES
+-- You and Eric Brewer
+(31, 32, '2024-12-04', 'accepted'),
+(32, 31, '2024-12-04', 'accepted'),
+-- You and Ada Lovelace
+(31, 33, '2024-12-04', 'accepted'),
+(33, 31, '2024-12-04', 'accepted');
+
+-- Podcast reviews for podcasts 18 and 19
+INSERT INTO podcast_review (user_id, podcast_id, rating, comment, created_at) VALUES
+-- Eric Brewer's reviews
+(32, 18, 5, 'Consistent, Available, and Partition Tolerable!', '2024-12-04'),
+(32, 19, 4, 'I have heard better', '2024-12-04'),
+-- Ada Lovelace's reviews
+(33, 18, 5, 'Podcasts on your computer would not exist without me', '2024-12-04'),
+(33, 19, 5, 'Not bad', '2024-12-04');
+
+-- Episode reviews for episode 1 of podcasts 1, 18, and 19
+INSERT INTO episode_review (user_id, podcast_id, episode_num, rating, comment, created_at) VALUES
+-- Eric Brewer's episode reviews
+(32, 1, 1, 4, 'Interesting conversation, good variety of topics', '2024-12-04'),
+(32, 18, 1, 5, 'Strong opening episode with clear explanations', '2024-12-04'),
+(32, 19, 1, 5, 'Excellent introduction to the series', '2024-12-04'),
+-- Ada Lovelace's episode reviews
+(33, 1, 1, 3, 'Engaging but could use more depth', '2024-12-04'),
+(33, 18, 1, 5, 'Perfect blend of theory and practice', '2024-12-04'),
+(33, 19, 1, 5, 'Captivating first episode, well structured', '2024-12-04');
+
+-- Podcast reviews for podcasts 1-5 by Eric Brewer (id 32) and Ada Lovelace (id 33)
+INSERT INTO podcast_review (user_id, podcast_id, rating, comment, created_at) VALUES
+-- Eric Brewer's reviews
+(32, 1, 4, 'Joe should invite me to the podcast', '2024-12-04'),
+(32, 2, 5, 'I should talk about how I built the CAP theorem', '2024-12-04'),
+(32, 3, 5, 'I should have gone into comedy like Conan', '2024-12-04'),
+(32, 4, 5, 'I think I will rename the CAP theorem to the TED theorem', '2024-12-04'),
+(32, 5, 3, 'I might be too old for games', '2024-12-04'),
+-- Ada Lovelace's reviews
+(33, 1, 4, 'I remember when Joe was born', '2024-12-04'),
+(33, 2, 5, 'Guy should really invite me on the podcast', '2024-12-04'),
+(33, 3, 4, 'Conan\'s chemistry with guests is wonderful, his curiosity makes every episode enjoyable', '2024-12-04'),
+(33, 4, 5, 'TED Radio Hour expands on the best talks with interviews and context - brilliant concept', '2024-12-04'),
+(33, 5, 3, 'Good for gaming news but the hosts could dive deeper into game design and mechanics', '2024-12-04');
+
+INSERT INTO user (email, username, password_hash, first_name, last_name, bio) VALUES
+('alanturing@email.com', 'alanturing', 'hashed_password_alan', 'Alan', 'Turing', 'I love podcasts more than I love computers');
+
+INSERT INTO user_to_user (id1, id2, date_added, status) VALUES
+(31, 36, '2024-12-04', 'accepted'),
+(36, 31, '2024-12-04', 'accepted');
+
+-- Podcast reviews for podcasts 1-5 by Eric Brewer (id 32) and Ada Lovelace (id 33)
+INSERT INTO podcast_review (user_id, podcast_id, rating, comment, created_at) VALUES
+-- Eric Brewer's reviews
+(36, 1, 3, 'I like computers more', '2024-12-04'),
+(36, 2, 5, 'An enigma in the best possible way!', '2024-12-04'),
+(36, 3, 5, 'Conan is great', '2024-12-04'),
+(36, 4, 5, "I can\'t believe Benedict Cumberbatch played me in a movie", '2024-12-04'),
+(36, 5, 5, 'Pretty cool', '2024-12-04');

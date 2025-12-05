@@ -380,7 +380,7 @@ BEGIN
     SELECT id2 AS id, rating, comment, created_at, username, first_name, last_name FROM user_to_user
     JOIN podcast_review ON id2 = podcast_review.user_id
     JOIN user ON id = id2
-    WHERE id1 = user_id_p AND podcast_id = podcast_id_p
+    WHERE id1 = user_id_p AND podcast_id = podcast_id_p AND status = "accepted"
     ORDER BY created_at DESC;
 END $$
 DELIMITER ;
@@ -413,7 +413,7 @@ BEGIN
     SELECT id, rating, comment, created_at, username, first_name, last_name FROM user_to_user
     JOIN episode_review ON id2 = user_id
     JOIN user ON id = id2
-    WHERE id1 = user_id_p AND podcast_id = podcast_id_p AND episode_num = episode_num_p
+    WHERE id1 = user_id_p AND podcast_id = podcast_id_p AND episode_num = episode_num_p AND status = "accepted"
     ORDER BY created_at DESC;
 END $$
 DELIMITER ;
