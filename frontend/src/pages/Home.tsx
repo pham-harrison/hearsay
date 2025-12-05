@@ -43,10 +43,10 @@ export default function Home() {
   }, [loggedIn]);
 
   return (
-    <div className="bg-background flex flex-1 items-center justify-center">
+    <div className="bg-background flex flex-1 justify-center">
       {loggedIn ? (
         <div className="flex flex-col px-15 gap-5">
-          <CardHeader>
+          <CardHeader className="flex flex-row justify-center">
             <CardTitle className="text-xl font-bold mt-5">Your feed</CardTitle>
           </CardHeader>
           {feed.length > 0 ? (
@@ -73,7 +73,7 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <div className="flex justify-center items-center min-h-screen">
+            <div className="flex flex-1 justify-center items-center">
               <Card className="w-100 text-center">
                 <CardHeader>
                   <CardTitle>Welcome!</CardTitle>
