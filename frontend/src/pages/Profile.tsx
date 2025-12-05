@@ -736,7 +736,12 @@ export default function Profile() {
                                   className="flex flex-row mt-2 mb-2 p-2 items-center bg-gradient-to-r from-purple-800 to-fuchsia-300 
                                    transition-all duration-300 ease-in-out 
                                    hover:from-purple-900 hover:to-fuchsia-400 rounded-sm"
-                                  key={episode.podcastId + episode.episodeNum}
+                                  key={
+                                    episode.episodeName +
+                                    episode.podcastName +
+                                    episode.podcastId +
+                                    episode.episodeNum
+                                  }
                                   onClick={() =>
                                     navigate(
                                       `/podcasts/${episode.podcastId}/episodes/${episode.episodeNum}`

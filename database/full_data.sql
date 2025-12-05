@@ -569,25 +569,25 @@ INSERT INTO episode_to_guest (podcast_id, episode_num, guest_id) VALUES
 -- Platform to podcast
 INSERT INTO platform_to_podcast (podcast_id, platform_name) VALUES
 -- 11
-(11, 'Spotify'), (11, 'Youtube'), (11, 'Apple Podcasts'), (11, 'Audible'),
+(11, 'Spotify'), (11, 'YouTube'), (11, 'Apple Podcasts'), (11, 'Audible'),
 -- 12
-(12, 'Spotify'), (12, 'Youtube'), (12, 'Apple Podcasts'), (12, 'Audible'),
+(12, 'Spotify'), (12, 'YouTube'), (12, 'Apple Podcasts'), (12, 'Audible'),
 -- 13
-(13, 'Spotify'), (13, 'Youtube'), (13, 'Apple Podcasts'), (13, 'Audible'),
+(13, 'Spotify'), (13, 'YouTube'), (13, 'Apple Podcasts'), (13, 'Audible'),
 -- 14
-(14, 'Spotify'), (14, 'Youtube'), (14, 'Apple Podcasts'),
+(14, 'Spotify'), (14, 'YouTube'), (14, 'Apple Podcasts'),
 -- 15
-(15, 'Spotify'), (15, 'Youtube'), (15, 'Apple Podcasts'), (15, 'Audible'),
+(15, 'Spotify'), (15, 'YouTube'), (15, 'Apple Podcasts'), (15, 'Audible'),
 -- 16
 (16, 'Spotify'), (16, 'Apple Podcasts'),
 -- 17
-(17, 'Spotify'), (17, 'Youtube'), (17, 'Apple Podcasts'), (17, 'Audible'),
+(17, 'Spotify'), (17, 'YouTube'), (17, 'Apple Podcasts'), (17, 'Audible'),
 -- 18
-(18, 'Spotify'), (18, 'Youtube'), (18, 'Apple Podcasts'), (18, 'Audible'),
+(18, 'Spotify'), (18, 'YouTube'), (18, 'Apple Podcasts'), (18, 'Audible'),
 -- 19
-(19, 'Spotify'), (19, 'Youtube'), (19, 'Apple Podcasts'), (19, 'Audible'),
+(19, 'Spotify'), (19, 'YouTube'), (19, 'Apple Podcasts'), (19, 'Audible'),
 -- 20
-(20, 'Spotify'), (20, 'Youtube'), (20, 'Apple Podcasts'), (20, 'Audible');
+(20, 'Spotify'), (20, 'YouTube'), (20, 'Apple Podcasts'), (20, 'Audible');
 
 -- Genre to podcast
 INSERT INTO genre_to_podcast (podcast_id, genre_name) VALUES

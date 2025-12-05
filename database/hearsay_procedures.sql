@@ -336,7 +336,7 @@ BEGIN
     ORDER BY created_at DESC;
 END $$
 DELIMITER ;
-CALL get_user_podcast_reviews(1);
+-- CALL get_user_podcast_reviews(1);
 
 /*
 Get a users episode reviews
@@ -357,7 +357,7 @@ BEGIN
     ORDER BY created_at DESC;
 END $$
 DELIMITER ;
-CALL get_user_episode_reviews(1);
+-- CALL get_user_episode_reviews(1);
 
 
 /*
@@ -1116,12 +1116,12 @@ CREATE PROCEDURE get_episodes_in_playlist(IN user_id_p INT, IN playlist_name_p V
 BEGIN
     SELECT p.podcast_id AS podcast_id, p.name AS podcast_name, e.name AS episode_name, e.episode_num FROM episode_to_playlist AS etp
     JOIN podcast AS p ON p.podcast_id = etp.podcast_id
-    JOIN episode AS e ON e.episode_num = etp.episode_num
+    JOIN episode AS e ON e.episode_num = etp.episode_num AND e.podcast_id = etp.podcast_id
     WHERE etp.user_id = user_id_p AND playlist_name = playlist_name_p;
 END $$
 DELIMITER ;
 
--- CALL get_episodes_in_playlist(1, "Morning Commute");
+-- CALL get_episodes_in_playlist(1, "Playlist Chan");
 
 /*
 Add episode to playlist
