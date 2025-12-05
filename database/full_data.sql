@@ -608,7 +608,7 @@ INSERT INTO genre_to_podcast (podcast_id, genre_name) VALUES
 -- 18
 (18, 'Comedy'), (18, 'History'),
 -- 19
-(19, 'Technology'),
+(19, 'True Crime'),
 -- 20
  (20, 'Technology'), (20, 'Science');
 -- Insert Language to Podcast
