@@ -43,14 +43,14 @@ CREATE TABLE genre (
 
 CREATE TABLE podcast (
 	podcast_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(32) NOT NULL,
+    name VARCHAR(64) NOT NULL,
     description VARCHAR(255),    -- Optional
     release_date DATE NOT NULL
 );
 
 CREATE TABLE episode (
 	episode_num INT NOT NULL,
-    name VARCHAR(32) NOT NULL,
+    name VARCHAR(64) NOT NULL,
     description VARCHAR(255),	-- Optional
     duration INT NOT NULL,		-- Duration in minutes
     release_date DATE NOT NULL,
