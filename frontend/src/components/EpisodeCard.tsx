@@ -1,10 +1,4 @@
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item";
+import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item";
 import episode from "../assets/episode_image.png";
 import { useNavigate } from "react-router-dom";
 
@@ -17,38 +11,23 @@ type EpisodeCardProps = {
   releaseDate: string;
 };
 
-export default function EpisodeCard({
-  podcastId,
-  episodeNum,
-  episodeName,
-  description,
-}: EpisodeCardProps) {
+export default function EpisodeCard({ podcastId, episodeNum, episodeName, description }: EpisodeCardProps) {
   const navigate = useNavigate();
   return (
-    <div
-      className="
-        
-      "
-    >
+    <div>
       <Item
         className="
-         shrink-0 cursor-pointer
+        shrink-0 cursor-pointer
         transition-all duration-150
         hover:scale-102
         active:scale-98
-        bg-gradient-to-br from-fuchsia-300 to-purple-800
-        hover:bg-linear-to-br hover:from-fuchsia-400 hover:to-purple-800
+        bg-gradient-to-br from-fuchsia-300 to-purple-700
+        h-60
       "
-        onClick={() =>
-          navigate(`/podcasts/${podcastId}/episodes/${episodeNum}`)
-        }
+        onClick={() => navigate(`/podcasts/${podcastId}/episodes/${episodeNum}`)}
       >
         <ItemMedia>
-          <img
-            className="rounded-sm"
-            src={episode}
-            alt={podcastId + " " + episodeNum}
-          />{" "}
+          <img className="rounded-sm" src={episode} alt={podcastId + " " + episodeNum} />{" "}
         </ItemMedia>
         <ItemContent>
           <ItemTitle className="hover:underline text-3xl text-gray-900 tracking-tight font-bold">
@@ -56,9 +35,7 @@ export default function EpisodeCard({
           </ItemTitle>
           <ItemDescription>
             <div className="flex flex-col">
-              <h1 className="text-gray-900 text-lg font-bold">
-                {"Episode: " + episodeNum}
-              </h1>
+              <h1 className="text-gray-900 text-lg font-bold">{"Episode: " + episodeNum}</h1>
               <div className="text-md text-gray-900">{description}</div>
             </div>
           </ItemDescription>
